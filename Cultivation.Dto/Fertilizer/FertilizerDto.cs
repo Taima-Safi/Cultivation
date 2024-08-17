@@ -1,9 +1,10 @@
 ﻿using Cultivation.Shared.Enum;
 
-namespace Cultivation.Database.Model;
+namespace Cultivation.Dto.Fertilizer;
 
-public class FertilizerModel : BaseModel
+public class FertilizerDto
 {
+    public long Id { get; set; }
     public string NPK { get; set; }
     public string Title { get; set; }
     public string PublicTitle { get; set; }

@@ -2,6 +2,6 @@
 
 public enum FertilizerType
 {
-    Natural,
-    Chemical
+    Foliar,
+    NoneFoliar
 }
