@@ -2,6 +2,7 @@
 using Cultivation.Database.Model;
 using Cultivation.Dto.Color;
 using Cultivation.Dto.Cutting;
+using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cultivation.Repository.Cutting;
@@ -27,7 +28,7 @@ public class CuttingRepo : ICuttingRepo
     public async Task<List<CuttingDto>> GetAllAsync(string title, string type, int? age)
     {
         return await context.Cutting.Where(c => (string.IsNullOrEmpty(title) || c.Title.Contains(title))
-        && (string.IsNullOrEmpty(type) || c.Title.Contains(type))
+        && (string.IsNullOrEmpty(type) || c.Type.Contains(type))
         && (!age.HasValue || c.Age == age)
         && c.IsValid).Select(c => new CuttingDto
         {
@@ -39,6 +40,9 @@ public class CuttingRepo : ICuttingRepo
     }
     public async Task<CuttingDto> GetByIdAsync(long id)
     {
+        if (!await CheckCuttingIfExistAsync(id))
+            throw new NotFoundException("Cutting not found..");
+
         return await context.Cutting.Where(c => c.Id == id && c.IsValid).Select(c => new CuttingDto
         {
             Id = c.Id,
@@ -48,11 +52,24 @@ public class CuttingRepo : ICuttingRepo
         }).FirstOrDefaultAsync();
     }
     public async Task UpdateAsync(long id, string title, string type, int age)
-        => await context.Cutting.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Age, age)
-        .SetProperty(c => c.Type, type).SetProperty(c => c.Title, title));
+    {
+        if (!await CheckCuttingIfExistAsync(id))
+            throw new NotFoundException("Cutting not found..");
+
+        await context.Cutting.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Age, age)
+            .SetProperty(c => c.Type, type).SetProperty(c => c.Title, title));
+    }
 
     public async Task RemoveAsync(long id)
-        => await context.Cutting.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    {
+        if (!await CheckCuttingIfExistAsync(id))
+            throw new NotFoundException("Cutting not found..");
+
+        await context.Cutting.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    }
+
+    public async Task<bool> CheckCuttingIfExistAsync(long id)
+        => await context.Cutting.Where(c => c.Id == id && c.IsValid).AnyAsync();
 
     #region CuttingColor
     public async Task<long> AddCuttingColorAsync(CuttingColorFormDto dto)
@@ -90,6 +107,9 @@ public class CuttingRepo : ICuttingRepo
     }
     public async Task<CuttingColorDto> GetCuttingColorByIdAsync(long id)
     {
+        if (!await CheckCuttingColorIfExistAsync(id))
+            throw new NotFoundException("color for this cutting not found..");
+
         return await context.CuttingColor.Where(c => c.Id == id && c.IsValid).Select(c => new CuttingColorDto
         {
             Id = c.Id,
@@ -110,10 +130,23 @@ public class CuttingRepo : ICuttingRepo
         }).FirstOrDefaultAsync();
     }
     public async Task UpdateCuttingColorAsync(long id, CuttingColorFormDto dto)
-        => await context.CuttingColor.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Code, dto.Code)
+    {
+        if (!await CheckCuttingColorIfExistAsync(id))
+            throw new NotFoundException("Color for cutting not found..");
+
+        await context.CuttingColor.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Code, dto.Code)
         .SetProperty(c => c.ColorId, dto.ColorId).SetProperty(c => c.CuttingId, dto.CuttingId));
+    }
 
     public async Task RemoveCuttingColorAsync(long id)
-        => await context.CuttingColor.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    {
+        if (!await CheckCuttingColorIfExistAsync(id))
+            throw new NotFoundException("Color for cutting not found..");
+
+        await context.CuttingColor.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    }
+
+    public async Task<bool> CheckCuttingColorIfExistAsync(long id)
+        => await context.CuttingColor.Where(c => c.Id == id && c.IsValid).AnyAsync();
     #endregion
 }

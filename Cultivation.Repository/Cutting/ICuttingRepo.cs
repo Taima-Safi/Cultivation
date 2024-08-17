@@ -1,6 +1,5 @@
 ﻿
 using Cultivation.Dto.Cutting;
-using Cultivation.Dto.Seed;
 
 namespace Cultivation.Repository.Cutting;
 

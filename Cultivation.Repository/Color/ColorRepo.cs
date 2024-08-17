@@ -1,6 +1,7 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Color;
+using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cultivation.Repository.Color;
@@ -36,6 +37,9 @@ public class ColorRepo : IColorRepo
     }
     public async Task<ColorDto> GetByIdAsync(long id)
     {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Color not found..");
+
         return await context.Color.Where(c => c.Id == id && c.IsValid).Select(c => new ColorDto
         {
             Id = c.Id,
@@ -44,8 +48,21 @@ public class ColorRepo : IColorRepo
         }).FirstOrDefaultAsync();
     }
     public async Task UpdateAsync(long id, string title, string code)
-     => await context.Color.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Code, code).SetProperty(c => c.Title, title));
+    {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Color not found..");
+
+        await context.Color.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Code, code).SetProperty(c => c.Title, title));
+    }
 
     public async Task RemoveAsync(long id)
-     => await context.Color.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Color not found..");
+
+        await context.Color.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    }
+
+    public async Task<bool> CheckIfExistAsync(long id)
+     => await context.Color.Where(c => c.Id == id && c.IsValid).AnyAsync();
 }

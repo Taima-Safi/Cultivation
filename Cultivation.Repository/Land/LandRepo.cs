@@ -62,6 +62,9 @@ public class LandRepo : ILandRepo
 
     public async Task<LandDto> GetByIdAsync(long id)
     {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Land not found..");
+
         var landModels = await context.Land.Where(l => l.IsValid)
             .Select(l => new LandDto
             {
