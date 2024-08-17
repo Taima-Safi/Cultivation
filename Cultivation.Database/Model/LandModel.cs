@@ -4,6 +4,7 @@ public class LandModel : BaseModel
 {
     public string Title { get; set; }
     public double Size { get; set; }
+    public string Location { get; set; }
 
     public long? ParentId { get; set; }
     public LandModel Parent { get; set; }

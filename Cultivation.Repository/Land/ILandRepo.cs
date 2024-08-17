@@ -5,5 +5,7 @@ namespace Cultivation.Repository.Land;
 public interface ILandRepo
 {
     Task<long> AddAsync(LandFormDto dto);
-    Task<List<LandDto>> GetLandRecursion();
+    Task<List<LandDto>> GetAllAsync(string title, double? size);
+    Task<LandDto> GetByIdAsync(long id);
+    //Task<List<LandDto>> GetLandRecursion();
 }

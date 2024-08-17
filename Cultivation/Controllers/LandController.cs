@@ -19,6 +19,9 @@ public class LandController : ControllerBase
         => Ok(await landRepo.AddAsync(dto));
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
-        => Ok(await landRepo.GetLandRecursion());
+    public async Task<IActionResult> GetAll(string title, double? size)
+        => Ok(await landRepo.GetAllAsync(title, size));
+    [HttpGet]
+    public async Task<IActionResult> GetById(long id)
+        => Ok(await landRepo.GetByIdAsync(id));
 }

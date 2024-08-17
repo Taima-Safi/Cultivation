@@ -3,7 +3,7 @@
 public class CuttingLandModel : BaseModel
 {
     public DateTime Date { get; set; }
-    public double Quantity { get; set; }//kg
+    public long Quantity { get; set; }
 
     public long LandId { get; set; }
     public LandModel Land { get; set; }
