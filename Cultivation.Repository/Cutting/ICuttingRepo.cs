@@ -7,6 +7,7 @@ public interface ICuttingRepo
 {
     Task<long> AddAsync(string title, string type, int age);
     Task<long> AddCuttingColorAsync(CuttingColorFormDto dto);
+    Task<bool> CheckCuttingColorIfExistAsync(long id);
     Task<List<CuttingDto>> GetAllAsync(string title, string type, int? age);
     Task<List<CuttingColorDto>> GetAllCuttingColorAsync(string code);
     Task<CuttingDto> GetByIdAsync(long id);

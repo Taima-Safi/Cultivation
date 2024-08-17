@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Cultivation.Dto.Cutting;
+using Cultivation.Dto.Land;
 
-namespace Cultivation.Dto.CuttingLand
+namespace Cultivation.Dto.CuttingLand;
+
+public class CuttingLandDto
 {
-    internal class CuttingLandDto
-    {
-    }
+    public long Id { get; set; }
+    public DateTime Date { get; set; }
+    public long Quantity { get; set; }
+
+    public LandDto Land { get; set; }
+    public CuttingColorDto CuttingColor { get; set; }
 }

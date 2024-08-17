@@ -145,7 +145,6 @@ public class CuttingRepo : ICuttingRepo
 
         await context.CuttingColor.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
     }
-
     public async Task<bool> CheckCuttingColorIfExistAsync(long id)
         => await context.CuttingColor.Where(c => c.Id == id && c.IsValid).AnyAsync();
     #endregion
