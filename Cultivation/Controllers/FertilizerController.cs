@@ -1,6 +1,5 @@
 ﻿using Cultivation.Dto.Fertilizer;
 using Cultivation.Repository.Fertilizer;
-using Cultivation.Shared.Enum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers;
@@ -23,9 +22,9 @@ public class FertilizerController : ControllerBase
         return Ok(id);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(string npk, string title, string publicTitle, string description, FertilizerType? type)
+    public async Task<IActionResult> GetAll(string npk, string title, string publicTitle, string description)
     {
-        var fertilizers = await fertilizerRepo.GetAllAsync(npk, title, publicTitle, description, type);
+        var fertilizers = await fertilizerRepo.GetAllAsync(npk, title, publicTitle, description);
         return Ok(fertilizers);
     }
     [HttpGet]

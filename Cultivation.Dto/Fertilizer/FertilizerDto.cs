@@ -1,6 +1,4 @@
-﻿using Cultivation.Shared.Enum;
-
-namespace Cultivation.Dto.Fertilizer;
+﻿namespace Cultivation.Dto.Fertilizer;
 
 public class FertilizerDto
 {
@@ -11,5 +9,4 @@ public class FertilizerDto
     //public double Price { get; set; }//kg
     public string File { get; set; }
     public string Description { get; set; }
-    public FertilizerType Type { get; set; }
 }

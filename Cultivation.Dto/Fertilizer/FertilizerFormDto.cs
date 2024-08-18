@@ -1,5 +1,4 @@
-﻿using Cultivation.Shared.Enum;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace Cultivation.Dto.Fertilizer;
 
@@ -11,5 +10,4 @@ public class FertilizerFormDto
     // public double Price { get; set; }//kg
     public IFormFile? File { get; set; }
     public string Description { get; set; }
-    public FertilizerType Type { get; set; }
 }

@@ -25,7 +25,6 @@ public class FertilizerRepo : IFertilizerRepo
         var model = await context.Fertilizer.AddAsync(new FertilizerModel
         {
             NPK = dto.NPK,
-            Type = dto.Type,
             File = fileName,
             Title = dto.Title,
             // Price = dto.Price,
@@ -35,12 +34,12 @@ public class FertilizerRepo : IFertilizerRepo
         await context.SaveChangesAsync();
         return model.Entity.Id;
     }
-    public async Task<List<FertilizerDto>> GetAllAsync(string npk, string title, string publicTitle, string description, FertilizerType? type)
+    public async Task<List<FertilizerDto>> GetAllAsync(string npk, string title, string publicTitle, string description)
     {
-        Expression<Func<FertilizerModel, bool>> expression = f => (!type.HasValue || f.Type == type)
-        && (string.IsNullOrEmpty(npk) || f.NPK.Contains(npk)) && (string.IsNullOrEmpty(title) || f.Title.Contains(title))
+        Expression<Func<FertilizerModel, bool>> expression = f => (string.IsNullOrEmpty(npk) || f.NPK.Contains(npk))
         && (string.IsNullOrEmpty(publicTitle) || f.PublicTitle.Contains(publicTitle))
         && (string.IsNullOrEmpty(description) || f.Description.Contains(description))
+        && (string.IsNullOrEmpty(title) || f.Title.Contains(title))
         && f.IsValid;
 
         return await context.Fertilizer.Where(expression).Select(f => new FertilizerDto
@@ -48,7 +47,6 @@ public class FertilizerRepo : IFertilizerRepo
             Id = f.Id,
             NPK = f.NPK,
             File = f.File,
-            Type = f.Type,
             Title = f.Title,
             //Price = f.Price,
             PublicTitle = f.PublicTitle,
@@ -66,7 +64,6 @@ public class FertilizerRepo : IFertilizerRepo
             Id = f.Id,
             NPK = f.NPK,
             File = f.File,
-            Type = f.Type,
             Title = f.Title,
             //Price = f.Price,
             PublicTitle = f.PublicTitle,
@@ -80,7 +77,7 @@ public class FertilizerRepo : IFertilizerRepo
 
         await context.Fertilizer.Where(f => f.Id == id && f.IsValid).ExecuteUpdateAsync(f => f.SetProperty(f => f.NPK, dto.NPK)
         .SetProperty(f => f.Title, dto.Title).SetProperty(f => f.PublicTitle, dto.PublicTitle)
-        .SetProperty(f => f.Description, dto.Description).SetProperty(f => f.Type, dto.Type)
+        .SetProperty(f => f.Description, dto.Description)
         /*.SetProperty(f => f.Price, dto.Price)*/);
     }
     public async Task RemoveAsync(long id)

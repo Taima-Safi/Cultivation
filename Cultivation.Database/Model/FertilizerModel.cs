@@ -1,6 +1,4 @@
-﻿using Cultivation.Shared.Enum;
-
-namespace Cultivation.Database.Model;
+﻿namespace Cultivation.Database.Model;
 
 public class FertilizerModel : BaseModel
 {
@@ -10,5 +8,4 @@ public class FertilizerModel : BaseModel
     //public double Price { get; set; }//kg
     public string File { get; set; }
     public string Description { get; set; }
-    public FertilizerType Type { get; set; }
 }

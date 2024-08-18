@@ -3,6 +3,7 @@ using Cultivation.Repository.Color;
 using Cultivation.Repository.Cutting;
 using Cultivation.Repository.CuttingLand;
 using Cultivation.Repository.Fertilizer;
+using Cultivation.Repository.FertilizerLand;
 using Cultivation.Repository.Land;
 using FourthPro.Middleware;
 using Microsoft.EntityFrameworkCore;
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IColorRepo, ColorRepo>();
 builder.Services.AddScoped<ICuttingRepo, CuttingRepo>();
 builder.Services.AddScoped<ICuttingLandRepo, CuttingLandRepo>();
 builder.Services.AddScoped<IFertilizerRepo, FertilizerRepo>();
+builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
 
 var app = builder.Build();
 //if (app.Environment.IsDevelopment())
