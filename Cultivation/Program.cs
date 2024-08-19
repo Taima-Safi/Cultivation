@@ -20,10 +20,10 @@ builder.Services.AddTransient<ErrorHandlerMiddleware>();
 builder.Services.AddHttpContextAccessor();
 
 #region Database
-var connectionString = builder.Configuration.GetConnectionString(builder.Environment.IsProduction() ? "Server" : "Server");
+var connectionString = builder.Configuration.GetConnectionString(builder.Environment.IsProduction() ? "MonsterServer" : "MonsterServer");
 builder.Services.AddDbContext<CultivationDbContext>(options =>
 {
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    options.UseSqlServer(connectionString/*, ServerVersion.AutoDetect(connectionString)*/);
 });
 #endregion
 

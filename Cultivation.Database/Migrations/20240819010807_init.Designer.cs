@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cultivation.Database.Migrations
 {
     [DbContext(typeof(CultivationDbContext))]
-    [Migration("20240810235717_init")]
+    [Migration("20240819010807_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -21,9 +21,9 @@ namespace Cultivation.Database.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "8.0.7")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("Cultivation.Database.Model.ColorModel", b =>
                 {
@@ -31,22 +31,22 @@ namespace Cultivation.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Code")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsValid")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -59,28 +59,25 @@ namespace Cultivation.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Code")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("ColorId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("CuttingId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsValid")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("longtext");
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -97,28 +94,28 @@ namespace Cultivation.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<long>("CuttingColorId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsValid")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<long>("LandId")
                         .HasColumnType("bigint");
 
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double");
+                    b.Property<long>("Quantity")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -135,23 +132,70 @@ namespace Cultivation.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsValid")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.ToTable("Cutting");
+                });
+
+            modelBuilder.Entity("Cultivation.Database.Model.FertilizerLandModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("FertilizerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("LandId")
+                        .HasColumnType("bigint");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FertilizerId");
+
+                    b.HasIndex("LandId");
+
+                    b.ToTable("FertilizerLand");
                 });
 
             modelBuilder.Entity("Cultivation.Database.Model.FertilizerModel", b =>
@@ -160,25 +204,31 @@ namespace Cultivation.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("File")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsValid")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
-                    b.Property<double>("Price")
-                        .HasColumnType("double");
+                    b.Property<string>("NPK")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PublicTitle")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -191,25 +241,28 @@ namespace Cultivation.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsValid")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("ParentId")
                         .HasColumnType("bigint");
 
                     b.Property<double>("Size")
-                        .HasColumnType("double");
+                        .HasColumnType("float");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -221,13 +274,13 @@ namespace Cultivation.Database.Migrations
             modelBuilder.Entity("Cultivation.Database.Model.CuttingColorModel", b =>
                 {
                     b.HasOne("Cultivation.Database.Model.ColorModel", "Color")
-                        .WithMany()
+                        .WithMany("CuttingColors")
                         .HasForeignKey("ColorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cultivation.Database.Model.CuttingModel", "Cutting")
-                        .WithMany()
+                        .WithMany("CuttingColors")
                         .HasForeignKey("CuttingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -240,18 +293,37 @@ namespace Cultivation.Database.Migrations
             modelBuilder.Entity("Cultivation.Database.Model.CuttingLandModel", b =>
                 {
                     b.HasOne("Cultivation.Database.Model.CuttingColorModel", "CuttingColor")
-                        .WithMany()
+                        .WithMany("CuttingLands")
                         .HasForeignKey("CuttingColorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Cultivation.Database.Model.LandModel", "Land")
-                        .WithMany()
+                        .WithMany("CuttingLands")
                         .HasForeignKey("LandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CuttingColor");
+
+                    b.Navigation("Land");
+                });
+
+            modelBuilder.Entity("Cultivation.Database.Model.FertilizerLandModel", b =>
+                {
+                    b.HasOne("Cultivation.Database.Model.FertilizerModel", "Fertilizer")
+                        .WithMany("FertilizerLands")
+                        .HasForeignKey("FertilizerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cultivation.Database.Model.LandModel", "Land")
+                        .WithMany("FertilizerLands")
+                        .HasForeignKey("LandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Fertilizer");
 
                     b.Navigation("Land");
                 });
@@ -265,9 +337,33 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("Parent");
                 });
 
+            modelBuilder.Entity("Cultivation.Database.Model.ColorModel", b =>
+                {
+                    b.Navigation("CuttingColors");
+                });
+
+            modelBuilder.Entity("Cultivation.Database.Model.CuttingColorModel", b =>
+                {
+                    b.Navigation("CuttingLands");
+                });
+
+            modelBuilder.Entity("Cultivation.Database.Model.CuttingModel", b =>
+                {
+                    b.Navigation("CuttingColors");
+                });
+
+            modelBuilder.Entity("Cultivation.Database.Model.FertilizerModel", b =>
+                {
+                    b.Navigation("FertilizerLands");
+                });
+
             modelBuilder.Entity("Cultivation.Database.Model.LandModel", b =>
                 {
                     b.Navigation("Children");
+
+                    b.Navigation("CuttingLands");
+
+                    b.Navigation("FertilizerLands");
                 });
 #pragma warning restore 612, 618
         }
