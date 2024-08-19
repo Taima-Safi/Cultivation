@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Cultivation.Dto.FertilizerLand;
+using Cultivation.Repository.FertilizerLand;
+using Cultivation.Shared.Enum;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers;
 
@@ -6,4 +9,46 @@ namespace Cultivation.Controllers;
 [ApiController]
 public class FertilizerLandController : ControllerBase
 {
+    private readonly IFertilizerLandRepo fertilizerLandRepo;
+
+    public FertilizerLandController(IFertilizerLandRepo fertilizerLandRepo)
+    {
+        this.fertilizerLandRepo = fertilizerLandRepo;
+    }
+    [HttpPost]
+    public async Task<IActionResult> Add(FertilizerLandFormDto dto)
+    {
+        await fertilizerLandRepo.AddAsync(dto);
+        return Ok();
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetAll(int pageSize = 10, int pageNum = 0)
+    {
+        var result = await fertilizerLandRepo.GetAllAsync(pageSize, pageNum);
+        return Ok(result);
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetFertilizersLand(long landId, DateTime? from, DateTime? to, int pageSize = 10, int pageNum = 0)
+    {
+        var result = await fertilizerLandRepo.GetFertilizersLandAsync(landId, from, to, pageSize, pageNum);
+        return Ok(result);
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetById(long id)
+    {
+        var result = await fertilizerLandRepo.GetByIdAsync(id);
+        return Ok(result);
+    }
+    [HttpPost]
+    public async Task<IActionResult> Update(long id, double? quantity, DateTime? date, FertilizerType? type, long? landId, long? fertilizerId)
+    {
+        await fertilizerLandRepo.UpdateAsync(id, quantity, date, type, landId, fertilizerId);
+        return Ok();
+    }
+    [HttpDelete]
+    public async Task<IActionResult> Remove(long id)
+    {
+        await fertilizerLandRepo.RemoveAsync(id);
+        return Ok();
+    }
 }

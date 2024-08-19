@@ -8,4 +8,5 @@ public class CuttingColorModel : BaseModel
     public CuttingModel Cutting { get; set; }
     public long ColorId { get; set; }
     public ColorModel Color { get; set; }
+    public ICollection<CuttingLandModel> CuttingLands { get; set; }
 }

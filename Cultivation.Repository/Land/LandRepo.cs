@@ -80,7 +80,8 @@ public class LandRepo : ILandRepo
                     Title = l.Title,
                     Location = l.Location,
                     ParentId = l.Parent.Id,
-                }).ToList()
+                }).ToList(),
+
             }).ToListAsync();
 
         var parent = landModels.Where(l => l.Id == id).FirstOrDefault();

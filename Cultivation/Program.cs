@@ -1,4 +1,5 @@
 using Cultivation.Database.Context;
+using Cultivation.Repository.Base;
 using Cultivation.Repository.Color;
 using Cultivation.Repository.Cutting;
 using Cultivation.Repository.CuttingLand;
@@ -43,6 +44,7 @@ builder.Services.AddScoped<ICuttingRepo, CuttingRepo>();
 builder.Services.AddScoped<ICuttingLandRepo, CuttingLandRepo>();
 builder.Services.AddScoped<IFertilizerRepo, FertilizerRepo>();
 builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
+builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 
 var app = builder.Build();
 //if (app.Environment.IsDevelopment())

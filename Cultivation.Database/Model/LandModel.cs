@@ -9,4 +9,6 @@ public class LandModel : BaseModel
     public long? ParentId { get; set; }
     public LandModel Parent { get; set; }
     public ICollection<LandModel> Children { get; set; }
+    public ICollection<CuttingLandModel> CuttingLands { get; set; }
+    public ICollection<FertilizerLandModel> FertilizerLands { get; set; }
 }
