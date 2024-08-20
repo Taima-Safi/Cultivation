@@ -2,5 +2,6 @@
 
 public enum FileType
 {
-    Fertilizer
+    Fertilizer,
+    Insecticide
 }

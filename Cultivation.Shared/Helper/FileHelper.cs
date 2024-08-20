@@ -26,6 +26,9 @@ public class FileHelper
             case FileType.Fertilizer:
                 folderName = Path.Combine("Uploads", "Fertilizer");
                 break;
+            case FileType.Insecticide:
+                folderName = Path.Combine("Uploads", "Insecticide");
+                break;
         }
         string path = Path.Combine(Directory.GetCurrentDirectory(), folderName);
 
@@ -47,6 +50,9 @@ public class FileHelper
         {
             case FileType.Fertilizer:
                 folderName = Path.Combine("Uploads", "Fertilizer");
+                break;
+            case FileType.Insecticide:
+                folderName = Path.Combine("Uploads", "Insecticide");
                 break;
         }
 
