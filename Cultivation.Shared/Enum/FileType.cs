@@ -3,5 +3,6 @@
 public enum FileType
 {
     Fertilizer,
-    Insecticide
+    Insecticide,
+    InsecticideLand,
 }

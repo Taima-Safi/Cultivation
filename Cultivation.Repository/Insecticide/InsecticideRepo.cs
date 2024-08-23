@@ -24,9 +24,10 @@ public class InsecticideRepo : IInsecticideRepo
         string fileName = null;
         if (dto.File != null)
             fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.Insecticide);
+
         var model = await context.Insecticide.AddAsync(new InsecticideModel
         {
-            Note = dto.Note,
+            Description = dto.Description,
             Type = dto.Type,
             File = fileName,
             Title = dto.Title,
@@ -41,7 +42,7 @@ public class InsecticideRepo : IInsecticideRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Insecticide not found..");
 
-        await context.Insecticide.Where(i => i.Id == id && i.IsValid).ExecuteUpdateAsync(i => i.SetProperty(i => i.Note, dto.Note)
+        await context.Insecticide.Where(i => i.Id == id && i.IsValid).ExecuteUpdateAsync(i => i.SetProperty(i => i.Description, dto.Description)
         .SetProperty(i => i.Title, dto.Title).SetProperty(i => i.Type, dto.Type).SetProperty(i => i.PublicTitle, dto.PublicTitle));
     }
     public async Task<CommonResponseDto<List<InsecticideDto>>> GetAllAsync(string title, string publicTitle, string note,
@@ -49,7 +50,7 @@ public class InsecticideRepo : IInsecticideRepo
     {
         Expression<Func<InsecticideModel, bool>> expression = i => (string.IsNullOrEmpty(title) || i.Title.Contains(title))
         && (string.IsNullOrEmpty(publicTitle) || i.PublicTitle.Contains(publicTitle))
-        && (string.IsNullOrEmpty(note) || i.Note.Contains(note))
+        && (string.IsNullOrEmpty(note) || i.Description.Contains(note))
         && (!type.HasValue || i.Type == type)
         && i.IsValid;
 
@@ -58,7 +59,7 @@ public class InsecticideRepo : IInsecticideRepo
             .Take(pageSize).Select(i => new InsecticideDto
             {
                 Type = i.Type,
-                Note = i.Note,
+                Description = i.Description,
                 File = i.File,
                 Title = i.Title,
                 PublicTitle = i.PublicTitle,
@@ -77,7 +78,7 @@ public class InsecticideRepo : IInsecticideRepo
         return await context.Insecticide.Where(i => i.Id == id && i.IsValid).Select(i => new InsecticideDto
         {
             Type = i.Type,
-            Note = i.Note,
+            Description = i.Description,
             File = i.File,
             Title = i.Title,
             PublicTitle = i.PublicTitle,

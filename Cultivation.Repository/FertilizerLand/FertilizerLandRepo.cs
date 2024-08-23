@@ -75,7 +75,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (result.Count > 0)
             hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
 
-        return new(result, hasNextPage);
+        return new CommonResponseDto<List<FertilizerLandDto>>(result, hasNextPage);
     }
     public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to, int pageSize, int pageNum)
     {

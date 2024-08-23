@@ -1,7 +1,6 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Fertilizer;
-using Cultivation.Shared.Enum;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -18,14 +17,14 @@ public class FertilizerRepo : IFertilizerRepo
 
     public async Task<long> AddAsync(FertilizerFormDto dto)
     {
-        string fileName = null;
-        if (dto.File != null)
-            fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.Fertilizer);
+        //string fileName = null;
+        //if (dto.File != null)
+        //    fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.Fertilizer);
 
         var model = await context.Fertilizer.AddAsync(new FertilizerModel
         {
             NPK = dto.NPK,
-            File = fileName,
+            //File = fileName,
             Title = dto.Title,
             // Price = dto.Price,
             PublicTitle = dto.PublicTitle,
@@ -46,7 +45,7 @@ public class FertilizerRepo : IFertilizerRepo
         {
             Id = f.Id,
             NPK = f.NPK,
-            File = f.File,
+            //File = f.File,
             Title = f.Title,
             //Price = f.Price,
             PublicTitle = f.PublicTitle,
@@ -63,7 +62,7 @@ public class FertilizerRepo : IFertilizerRepo
         {
             Id = f.Id,
             NPK = f.NPK,
-            File = f.File,
+            //File = f.File,
             Title = f.Title,
             //Price = f.Price,
             PublicTitle = f.PublicTitle,

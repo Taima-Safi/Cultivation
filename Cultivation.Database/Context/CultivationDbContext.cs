@@ -22,6 +22,7 @@ public class CultivationDbContext : DbContext
     public DbSet<CuttingLandModel> CuttingLand { get; set; }
     public DbSet<CuttingColorModel> CuttingColor { get; set; }
     public DbSet<FertilizerLandModel> FertilizerLand { get; set; }
+    public DbSet<InsecticideLandModel> InsecticideLand { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
-namespace Cultivation.Dto.Fertilizer;
+﻿namespace Cultivation.Dto.Fertilizer;
 
 public class FertilizerFormDto
 {
@@ -8,6 +6,6 @@ public class FertilizerFormDto
     public string Title { get; set; }
     public string PublicTitle { get; set; }
     // public double Price { get; set; }//kg
-    public IFormFile? File { get; set; }
+    //public IFormFile File { get; set; }
     public string Description { get; set; }
 }
