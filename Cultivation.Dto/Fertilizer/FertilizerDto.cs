@@ -7,6 +7,6 @@ public class FertilizerDto
     public string Title { get; set; }
     public string PublicTitle { get; set; }
     //public double Price { get; set; }//kg
-    public string File { get; set; }
+    //public string File { get; set; }
     public string Description { get; set; }
 }
