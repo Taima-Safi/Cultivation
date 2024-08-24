@@ -30,7 +30,7 @@ public class LandRepo : ILandRepo
         await context.SaveChangesAsync();
         return land.Entity.Id;
     }
-    public async Task<List<LandDto>> GetAllAsync(string title, double? size)
+    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren)
     {
         var landModels = await context.Land.Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
@@ -53,10 +53,16 @@ public class LandRepo : ILandRepo
             }).ToListAsync();
         var parents = landModels.Where(l => !l.ParentId.HasValue).ToList();
         var result = new List<LandDto>();
+        List<LandDto> resultWithoutChildren = [];
+
         foreach (var parent in parents)
+            result.Add(GetChildrenAsync(parent, landModels, resultWithoutChildren));
+
+        if (justChildren)
         {
-            result.Add(GetChildrenAsync(parent, landModels));
+            return resultWithoutChildren;
         }
+
         return result;
     }
 
@@ -86,7 +92,7 @@ public class LandRepo : ILandRepo
 
         var parent = landModels.Where(l => l.Id == id).FirstOrDefault();
 
-        var result = GetChildrenAsync(parent, landModels);
+        var result = GetChildrenAsync(parent, landModels, new());
         return result;
     }
     //public async Task<List<LandDto>> GetLandRecursion()
@@ -100,13 +106,15 @@ public class LandRepo : ILandRepo
     //    }
     //    return result;
     //}
-    private LandDto GetChildrenAsync(LandDto parent, List<LandDto> allLands)
+    private LandDto GetChildrenAsync(LandDto parent, List<LandDto> allLands, List<LandDto> resultWithoutChildren)
     {
         var children = allLands.Where(a => a.ParentId == parent.Id).ToList();
+        if (children.Count == 0)
+            resultWithoutChildren.Add(parent);
         parent.Children = children;
         foreach (var child in children)
         {
-            GetChildrenAsync(child, allLands);
+            GetChildrenAsync(child, allLands, resultWithoutChildren);
         }
 
         return parent;
