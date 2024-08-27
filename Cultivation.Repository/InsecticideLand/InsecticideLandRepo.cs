@@ -4,6 +4,8 @@ using Cultivation.Dto.Insecticide;
 using Cultivation.Dto.InsecticideLand;
 using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
+using Cultivation.Repository.Insecticide;
+using Cultivation.Repository.Land;
 using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
@@ -16,6 +18,8 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 {
     private readonly CultivationDbContext context;
     private readonly IBaseRepo<InsecticideLandModel> baseRepo;
+    private readonly ILandRepo landRepo;
+    private readonly IInsecticideRepo insecticideRepo;
 
     public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo)
     {
@@ -24,6 +28,12 @@ public class InsecticideLandRepo : IInsecticideLandRepo
     }
     public async Task<long> AddAsync(InsecticideLandFormDto dto)
     {
+        if (!await landRepo.CheckIfExistAsync(dto.LandId))
+            throw new NotFoundException("Land not found..");
+
+        if (!await insecticideRepo.CheckIfExistAsync(dto.InsecticideId))
+            throw new NotFoundException("Insecticide not found..");
+
         string fileName = null;
         if (dto.File != null)
             fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.InsecticideLand);
@@ -77,8 +87,8 @@ public class InsecticideLandRepo : IInsecticideLandRepo
             }).ToListAsync();
 
         var hasNextPage = false;
-        if(result.Any())
-            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(expression, pageSize, pageNum);    
+        if (result.Any())
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(expression, pageSize, pageNum);
 
         return new(result, hasNextPage);
     }
