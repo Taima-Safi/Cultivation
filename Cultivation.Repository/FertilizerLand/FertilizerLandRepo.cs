@@ -30,6 +30,12 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     }
     public async Task AddAsync(FertilizerLandFormDto dto)
     {
+        if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
+            throw new NotFoundException("One of lands not found..");
+
+        if (!await fertilizerRepo.CheckIfExistByIdsAsync(dto.Mixes.Select(f => f.FertilizerId).ToList()))
+            throw new NotFoundException("One of Fertilizers not found..");
+
         List<FertilizerLandModel> models = [];
         foreach (var landId in dto.LandIds)
         {

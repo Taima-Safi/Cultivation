@@ -88,4 +88,6 @@ public class FertilizerRepo : IFertilizerRepo
     }
     public async Task<bool> CheckIfExistAsync(long id)
     => await context.Fertilizer.Where(cl => cl.Id == id && cl.IsValid).AnyAsync();
+    public async Task<bool> CheckIfExistByIdsAsync(List<long> ids)
+        => await context.Fertilizer.AnyAsync(l => ids.Contains(l.Id) && l.IsValid);
 }

@@ -121,4 +121,7 @@ public class LandRepo : ILandRepo
     }
     public async Task<bool> CheckIfExistAsync(long id)
         => await context.Land.Where(l => l.Id == id && l.IsValid).AnyAsync();
+
+    public async Task<bool> CheckIfExistByIdsAsync(List<long> ids)
+        => await context.Land.AnyAsync(l => ids.Contains(l.Id) && l.IsValid);
 }
