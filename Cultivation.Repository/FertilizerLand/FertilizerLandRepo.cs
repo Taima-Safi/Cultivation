@@ -6,7 +6,6 @@ using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Repository.Land;
-using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
@@ -143,19 +142,20 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 }
             }).FirstOrDefaultAsync();
     }
-    public async Task UpdateAsync(long id, double? quantity, DateTime? date, FertilizerType? type, long? landId, long? fertilizerId)
+    public async Task UpdateAsync(long id, UpdateFertilizerLandDto dto)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this fertilizer..");
 
-        if (!await landRepo.CheckIfExistAsync(landId.Value))
+        if (!await landRepo.CheckIfExistAsync(dto.LandId))
             throw new NotFoundException("Land not found..");
 
-        if (!await fertilizerRepo.CheckIfExistAsync(fertilizerId.Value))
+        if (!await fertilizerRepo.CheckIfExistAsync(dto.FertilizerId))
             throw new NotFoundException("Fertilizer not has this fertilizer..");
 
-        await context.FertilizerLand.Where(fl => fl.Id == id && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.Type, type)
-        .SetProperty(fl => fl.Quantity, quantity).SetProperty(fl => fl.Date, date));
+        await context.FertilizerLand.Where(fl => fl.Id == id && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.Type, dto.Type)
+        .SetProperty(fl => fl.Quantity, dto.Quantity).SetProperty(fl => fl.Date, dto.Date).SetProperty(fl => fl.FertilizerId, dto.FertilizerId)
+        .SetProperty(fl => fl.LandId, dto.LandId));
     }
     public async Task RemoveAsync(long id)
     {

@@ -1,6 +1,5 @@
 ﻿using Cultivation.Dto.FertilizerLand;
 using Cultivation.Repository.FertilizerLand;
-using Cultivation.Shared.Enum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers;
@@ -40,9 +39,9 @@ public class FertilizerLandController : ControllerBase
         return Ok(result);
     }
     [HttpPost]
-    public async Task<IActionResult> Update(long id, double? quantity, DateTime? date, FertilizerType? type, long? landId, long? fertilizerId)
+    public async Task<IActionResult> Update(long id, UpdateFertilizerLandDto dto)
     {
-        await fertilizerLandRepo.UpdateAsync(id, quantity, date, type, landId, fertilizerId);
+        await fertilizerLandRepo.UpdateAsync(id, dto);
         return Ok();
     }
     [HttpDelete]
