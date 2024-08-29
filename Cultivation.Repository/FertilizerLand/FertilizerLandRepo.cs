@@ -122,7 +122,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this fertilizer..");
 
-        return await context.FertilizerLand.Where(fl => fl.IsValid)
+        return await context.FertilizerLand.Where(fl => fl.Id == id && fl.IsValid)
             .Select(fl => new FertilizerLandDto
             {
                 Id = fl.Id,
