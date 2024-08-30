@@ -2,7 +2,7 @@
 
 public class InsecticideLandModel : BaseModel
 {
-    public string File { get; set; }
+    // public string File { get; set; }
     public string Note { get; set; }
     public double Liter { get; set; }
     public DateTime Date { get; set; }

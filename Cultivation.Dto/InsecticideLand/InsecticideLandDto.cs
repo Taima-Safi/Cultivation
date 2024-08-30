@@ -6,7 +6,7 @@ namespace Cultivation.Dto.InsecticideLand;
 public class InsecticideLandDto
 {
     public long Id { get; set; }
-    public string File { get; set; }
+    //public string File { get; set; }
     public string Note { get; set; }
     public double Liter { get; set; }
     public DateTime Date { get; set; }

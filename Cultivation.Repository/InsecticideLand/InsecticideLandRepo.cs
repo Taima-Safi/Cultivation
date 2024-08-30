@@ -6,7 +6,6 @@ using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.Insecticide;
 using Cultivation.Repository.Land;
-using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
@@ -17,14 +16,16 @@ namespace Cultivation.Repository.InsecticideLand;
 public class InsecticideLandRepo : IInsecticideLandRepo
 {
     private readonly CultivationDbContext context;
-    private readonly IBaseRepo<InsecticideLandModel> baseRepo;
     private readonly ILandRepo landRepo;
     private readonly IInsecticideRepo insecticideRepo;
+    private readonly IBaseRepo<InsecticideLandModel> baseRepo;
 
-    public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo)
+    public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo, ILandRepo landRepo, IInsecticideRepo insecticideRepo)
     {
         this.context = context;
         this.baseRepo = baseRepo;
+        this.landRepo = landRepo;
+        this.insecticideRepo = insecticideRepo;
     }
     public async Task<long> AddAsync(InsecticideLandFormDto dto)
     {
@@ -34,14 +35,14 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         if (!await insecticideRepo.CheckIfExistAsync(dto.InsecticideId))
             throw new NotFoundException("Insecticide not found..");
 
-        string fileName = null;
-        if (dto.File != null)
-            fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.InsecticideLand);
+        //string fileName = null;
+        //if (dto.File != null)
+        //    fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.InsecticideLand);
 
         var model = await context.InsecticideLand.AddAsync(new InsecticideLandModel
         {
             Note = dto.Note,
-            File = fileName,
+            //File = fileName,
             Date = dto.Date,
             Liter = dto.Liter,
             LandId = dto.LandId,
@@ -52,12 +53,12 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 
         return model.Entity.Id;
     }
-    public async Task<CommonResponseDto<List<InsecticideLandDto>>> GetAllAsync(DateTime? date, string note, double? liter, double? quantity, long? landId, long? insecticideId
-        , int pageSize, int pageNum)
+    public async Task<CommonResponseDto<List<InsecticideLandDto>>> GetAllAsync(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to
+        , long? landId, long? insecticideId, int pageSize, int pageNum)
     {
         Expression<Func<InsecticideLandModel, bool>> expression = il => (!insecticideId.HasValue || il.InsecticideId == insecticideId) && (!landId.HasValue || il.LandId == landId)
-        && (!quantity.HasValue || il.Quantity == quantity) && (!liter.HasValue || il.Liter == liter) && (!date.HasValue || il.Date == date)
-        && (string.IsNullOrEmpty(note) || il.Note.Contains(note)) && il.IsValid;
+        && (!quantity.HasValue || il.Quantity == quantity) && (!liter.HasValue || il.Liter == liter)/* && (!date.HasValue || il.Date == date)*/
+        && (!from.HasValue || il.Date.Date >= from) && (!to.HasValue || il.Date.Date <= to) && (string.IsNullOrEmpty(note) || il.Note.Contains(note)) && il.IsValid;
 
         var result = await context.InsecticideLand.Where(expression)
             .Skip(pageSize * pageNum)
@@ -69,7 +70,7 @@ public class InsecticideLandRepo : IInsecticideLandRepo
                 Note = il.Note,
                 Liter = il.Liter,
                 Quantity = il.Quantity,
-                File = il.File,
+                //File = il.File,
                 Land = new LandDto
                 {
                     Id = il.Land.Id,
@@ -104,7 +105,7 @@ public class InsecticideLandRepo : IInsecticideLandRepo
             Note = il.Note,
             Liter = il.Liter,
             Quantity = il.Quantity,
-            File = il.File,
+            //File = il.File,
             Land = new LandDto
             {
                 Id = il.Land.Id,
@@ -126,16 +127,16 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this insecticide...");
 
-        await context.InsecticideLand.ExecuteUpdateAsync(il => il.SetProperty(il => il.Note, dto.Note).SetProperty(il => il.Quantity, dto.Quantity)
-        .SetProperty(il => il.Liter, dto.Liter).SetProperty(il => il.Date, dto.Date).SetProperty(il => il.InsecticideId, dto.InsecticideId)
-        .SetProperty(il => il.LandId, dto.LandId));
+        await context.InsecticideLand.Where(il => il.Id == id && il.IsValid).ExecuteUpdateAsync(il => il.SetProperty(il => il.Note, dto.Note)
+        .SetProperty(il => il.Quantity, dto.Quantity).SetProperty(il => il.Liter, dto.Liter).SetProperty(il => il.Date, dto.Date)
+        .SetProperty(il => il.InsecticideId, dto.InsecticideId).SetProperty(il => il.LandId, dto.LandId));
     }
     public async Task RemoveAsync(long id)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this insecticide...");
 
-        await context.InsecticideLand.ExecuteUpdateAsync(il => il.SetProperty(il => il.IsValid, false));
+        await context.InsecticideLand.Where(il => il.Id == id && il.IsValid).ExecuteUpdateAsync(il => il.SetProperty(il => il.IsValid, false));
     }
 
     public async Task<bool> CheckIfExistAsync(long id)

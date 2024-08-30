@@ -6,6 +6,7 @@ using Cultivation.Repository.CuttingLand;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Repository.FertilizerLand;
 using Cultivation.Repository.Insecticide;
+using Cultivation.Repository.InsecticideLand;
 using Cultivation.Repository.Land;
 using FourthPro.Middleware;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,7 @@ builder.Services.AddScoped<ICuttingLandRepo, CuttingLandRepo>();
 builder.Services.AddScoped<IFertilizerRepo, FertilizerRepo>();
 builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
 builder.Services.AddScoped<IInsecticideRepo, InsecticideRepo>();
+builder.Services.AddScoped<IInsecticideLandRepo, InsecticideLandRepo>();
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 
 var app = builder.Build();
