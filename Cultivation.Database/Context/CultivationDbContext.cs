@@ -15,12 +15,14 @@ public class CultivationDbContext : DbContext
     {
     }
     public DbSet<LandModel> Land { get; set; }
-    public DbSet<CuttingModel> Cutting { get; set; }
     public DbSet<ColorModel> Color { get; set; }
+    public DbSet<CuttingModel> Cutting { get; set; }
+    public DbSet<FertilizerModel> Fertilizer { get; set; }
+    public DbSet<InsecticideModel> Insecticide { get; set; }
     public DbSet<CuttingLandModel> CuttingLand { get; set; }
     public DbSet<CuttingColorModel> CuttingColor { get; set; }
-    public DbSet<FertilizerModel> Fertilizer { get; set; }
     public DbSet<FertilizerLandModel> FertilizerLand { get; set; }
+    public DbSet<InsecticideLandModel> InsecticideLand { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

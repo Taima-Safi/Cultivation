@@ -4,6 +4,7 @@ using Cultivation.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cultivation.Database.Migrations
 {
     [DbContext(typeof(CultivationDbContext))]
-    partial class CultivationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240820143306_insecticideModel")]
+    partial class insecticideModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -232,50 +235,6 @@ namespace Cultivation.Database.Migrations
                     b.ToTable("Fertilizer");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideLandModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("InsecticideId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("LandId")
-                        .HasColumnType("bigint");
-
-                    b.Property<double>("Liter")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("Quantity")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InsecticideId");
-
-                    b.HasIndex("LandId");
-
-                    b.ToTable("InsecticideLand");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.InsecticideModel", b =>
                 {
                     b.Property<long>("Id")
@@ -287,11 +246,14 @@ namespace Cultivation.Database.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("File")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsValid")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PublicTitle")
                         .HasColumnType("nvarchar(max)");
@@ -403,25 +365,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("Land");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideLandModel", b =>
-                {
-                    b.HasOne("Cultivation.Database.Model.InsecticideModel", "Insecticide")
-                        .WithMany("InsecticideLands")
-                        .HasForeignKey("InsecticideId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Cultivation.Database.Model.LandModel", "Land")
-                        .WithMany("InsecticideLands")
-                        .HasForeignKey("LandId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Insecticide");
-
-                    b.Navigation("Land");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.LandModel", b =>
                 {
                     b.HasOne("Cultivation.Database.Model.LandModel", "Parent")
@@ -451,11 +394,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("FertilizerLands");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideModel", b =>
-                {
-                    b.Navigation("InsecticideLands");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.LandModel", b =>
                 {
                     b.Navigation("Children");
@@ -463,8 +401,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("CuttingLands");
 
                     b.Navigation("FertilizerLands");
-
-                    b.Navigation("InsecticideLands");
                 });
 #pragma warning restore 612, 618
         }
