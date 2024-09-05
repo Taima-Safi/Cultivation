@@ -17,9 +17,16 @@ public class LandRepo : ILandRepo
     public async Task<long> AddAsync(LandFormDto dto)
     {
         if (dto.ParentId.HasValue)
-            if (!await CheckIfExistAsync(dto.ParentId.Value))
+        {
+            var parent = await GetLandModelAsync(dto.ParentId.Value);
+
+            if (parent == null)
                 throw new NotFoundException("Parent land Not Found..");
 
+            var childrenLandsSize = parent.Children.Select(l => l.Size).Sum();
+            if (parent.Size < (childrenLandsSize + dto.Size))
+                throw new NotFoundException("No land  size used completely");
+        }
         var land = await context.Land.AddAsync(new LandModel
         {
             Size = dto.Size,
@@ -119,6 +126,9 @@ public class LandRepo : ILandRepo
 
         return parent;
     }
+    public async Task<LandModel> GetLandModelAsync(long id)
+        => await context.Land.Where(l => l.Id == id && l.IsValid).Include(l => l.Children).FirstOrDefaultAsync();
+
     public async Task<bool> CheckIfExistAsync(long id)
         => await context.Land.Where(l => l.Id == id && l.IsValid).AnyAsync();
 
