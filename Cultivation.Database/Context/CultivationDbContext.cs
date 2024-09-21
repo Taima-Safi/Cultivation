@@ -16,6 +16,7 @@ public class CultivationDbContext : DbContext
     }
     public DbSet<LandModel> Land { get; set; }
     public DbSet<ColorModel> Color { get; set; }
+    public DbSet<FlowerModel> Flower { get; set; }
     public DbSet<CuttingModel> Cutting { get; set; }
     public DbSet<FertilizerModel> Fertilizer { get; set; }
     public DbSet<InsecticideModel> Insecticide { get; set; }
