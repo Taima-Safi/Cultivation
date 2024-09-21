@@ -41,6 +41,35 @@ public class FertilizerLandController : ControllerBase
         return Ok(result);
     }
     [HttpPost]
+    public async Task<IActionResult> ExportExcel(long landId, DateTime? from, DateTime? to, string fileName = "ExcelFile")
+    {
+        Console.WriteLine("EXCEL PASS HERE ON CONTROLLER");
+        //var (file, stream) = await fertilizerLandRepo.ExportExcelFileAsync(landId, from, to);
+        var result = await fertilizerLandRepo.GetFertilizersLandAsync(landId, from, to, int.MaxValue, 0);
+        var toExport = result.Data.Select(x => new ExportToExcelDto
+        {
+            Type = x.Type.ToString(),
+            Date = x.Date.ToShortDateString(),
+            Quantity = x.Quantity.ToString(),
+            NPK = x.Fertilizer.NPK,
+            Title = x.Fertilizer.Title,
+            Description = x.Fertilizer.Description,
+            PublicTitle = x.Fertilizer.PublicTitle,
+        }).ToList();
+        //List<string> filtersPropertiesNames = new();
+        //Type filterPropertiesType = typeof(HcpPatientFilterDto);
+        //PropertyInfo[] filterProperties = filterPropertiesType.GetProperties();
+        //foreach (var item in filterProperties)
+        //{
+        //    var valueOfFilterProp = (bool)item.GetValue(filterDto);
+        //    if (valueOfFilterProp)
+        //        filtersPropertiesNames.Add(item.Name);
+        //}
+
+        var excel = ExportToExcel(ExportType.LandFertilizers, fileName, new(), /*filtersPropertiesNames,*/ toExport);
+        return File(excel.stream, excel.file.ContentType, excel.file.FileName);
+    }
+    [HttpPost]
     public async Task<IActionResult> Update(long id, UpdateFertilizerLandDto dto)
     {
         await fertilizerLandRepo.UpdateAsync(id, dto);
