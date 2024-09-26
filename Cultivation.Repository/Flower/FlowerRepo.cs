@@ -18,7 +18,7 @@ public class FlowerRepo : IFlowerRepo
     {
         this.context = context;
     }
-    public async Task<long> AddAsync(int count, DateTime date, long cuttingLandId)
+    public async Task<long> AddAsync(int count, string note, DateTime date, long cuttingLandId)
     {
         if (!await context.CuttingLand.Where(c => c.Id == cuttingLandId && c.IsValid).AnyAsync())
             throw new NotFoundException("Cuttings not found..");
@@ -26,6 +26,7 @@ public class FlowerRepo : IFlowerRepo
         var x = await context.Flower.AddAsync(new FlowerModel
         {
             Date = date,
+            Note = note,
             Count = count,
             CuttingLandId = cuttingLandId
         });
@@ -39,8 +40,9 @@ public class FlowerRepo : IFlowerRepo
         && c.IsValid).Select(c => new FlowerDto
         {
             Id = c.Id,
-            Count = c.Count,
             Date = c.Date,
+            Note = c.Note,
+            Count = c.Count,
             CuttingLand = new CuttingLandDto
             {
                 Id = c.CuttingLand.Id,
@@ -79,8 +81,9 @@ public class FlowerRepo : IFlowerRepo
         return await context.Flower.Where(c => c.Id == id && c.IsValid).Select(c => new FlowerDto
         {
             Id = c.Id,
-            Count = c.Count,
             Date = c.Date,
+            Note = c.Note,
+            Count = c.Count,
             CuttingLand = new CuttingLandDto
             {
                 Id = c.CuttingLand.Id,
@@ -114,12 +117,13 @@ public class FlowerRepo : IFlowerRepo
             }
         }).FirstOrDefaultAsync();
     }
-    public async Task UpdateAsync(long id, int count, DateTime date)
+    public async Task UpdateAsync(long id, string note, int count, DateTime date)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Flowers not found..");
 
-        await context.Flower.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Date, date).SetProperty(c => c.Count, count));
+        await context.Flower.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Date, date)
+        .SetProperty(c => c.Note, note).SetProperty(c => c.Count, count));
     }
 
     public async Task RemoveAsync(long id)

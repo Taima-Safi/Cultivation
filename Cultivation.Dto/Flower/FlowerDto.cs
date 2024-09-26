@@ -5,6 +5,7 @@ namespace Cultivation.Dto.Flower;
 public class FlowerDto
 {
     public long Id { get; set; }
+    public string Note { get; set; }
     public int Count { get; set; }
     public DateTime Date { get; set; }
 

@@ -3,6 +3,7 @@
 public class FlowerModel : BaseModel
 {
     public int Count { get; set; }
+    public string Note { get; set; }
     public DateTime Date { get; set; }
 
     public long CuttingLandId { get; set; }

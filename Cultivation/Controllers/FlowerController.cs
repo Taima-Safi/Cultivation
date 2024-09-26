@@ -14,9 +14,9 @@ public class FlowerController : ControllerBase
         this.flowerRepo = flowerRepo;
     }
     [HttpPost]
-    public async Task<IActionResult> Add(int count, DateTime date, long cuttingLandId)
+    public async Task<IActionResult> Add(int count, string note, DateTime date, long cuttingLandId)
     {
-        var id = await flowerRepo.AddAsync(count, date, cuttingLandId);
+        var id = await flowerRepo.AddAsync(count, note, date, cuttingLandId);
         return Ok(id);
     }
     [HttpGet]
@@ -32,9 +32,9 @@ public class FlowerController : ControllerBase
         return Ok(x);
     }
     [HttpPost]
-    public async Task<IActionResult> Update(long id, int count, DateTime date)
+    public async Task<IActionResult> Update(long id, string note, int count, DateTime date)
     {
-        await flowerRepo.UpdateAsync(id, count, date);
+        await flowerRepo.UpdateAsync(id, note, count, date);
         return Ok();
     }
     [HttpDelete]
