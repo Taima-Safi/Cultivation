@@ -54,10 +54,10 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     {
         var result = await context.FertilizerLand.Where(fl => fl.IsValid)
             .OrderByDescending(fl => fl.Date)
-            .OrderByDescending(fl => fl.LandId)
-            .Skip(pageNum * pageSize)
-            .Take(pageSize)
-            .Select(fl => new FertilizerLandDto
+            .OrderByDescending(fl => fl.LandId).ToListAsync();
+
+        var x = result.Skip(pageNum * pageSize)
+            .Take(pageSize).Select(fl => new FertilizerLandDto
             {
                 Id = fl.Id,
                 Date = fl.Date,
@@ -74,13 +74,13 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                     Id = fl.Land.Id,
                     Title = fl.Land.Title,
                 }
-            }).ToListAsync();
+            }).ToList();
 
         bool hasNextPage = false;
-        if (result.Count > 0)
+        if (x.Count > 0)
             hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
 
-        return new CommonResponseDto<List<FertilizerLandDto>>(result, hasNextPage);
+        return new CommonResponseDto<List<FertilizerLandDto>>(x, hasNextPage);
     }
     public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to, int pageSize, int pageNum)
     {

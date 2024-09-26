@@ -20,9 +20,9 @@ public class FlowerController : ControllerBase
         return Ok(id);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateTime? date, long? cuttingLandId)
+    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId)
     {
-        var x = await flowerRepo.GetAllAsync(date, cuttingLandId);
+        var x = await flowerRepo.GetAllAsync(from, to, cuttingLandId);
         return Ok(x);
     }
     [HttpGet]

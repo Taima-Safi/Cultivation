@@ -33,45 +33,50 @@ public class FlowerRepo : IFlowerRepo
         await context.SaveChangesAsync();
         return x.Entity.Id;
     }
-    public async Task<List<FlowerDto>> GetAllAsync(DateTime? date, long? cuttingLandId)
+    public async Task<List<FlowerDto>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId)
     {
-        return await context.Flower.Where(c => (!date.HasValue || c.Date == date)
-        && (!cuttingLandId.HasValue || c.CuttingLandId == cuttingLandId)
-        && c.IsValid).Select(c => new FlowerDto
-        {
-            Id = c.Id,
-            Date = c.Date,
-            Note = c.Note,
-            Count = c.Count,
-            CuttingLand = new CuttingLandDto
+        return await context.Flower.Where(f => (!from.HasValue || f.Date.Date >= from)
+        && (!to.HasValue || f.Date.Date <= to)
+        && (!cuttingLandId.HasValue || f.CuttingLandId == cuttingLandId)
+        // && (!colorId.HasValue || f.CuttingLand.CuttingColor.ColorId == colorId)
+        && f.IsValid)
+            .OrderByDescending(f => f.Date)
+            .OrderByDescending(f => f.CuttingLandId)
+            .Select(c => new FlowerDto
             {
-                Id = c.CuttingLand.Id,
-                Land = new LandDto
+                Id = c.Id,
+                Date = c.Date,
+                Note = c.Note,
+                Count = c.Count,
+                CuttingLand = new CuttingLandDto
                 {
-                    Id = c.CuttingLand.Land.Id,
-                    Size = c.CuttingLand.Land.Size,
-                    Title = c.CuttingLand.Land.Title,
-                    ParentId = c.CuttingLand.Land.ParentId,
-                    Location = c.CuttingLand.Land.Location,
-                },
-                CuttingColor = new CuttingColorDto
-                {
-                    Id = c.CuttingLand.CuttingColor.Id,
-                    Code = c.CuttingLand.CuttingColor.Code,
-                    Color = new ColorDto
+                    Id = c.CuttingLand.Id,
+                    Land = new LandDto
                     {
-                        Id = c.CuttingLand.CuttingColor.Color.Id,
-                        Title = c.CuttingLand.CuttingColor.Color.Title,
+                        Id = c.CuttingLand.Land.Id,
+                        Size = c.CuttingLand.Land.Size,
+                        Title = c.CuttingLand.Land.Title,
+                        ParentId = c.CuttingLand.Land.ParentId,
+                        Location = c.CuttingLand.Land.Location,
                     },
-                    Cutting = new CuttingDto
+                    CuttingColor = new CuttingColorDto
                     {
-                        Id = c.CuttingLand.CuttingColor.Cutting.Id,
-                        Type = c.CuttingLand.CuttingColor.Cutting.Type,
-                        Title = c.CuttingLand.CuttingColor.Cutting.Title,
+                        Id = c.CuttingLand.CuttingColor.Id,
+                        Code = c.CuttingLand.CuttingColor.Code,
+                        Color = new ColorDto
+                        {
+                            Id = c.CuttingLand.CuttingColor.Color.Id,
+                            Title = c.CuttingLand.CuttingColor.Color.Title,
+                        },
+                        Cutting = new CuttingDto
+                        {
+                            Id = c.CuttingLand.CuttingColor.Cutting.Id,
+                            Type = c.CuttingLand.CuttingColor.Cutting.Type,
+                            Title = c.CuttingLand.CuttingColor.Cutting.Title,
+                        }
                     }
                 }
-            }
-        }).ToListAsync();
+            }).ToListAsync();
     }
     public async Task<FlowerDto> GetByIdAsync(long id)
     {
