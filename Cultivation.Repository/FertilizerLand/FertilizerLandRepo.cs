@@ -53,11 +53,14 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetAllAsync(int pageSize, int pageNum)
     {
         var result = await context.FertilizerLand.Where(fl => fl.IsValid)
+            .Include(fl => fl.Land).Include(fl => fl.Fertilizer)
             .OrderByDescending(fl => fl.Date)
             .OrderByDescending(fl => fl.LandId).ToListAsync();
 
-        var x = result.Skip(pageNum * pageSize)
-            .Take(pageSize).Select(fl => new FertilizerLandDto
+        var x = result
+            .Skip(pageNum * pageSize)
+            .Take(pageSize)
+            .Select(fl => new FertilizerLandDto
             {
                 Id = fl.Id,
                 Date = fl.Date,
@@ -72,7 +75,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 Land = new LandDto
                 {
                     Id = fl.Land.Id,
-                    Title = fl.Land.Title,
+                    Title = fl.Land.Title
                 }
             }).ToList();
 
