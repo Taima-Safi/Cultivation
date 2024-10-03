@@ -33,11 +33,15 @@ public class FlowerRepo : IFlowerRepo
         await context.SaveChangesAsync();
         return x.Entity.Id;
     }
-    public async Task<List<FlowerDto>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId)
+    public async Task<List<FlowerDto>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
+        , string cuttingColorCode, string colorTitle)
     {
         return await context.Flower.Where(f => (!from.HasValue || f.Date.Date >= from)
         && (!to.HasValue || f.Date.Date <= to)
         && (!cuttingLandId.HasValue || f.CuttingLandId == cuttingLandId)
+        && (string.IsNullOrEmpty(colorTitle) || f.CuttingLand.CuttingColor.Color.Title == colorTitle)
+        && (string.IsNullOrEmpty(cuttingColorCode) || f.CuttingLand.CuttingColor.Code == cuttingColorCode)
+        && (string.IsNullOrEmpty(cuttingTitle) || f.CuttingLand.CuttingColor.Cutting.Title == cuttingTitle)
         // && (!colorId.HasValue || f.CuttingLand.CuttingColor.ColorId == colorId)
         && f.IsValid)
             .OrderByDescending(f => f.Date)
