@@ -1,5 +1,8 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.Color;
+using Cultivation.Dto.Cutting;
+using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Fertilizer;
 using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.Land;
@@ -111,6 +114,26 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 {
                     Id = fl.Land.Id,
                     Title = fl.Land.Title,
+                    Location = fl.Land.Location,
+                    ParentId = fl.Land.ParentId,
+                    CuttingLands = fl.Land.CuttingLands.Where(x => x.IsValid).Select(c => new CuttingLandDto
+                    {
+                        CuttingColor = new CuttingColorDto
+                        {
+                            Cutting = new CuttingDto
+                            {
+                                Id = c.CuttingColor.Cutting.Id,
+                                Type = c.CuttingColor.Cutting.Type,
+                                Title = c.CuttingColor.Cutting.Title,
+                            },
+                            Color = new ColorDto
+                            {
+                                Id = c.CuttingColor.Color.Id,
+                                Code = c.CuttingColor.Color.Code,
+                                Title = c.CuttingColor.Color.Title,
+                            }
+                        }
+                    }).ToList(),
                 }
             }).ToListAsync();
 
@@ -142,6 +165,26 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 {
                     Id = fl.Land.Id,
                     Title = fl.Land.Title,
+                    Location = fl.Land.Location,
+                    ParentId = fl.Land.ParentId,
+                    CuttingLands = fl.Land.CuttingLands.Where(x => x.IsValid).Select(c => new CuttingLandDto
+                    {
+                        CuttingColor = new CuttingColorDto
+                        {
+                            Cutting = new CuttingDto
+                            {
+                                Id = c.CuttingColor.Cutting.Id,
+                                Type = c.CuttingColor.Cutting.Type,
+                                Title = c.CuttingColor.Cutting.Title,
+                            },
+                            Color = new ColorDto
+                            {
+                                Id = c.CuttingColor.Color.Id,
+                                Code = c.CuttingColor.Color.Code,
+                                Title = c.CuttingColor.Color.Title,
+                            }
+                        }
+                    }).ToList(),
                 }
             }).FirstOrDefaultAsync();
     }

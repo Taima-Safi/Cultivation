@@ -1,4 +1,6 @@
-﻿namespace Cultivation.Dto.Land;
+﻿using Cultivation.Dto.CuttingLand;
+
+namespace Cultivation.Dto.Land;
 
 public class LandDto
 {
@@ -9,4 +11,5 @@ public class LandDto
 
     public long? ParentId { get; set; }
     public List<LandDto> Children { get; set; } = [];
+    public List<CuttingLandDto> CuttingLands { get; set; } = [];
 }
