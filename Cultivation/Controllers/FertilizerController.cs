@@ -22,9 +22,9 @@ public class FertilizerController : ControllerBase
         return Ok(id);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(string npk, string title, string publicTitle, string description)
+    public async Task<IActionResult> GetAll(string npk, string title, string publicTitle, string description, int pageSize = 10, int pageNum = 0)
     {
-        var fertilizers = await fertilizerRepo.GetAllAsync(npk, title, publicTitle, description);
+        var fertilizers = await fertilizerRepo.GetAllAsync(npk, title, publicTitle, description, pageSize, pageNum);
         return Ok(fertilizers);
     }
     [HttpGet]

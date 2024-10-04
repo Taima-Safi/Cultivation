@@ -1,6 +1,8 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Color;
+using Cultivation.Repository.Base;
+using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +11,12 @@ namespace Cultivation.Repository.Color;
 public class ColorRepo : IColorRepo
 {
     private readonly CultivationDbContext context;
-    public ColorRepo(CultivationDbContext context)
+    private readonly IBaseRepo<ColorModel> baseRepo;
+
+    public ColorRepo(CultivationDbContext context, IBaseRepo<ColorModel> baseRepo)
     {
         this.context = context;
+        this.baseRepo = baseRepo;
     }
 
     public async Task<long> AddAsync(string title, string code)
@@ -24,16 +29,24 @@ public class ColorRepo : IColorRepo
         await context.SaveChangesAsync();
         return color.Entity.Id;
     }
-    public async Task<List<ColorDto>> GetAllAsync(string title, string code)
+    public async Task<CommonResponseDto<List<ColorDto>>> GetAllAsync(string title, string code, int pageSize, int pageNum)
     {
-        return await context.Color.Where(c => (string.IsNullOrEmpty(title) || c.Title.Contains(title))
+        var x = await context.Color.Where(c => (string.IsNullOrEmpty(title) || c.Title.Contains(title))
         && (string.IsNullOrEmpty(code) || c.Title.Contains(code))
-        && c.IsValid).Select(c => new ColorDto
-        {
-            Id = c.Id,
-            Code = c.Code,
-            Title = c.Title
-        }).ToListAsync();
+        && c.IsValid)
+            .Skip(pageNum * pageSize)
+            .Take(pageSize).Select(c => new ColorDto
+            {
+                Id = c.Id,
+                Code = c.Code,
+                Title = c.Title
+            }).ToListAsync();
+
+        bool hasNextPage = false;
+        if (x.Count > 0)
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
+
+        return new CommonResponseDto<List<ColorDto>>(x, hasNextPage);
     }
     public async Task<ColorDto> GetByIdAsync(long id)
     {

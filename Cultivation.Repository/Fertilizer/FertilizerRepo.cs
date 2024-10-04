@@ -1,6 +1,8 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Fertilizer;
+using Cultivation.Repository.Base;
+using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -9,10 +11,12 @@ namespace Cultivation.Repository.Fertilizer;
 
 public class FertilizerRepo : IFertilizerRepo
 {
+    private readonly IBaseRepo<FertilizerModel> baseRepo;
     private readonly CultivationDbContext context;
-    public FertilizerRepo(CultivationDbContext context)
+    public FertilizerRepo(CultivationDbContext context, IBaseRepo<FertilizerModel> baseRepo)
     {
         this.context = context;
+        this.baseRepo = baseRepo;
     }
 
     public async Task<long> AddAsync(FertilizerFormDto dto)
@@ -33,7 +37,8 @@ public class FertilizerRepo : IFertilizerRepo
         await context.SaveChangesAsync();
         return model.Entity.Id;
     }
-    public async Task<List<FertilizerDto>> GetAllAsync(string npk, string title, string publicTitle, string description)
+    public async Task<CommonResponseDto<List<FertilizerDto>>> GetAllAsync(string npk, string title, string publicTitle,
+        string description, int pageSize, int pageNum)
     {
         Expression<Func<FertilizerModel, bool>> expression = f => (string.IsNullOrEmpty(npk) || f.NPK.Contains(npk))
         && (string.IsNullOrEmpty(publicTitle) || f.PublicTitle.Contains(publicTitle))
@@ -41,16 +46,25 @@ public class FertilizerRepo : IFertilizerRepo
         && (string.IsNullOrEmpty(title) || f.Title.Contains(title))
         && f.IsValid;
 
-        return await context.Fertilizer.Where(expression).Select(f => new FertilizerDto
-        {
-            Id = f.Id,
-            NPK = f.NPK,
-            //File = f.File,
-            Title = f.Title,
-            //Price = f.Price,
-            PublicTitle = f.PublicTitle,
-            Description = f.Description,
-        }).ToListAsync();
+        var x = await context.Fertilizer.Where(expression)
+            .Skip(pageNum * pageSize)
+            .Take(pageSize)
+            .Select(f => new FertilizerDto
+            {
+                Id = f.Id,
+                NPK = f.NPK,
+                //File = f.File,
+                Title = f.Title,
+                //Price = f.Price,
+                PublicTitle = f.PublicTitle,
+                Description = f.Description,
+            }).ToListAsync();
+
+        bool hasNextPage = false;
+        if (x.Count > 0)
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(f => f.IsValid, pageSize, pageNum);
+
+        return new CommonResponseDto<List<FertilizerDto>>(x, hasNextPage);
     }
 
     public async Task<FertilizerDto> GetByIdAsync(long id)

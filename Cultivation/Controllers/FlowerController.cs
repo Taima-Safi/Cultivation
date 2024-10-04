@@ -20,10 +20,10 @@ public class FlowerController : ControllerBase
         return Ok(id);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle, string cuttingColorCode, string colorTitle)
+    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle, string cuttingColorCode, string colorTitle, int pageSize, int pageNum)
     {
-        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle);
-        var totalCount = Data.Sum(x => x.Count);
+        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle, pageSize, pageNum);
+        var totalCount = Data.Data.Sum(x => x.Count);
         return Ok(new { Data, totalCount });
     }
     [HttpGet]

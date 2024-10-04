@@ -5,6 +5,8 @@ using Cultivation.Dto.Cutting;
 using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Flower;
 using Cultivation.Dto.Land;
+using Cultivation.Repository.Base;
+using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,10 +15,12 @@ namespace Cultivation.Repository.Flower;
 public class FlowerRepo : IFlowerRepo
 {
     private readonly CultivationDbContext context;
+    private readonly IBaseRepo<FertilizerLandModel> baseRepo;
 
-    public FlowerRepo(CultivationDbContext context)
+    public FlowerRepo(CultivationDbContext context, IBaseRepo<FertilizerLandModel> baseRepo)
     {
         this.context = context;
+        this.baseRepo = baseRepo;
     }
     public async Task<long> AddAsync(int count, string note, DateTime date, long cuttingLandId)
     {
@@ -33,10 +37,10 @@ public class FlowerRepo : IFlowerRepo
         await context.SaveChangesAsync();
         return x.Entity.Id;
     }
-    public async Task<List<FlowerDto>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
-        , string cuttingColorCode, string colorTitle)
+    public async Task<CommonResponseDto<List<FlowerDto>>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
+        , string cuttingColorCode, string colorTitle, int pageSize, int pageNum)
     {
-        return await context.Flower.Where(f => (!from.HasValue || f.Date.Date >= from)
+        var x = await context.Flower.Where(f => (!from.HasValue || f.Date.Date >= from)
         && (!to.HasValue || f.Date.Date <= to)
         && (!cuttingLandId.HasValue || f.CuttingLandId == cuttingLandId)
         && (string.IsNullOrEmpty(colorTitle) || f.CuttingLand.CuttingColor.Color.Title == colorTitle)
@@ -46,6 +50,8 @@ public class FlowerRepo : IFlowerRepo
         && f.IsValid)
             .OrderByDescending(f => f.Date)
             .OrderByDescending(f => f.CuttingLandId)
+            .Skip(pageNum * pageSize)
+            .Take(pageSize)
             .Select(c => new FlowerDto
             {
                 Id = c.Id,
@@ -81,6 +87,12 @@ public class FlowerRepo : IFlowerRepo
                     }
                 }
             }).ToListAsync();
+
+        bool hasNextPage = false;
+        if (x.Count > 0)
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
+
+        return new CommonResponseDto<List<FlowerDto>>(x, hasNextPage);
     }
     public async Task<FlowerDto> GetByIdAsync(long id)
     {

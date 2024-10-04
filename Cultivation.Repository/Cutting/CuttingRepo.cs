@@ -2,6 +2,8 @@
 using Cultivation.Database.Model;
 using Cultivation.Dto.Color;
 using Cultivation.Dto.Cutting;
+using Cultivation.Repository.Base;
+using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +12,12 @@ namespace Cultivation.Repository.Cutting;
 public class CuttingRepo : ICuttingRepo
 {
     private readonly CultivationDbContext context;
-    public CuttingRepo(CultivationDbContext context)
+    private readonly IBaseRepo<FertilizerLandModel> baseRepo;
+
+    public CuttingRepo(CultivationDbContext context, IBaseRepo<FertilizerLandModel> baseRepo)
     {
         this.context = context;
+        this.baseRepo = baseRepo;
     }
     public async Task<long> AddAsync(string title, string type, int age)
     {
@@ -25,18 +30,27 @@ public class CuttingRepo : ICuttingRepo
         await context.SaveChangesAsync();
         return cutting.Entity.Id;
     }
-    public async Task<List<CuttingDto>> GetAllAsync(string title, string type, int? age)
+    public async Task<CommonResponseDto<List<CuttingDto>>> GetAllAsync(string title, string type, int? age, int pageSize, int pageNum)
     {
-        return await context.Cutting.Where(c => (string.IsNullOrEmpty(title) || c.Title.Contains(title))
+        var x = await context.Cutting.Where(c => (string.IsNullOrEmpty(title) || c.Title.Contains(title))
         && (string.IsNullOrEmpty(type) || c.Type.Contains(type))
         && (!age.HasValue || c.Age == age)
-        && c.IsValid).Select(c => new CuttingDto
-        {
-            Id = c.Id,
-            Age = c.Age,
-            Type = c.Type,
-            Title = c.Title
-        }).ToListAsync();
+        && c.IsValid)
+            .Skip(pageNum * pageSize)
+            .Take(pageSize)
+            .Select(c => new CuttingDto
+            {
+                Id = c.Id,
+                Age = c.Age,
+                Type = c.Type,
+                Title = c.Title
+            }).ToListAsync();
+
+        bool hasNextPage = false;
+        if (x.Count > 0)
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
+
+        return new CommonResponseDto<List<CuttingDto>>(x, hasNextPage);
     }
     public async Task<CuttingDto> GetByIdAsync(long id)
     {

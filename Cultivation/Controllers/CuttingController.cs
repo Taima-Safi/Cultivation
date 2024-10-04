@@ -21,9 +21,9 @@ public class CuttingController : ControllerBase
         return Ok(cuttingId);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(string title, string type, int? age)
+    public async Task<IActionResult> GetAll(string title, string type, int? age, int pageSize = 10, int pageNum = 0)
     {
-        var cuttings = await cuttingRepo.GetAllAsync(title, type, age);
+        var cuttings = await cuttingRepo.GetAllAsync(title, type, age, pageSize, pageNum);
         return Ok(cuttings);
     }
     [HttpGet]
