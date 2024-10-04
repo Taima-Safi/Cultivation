@@ -22,9 +22,9 @@ public class FlowerController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle, string cuttingColorCode, string colorTitle)
     {
-        var x = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle);
-        var totalCount = x.Sum(x => x.Count);
-        return Ok(new { x, totalCount });
+        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle);
+        var totalCount = Data.Sum(x => x.Count);
+        return Ok(new { Data, totalCount });
     }
     [HttpGet]
     public async Task<IActionResult> GetById(long id)
