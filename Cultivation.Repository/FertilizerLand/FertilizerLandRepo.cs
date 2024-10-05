@@ -73,12 +73,17 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 {
                     Id = fl.Fertilizer.Id,
                     NPK = fl.Fertilizer.NPK,
-                    PublicTitle = fl.Fertilizer.PublicTitle
+                    Title = fl.Fertilizer.Title,
+                    PublicTitle = fl.Fertilizer.PublicTitle,
+                    Description = fl.Fertilizer.Description,
                 },
                 Land = new LandDto
                 {
                     Id = fl.Land.Id,
-                    Title = fl.Land.Title
+                    Size = fl.Land.Size,
+                    Title = fl.Land.Title,
+                    Location = fl.Land.Location,
+                    ParentId = fl.Land.ParentId,
                 }
             }).ToList();
 
@@ -108,11 +113,14 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 {
                     Id = fl.Fertilizer.Id,
                     NPK = fl.Fertilizer.NPK,
-                    PublicTitle = fl.Fertilizer.PublicTitle
+                    Title = fl.Fertilizer.Title,
+                    PublicTitle = fl.Fertilizer.PublicTitle,
+                    Description = fl.Fertilizer.Description,
                 },
                 Land = new LandDto
                 {
                     Id = fl.Land.Id,
+                    Size = fl.Land.Size,
                     Title = fl.Land.Title,
                     Location = fl.Land.Location,
                     ParentId = fl.Land.ParentId,
@@ -164,6 +172,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 Land = new LandDto
                 {
                     Id = fl.Land.Id,
+                    Size = fl.Land.Size,
                     Title = fl.Land.Title,
                     Location = fl.Land.Location,
                     ParentId = fl.Land.ParentId,

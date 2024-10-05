@@ -20,7 +20,7 @@ public class FlowerController : ControllerBase
         return Ok(id);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle, string cuttingColorCode, string colorTitle, int pageSize, int pageNum)
+    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle, string cuttingColorCode, string colorTitle, int pageSize = 10, int pageNum = 0)
     {
         var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle, pageSize, pageNum);
         var totalCount = Data.Data.Sum(x => x.Count);

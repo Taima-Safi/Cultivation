@@ -20,7 +20,7 @@ public class ColorController : ControllerBase
         return Ok(colorId);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(string title, string code, int pageSize, int pageNum)
+    public async Task<IActionResult> GetAll(string title, string code, int pageSize = 10, int pageNum = 0)
     {
         var colors = await colorRepo.GetAllAsync(title, code, pageSize, pageNum);
         return Ok(colors);

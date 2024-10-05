@@ -21,9 +21,9 @@ public class CuttingLandController : ControllerBase
         return Ok(id);
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateTime? date)
+    public async Task<IActionResult> GetAll(DateTime? date, int pageSize = 10, int pageNum = 0)
     {
-        var cuttingLands = await cuttingLandRepo.GetAllAsync(date);
+        var cuttingLands = await cuttingLandRepo.GetAllAsync(date, pageSize, pageNum);
         return Ok(cuttingLands);
     }
     [HttpGet]

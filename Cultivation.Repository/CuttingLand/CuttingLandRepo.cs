@@ -4,8 +4,10 @@ using Cultivation.Dto.Color;
 using Cultivation.Dto.Cutting;
 using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Land;
+using Cultivation.Repository.Base;
 using Cultivation.Repository.Cutting;
 using Cultivation.Repository.Land;
+using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -15,6 +17,7 @@ namespace Cultivation.Repository.CuttingLand;
 public class CuttingLandRepo : ICuttingLandRepo
 {
     private readonly CultivationDbContext context;
+    private readonly IBaseRepo<CuttingLandModel> baseRepo;
     private readonly ILandRepo landRepo;
     private readonly ICuttingRepo cuttingRepo;
 
@@ -44,11 +47,11 @@ public class CuttingLandRepo : ICuttingLandRepo
         return x.Entity.Id;
     }
 
-    public async Task<List<CuttingLandDto>> GetAllAsync(DateTime? date)
+    public async Task<CommonResponseDto<List<CuttingLandDto>>> GetAllAsync(DateTime? date, int pageSize = 10, int pageNum = 0)
     {
         Expression<Func<CuttingLandModel, bool>> expression = cl => (!date.HasValue || cl.Date.Date == date) && cl.IsValid;
 
-        return await context.CuttingLand.Where(expression).Select(cl => new CuttingLandDto
+        var result = await context.CuttingLand.Where(expression).Select(cl => new CuttingLandDto
         {
             Id = cl.Id,
             Date = cl.Date,
@@ -64,6 +67,12 @@ public class CuttingLandRepo : ICuttingLandRepo
                 Code = cl.CuttingColor.Code,
             }
         }).ToListAsync();
+
+        bool hasNestPage = false;
+        if (result.Any())
+            hasNestPage = await baseRepo.CheckIfHasNextPageAsync(expression, pageSize, pageNum);
+
+        return new(result, hasNestPage);
     }
 
     public async Task<CuttingLandDto> GetByIdAsync(long id)
@@ -79,7 +88,10 @@ public class CuttingLandRepo : ICuttingLandRepo
             Land = new LandDto
             {
                 Id = cl.Land.Id,
-                Title = cl.Land.Title
+                Size = cl.Land.Size,
+                Title = cl.Land.Title,
+                ParentId = cl.Land.ParentId,
+                Location = cl.Land.Location,
             },
             CuttingColor = new CuttingColorDto
             {
@@ -88,13 +100,14 @@ public class CuttingLandRepo : ICuttingLandRepo
                 Color = new ColorDto
                 {
                     Id = cl.CuttingColor.Color.Id,
-                    Title = cl.CuttingColor.Color.Title
+                    Code = cl.CuttingColor.Color.Code,
+                    Title = cl.CuttingColor.Color.Title,
                 },
                 Cutting = new CuttingDto
                 {
                     Id = cl.CuttingColor.Cutting.Id,
                     Type = cl.CuttingColor.Cutting.Type,
-                    Title = cl.CuttingColor.Cutting.Title
+                    Title = cl.CuttingColor.Cutting.Title,
                 }
             }
         }).FirstOrDefaultAsync();
