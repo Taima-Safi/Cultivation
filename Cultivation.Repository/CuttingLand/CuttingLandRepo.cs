@@ -21,11 +21,12 @@ public class CuttingLandRepo : ICuttingLandRepo
     private readonly ILandRepo landRepo;
     private readonly ICuttingRepo cuttingRepo;
 
-    public CuttingLandRepo(CultivationDbContext context, ILandRepo landRepo, ICuttingRepo cuttingRepo)
+    public CuttingLandRepo(CultivationDbContext context, ILandRepo landRepo, ICuttingRepo cuttingRepo, IBaseRepo<CuttingLandModel> baseRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
         this.cuttingRepo = cuttingRepo;
+        this.baseRepo = baseRepo;
     }
 
     public async Task<long> AddAsync(CuttingLandFormDto dto)
@@ -51,25 +52,29 @@ public class CuttingLandRepo : ICuttingLandRepo
     {
         Expression<Func<CuttingLandModel, bool>> expression = cl => (!date.HasValue || cl.Date.Date == date) && cl.IsValid;
 
-        var result = await context.CuttingLand.Where(expression).Select(cl => new CuttingLandDto
-        {
-            Id = cl.Id,
-            Date = cl.Date,
-            Quantity = cl.Quantity,
-            Land = new LandDto
+        var result = await context.CuttingLand
+            .Where(expression)
+            .Skip(pageNum * pageSize)
+            .Take(pageSize)
+            .Select(cl => new CuttingLandDto
             {
-                Id = cl.Land.Id,
-                Title = cl.Land.Title
-            },
-            CuttingColor = new CuttingColorDto
-            {
-                Id = cl.CuttingColor.Id,
-                Code = cl.CuttingColor.Code,
-            }
-        }).ToListAsync();
+                Id = cl.Id,
+                Date = cl.Date,
+                Quantity = cl.Quantity,
+                Land = new LandDto
+                {
+                    Id = cl.Land.Id,
+                    Title = cl.Land.Title
+                },
+                CuttingColor = new CuttingColorDto
+                {
+                    Id = cl.CuttingColor.Id,
+                    Code = cl.CuttingColor.Code,
+                }
+            }).ToListAsync();
 
         bool hasNestPage = false;
-        if (result.Any())
+        if (result.Count > 0)
             hasNestPage = await baseRepo.CheckIfHasNextPageAsync(expression, pageSize, pageNum);
 
         return new(result, hasNestPage);
