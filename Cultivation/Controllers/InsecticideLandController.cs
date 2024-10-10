@@ -19,8 +19,8 @@ public class InsecticideLandController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add(InsecticideLandFormDto dto)
     {
-        var id = await insecticideLandRepo.AddAsync(dto);
-        return Ok(id);
+        await insecticideLandRepo.AddAsync(dto);
+        return Ok();
     }
     [HttpGet]
     public async Task<IActionResult> GetAll(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to,
@@ -36,7 +36,7 @@ public class InsecticideLandController : ControllerBase
         return Ok(result);
     }
     [HttpPost]
-    public async Task<IActionResult> Update(long id, InsecticideLandFormDto dto)
+    public async Task<IActionResult> Update(long id, UpdateInsecticideLandFormDto dto)
     {
         await insecticideLandRepo.UpdateAsync(id, dto);
         return Ok();

@@ -95,4 +95,6 @@ public class InsecticideRepo : IInsecticideRepo
     }
     public async Task<bool> CheckIfExistAsync(long id)
     => await context.Insecticide.AnyAsync(i => i.Id == id && i.IsValid);
+    public async Task<bool> CheckIfExistByIdsAsync(List<long> ids)
+    => await context.Insecticide.AnyAsync(l => ids.Contains(l.Id) && l.IsValid);
 }

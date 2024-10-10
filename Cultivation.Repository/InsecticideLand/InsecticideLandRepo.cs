@@ -30,31 +30,44 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         this.landRepo = landRepo;
         this.insecticideRepo = insecticideRepo;
     }
-    public async Task<long> AddAsync(InsecticideLandFormDto dto)
+    public async Task AddAsync(InsecticideLandFormDto dto)
     {
-        if (!await landRepo.CheckIfExistAsync(dto.LandId))
-            throw new NotFoundException("Land not found..");
+        if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
+            throw new NotFoundException("One of lands not found..");
 
-        if (!await insecticideRepo.CheckIfExistAsync(dto.InsecticideId))
-            throw new NotFoundException("Insecticide not found..");
+        if (!await insecticideRepo.CheckIfExistByIdsAsync(dto.Mixes.Select(x => x.InsecticideId).ToList()))
+            throw new NotFoundException("One of insecticides not found..");
 
         //string fileName = null;
         //if (dto.File != null)
         //    fileName = FileHelper.FileHelper.UploadFile(dto.File, FileType.InsecticideLand);
 
-        var model = await context.InsecticideLand.AddAsync(new InsecticideLandModel
-        {
-            Note = dto.Note,
-            //File = fileName,
-            Date = dto.Date,
-            Liter = dto.Liter,
-            LandId = dto.LandId,
-            Quantity = dto.Quantity,
-            InsecticideId = dto.InsecticideId,
-        });
-        await context.SaveChangesAsync();
+        //var model = await context.InsecticideLand.AddAsync(new InsecticideLandModel
+        //{
+        //    Note = dto.Note,
+        //    //File = fileName,
+        //    Date = dto.Date,
+        //    Liter = dto.Liter,
+        //    LandId = dto.LandId,
+        //    Quantity = dto.Quantity,
+        //    InsecticideId = dto.InsecticideId,
+        //});
 
-        return model.Entity.Id;
+        List<InsecticideLandModel> models = [];
+        foreach (var landId in dto.LandIds)
+        {
+            models.AddRange(dto.Mixes.Select(i => new InsecticideLandModel
+            {
+                LandId = landId,
+                Date = dto.Date,
+                Liter = i.Liter,
+                Note = dto.Note,
+                Quantity = i.Quantity,
+                InsecticideId = i.InsecticideId,
+            }).ToList());
+        }
+        await context.InsecticideLand.AddRangeAsync(models);
+        await context.SaveChangesAsync();
     }
     public async Task<CommonResponseDto<List<InsecticideLandDto>>> GetAllAsync(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to
         , long? landId, long? insecticideId, int pageSize, int pageNum)
@@ -147,7 +160,7 @@ public class InsecticideLandRepo : IInsecticideLandRepo
             }
         }).FirstOrDefaultAsync();
     }
-    public async Task UpdateAsync(long id, InsecticideLandFormDto dto)
+    public async Task UpdateAsync(long id, UpdateInsecticideLandFormDto dto)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this insecticide...");

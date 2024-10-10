@@ -8,6 +8,7 @@ public interface IInsecticideRepo
 {
     Task<long> AddAsync(InsecticideFormDto dto);
     Task<bool> CheckIfExistAsync(long id);
+    Task<bool> CheckIfExistByIdsAsync(List<long> ids);
     Task<CommonResponseDto<List<InsecticideDto>>> GetAllAsync(string title, string publicTitle, string description, InsecticideType? type, int pageSize, int pageNum);
     Task<InsecticideDto> GetByIdAsync(long id);
     Task RemoveAsync(long id);
