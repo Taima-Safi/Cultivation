@@ -76,34 +76,39 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         && (!quantity.HasValue || il.Quantity == quantity) && (!liter.HasValue || il.Liter == liter)/* && (!date.HasValue || il.Date == date)*/
         && (!from.HasValue || il.Date.Date >= from) && (!to.HasValue || il.Date.Date <= to) && (string.IsNullOrEmpty(note) || il.Note.Contains(note)) && il.IsValid;
 
-        var result = await context.InsecticideLand.Where(expression)
-            .Skip(pageSize * pageNum)
-            .Take(pageSize)
-            .Select(il => new InsecticideLandDto
-            {
-                Id = il.Id,
-                Date = il.Date,
-                Note = il.Note,
-                Liter = il.Liter,
-                Quantity = il.Quantity,
-                //File = il.File,
-                Land = new LandDto
-                {
-                    Id = il.Land.Id,
-                    Size = il.Land.Size,
-                    Title = il.Land.Title,
-                    Location = il.Land.Location,
-                    ParentId = il.Land.ParentId,
-                },
-                Insecticide = new InsecticideDto
-                {
-                    Id = il.Insecticide.Id,
-                    Type = il.Insecticide.Type,
-                    Title = il.Insecticide.Title,
-                    Description = il.Insecticide.Description,
-                    PublicTitle = il.Insecticide.PublicTitle,
-                }
-            }).ToListAsync();
+        var x = await context.InsecticideLand.Where(expression)
+            .Include(fl => fl.Land).Include(fl => fl.Insecticide)
+            .OrderByDescending(fl => fl.Date)
+            .OrderByDescending(fl => fl.LandId).ToListAsync();
+
+        var result = x
+         .Skip(pageSize * pageNum)
+         .Take(pageSize)
+         .Select(il => new InsecticideLandDto
+         {
+             Id = il.Id,
+             Date = il.Date,
+             Note = il.Note,
+             Liter = il.Liter,
+             Quantity = il.Quantity,
+             //File = il.File,
+             Land = new LandDto
+             {
+                 Id = il.Land.Id,
+                 Size = il.Land.Size,
+                 Title = il.Land.Title,
+                 Location = il.Land.Location,
+                 ParentId = il.Land.ParentId,
+             },
+             Insecticide = new InsecticideDto
+             {
+                 Id = il.Insecticide.Id,
+                 Type = il.Insecticide.Type,
+                 Title = il.Insecticide.Title,
+                 Description = il.Insecticide.Description,
+                 PublicTitle = il.Insecticide.PublicTitle,
+             }
+         }).ToList();
 
         var hasNextPage = false;
         if (result.Any())
