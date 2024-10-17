@@ -69,7 +69,7 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         await context.InsecticideLand.AddRangeAsync(models);
         await context.SaveChangesAsync();
     }
-    public async Task<CommonResponseDto<List<InsecticideLandDto>>> GetAllAsync(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to
+    public async Task<CommonResponseDto<List<GroupedInsecticideLandDto>>> GetAllAsync(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to
         , long? landId, long? insecticideId, int pageSize, int pageNum)
     {
         Expression<Func<InsecticideLandModel, bool>> expression = il => (!insecticideId.HasValue || il.InsecticideId == insecticideId) && (!landId.HasValue || il.LandId == landId)
@@ -78,37 +78,42 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 
         var x = await context.InsecticideLand.Where(expression)
             .Include(fl => fl.Land).Include(fl => fl.Insecticide)
-            .OrderByDescending(fl => fl.Date)
             .OrderByDescending(fl => fl.LandId).ToListAsync();
 
         var result = x
-         .Skip(pageSize * pageNum)
-         .Take(pageSize)
-         .Select(il => new InsecticideLandDto
-         {
-             Id = il.Id,
-             Date = il.Date,
-             Note = il.Note,
-             Liter = il.Liter,
-             Quantity = il.Quantity,
-             //File = il.File,
-             Land = new LandDto
-             {
-                 Id = il.Land.Id,
-                 Size = il.Land.Size,
-                 Title = il.Land.Title,
-                 Location = il.Land.Location,
-                 ParentId = il.Land.ParentId,
-             },
-             Insecticide = new InsecticideDto
-             {
-                 Id = il.Insecticide.Id,
-                 Type = il.Insecticide.Type,
-                 Title = il.Insecticide.Title,
-                 Description = il.Insecticide.Description,
-                 PublicTitle = il.Insecticide.PublicTitle,
-             }
-         }).ToList();
+            .GroupBy(group => group.Date)
+            .OrderByDescending(fl => fl.Key)
+            .Skip(pageSize * pageNum)
+            .Take(pageSize)
+            .Select(il => new GroupedInsecticideLandDto
+            {
+                Date = il.Key,
+                InsecticideLand = il.Select(il => new InsecticideLandDto
+                {
+                    Id = il.Id,
+                    //Date = il.Date,
+                    Note = il.Note,
+                    Liter = il.Liter,
+                    Quantity = il.Quantity,
+                    //File = il.File,
+                    Land = new LandDto
+                    {
+                        Id = il.Land.Id,
+                        Size = il.Land.Size,
+                        Title = il.Land.Title,
+                        Location = il.Land.Location,
+                        ParentId = il.Land.ParentId,
+                    },
+                    Insecticide = new InsecticideDto
+                    {
+                        Id = il.Insecticide.Id,
+                        Type = il.Insecticide.Type,
+                        Title = il.Insecticide.Title,
+                        Description = il.Insecticide.Description,
+                        PublicTitle = il.Insecticide.PublicTitle,
+                    }
+                }).ToList()
+            }).ToList();
 
         var hasNextPage = false;
         if (result.Any())

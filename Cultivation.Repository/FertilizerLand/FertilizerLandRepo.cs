@@ -68,7 +68,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
             .Select(group => new GroupedFertilizerLandDto
             {
                 Date = group.Key,  // The Date
-                FertilizerLandGroup = group.Select(fl => new FertilizerLandDto
+                FertilizerLand = group.Select(fl => new FertilizerLandDto
                 {
                     Id = fl.Id,
                     Type = fl.Type,
