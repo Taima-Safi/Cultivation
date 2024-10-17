@@ -53,45 +53,50 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         await context.FertilizerLand.AddRangeAsync(models);
         await context.SaveChangesAsync();
     }
-    public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetAllAsync(int pageSize, int pageNum)
+    public async Task<CommonResponseDto<List<GroupedFertilizerLandDto>>> GetAllAsync(int pageSize, int pageNum)
     {
         var result = await context.FertilizerLand.Where(fl => fl.IsValid)
             .Include(fl => fl.Land).Include(fl => fl.Fertilizer)
-            .OrderByDescending(fl => fl.Date)
-            .OrderByDescending(fl => fl.LandId).ToListAsync();
+            //.OrderByDescending(fl => fl.LandId)
+            .ToListAsync();
 
         var x = result
+            .GroupBy(fl => fl.Date)
+            .OrderByDescending(group => group.Key)
             .Skip(pageNum * pageSize)
             .Take(pageSize)
-            .Select(fl => new FertilizerLandDto
+            .Select(group => new GroupedFertilizerLandDto
             {
-                Id = fl.Id,
-                Date = fl.Date,
-                Type = fl.Type,
-                Quantity = fl.Quantity,
-                Fertilizer = new FertilizerDto
+                Date = group.Key,  // The Date
+                FertilizerLandGroup = group.Select(fl => new FertilizerLandDto
                 {
-                    Id = fl.Fertilizer.Id,
-                    NPK = fl.Fertilizer.NPK,
-                    Title = fl.Fertilizer.Title,
-                    PublicTitle = fl.Fertilizer.PublicTitle,
-                    Description = fl.Fertilizer.Description,
-                },
-                Land = new LandDto
-                {
-                    Id = fl.Land.Id,
-                    Size = fl.Land.Size,
-                    Title = fl.Land.Title,
-                    Location = fl.Land.Location,
-                    ParentId = fl.Land.ParentId,
-                }
+                    Id = fl.Id,
+                    Type = fl.Type,
+                    Quantity = fl.Quantity,
+                    Fertilizer = new FertilizerDto
+                    {
+                        Id = fl.Fertilizer.Id,
+                        NPK = fl.Fertilizer.NPK,
+                        Title = fl.Fertilizer.Title,
+                        PublicTitle = fl.Fertilizer.PublicTitle,
+                        Description = fl.Fertilizer.Description,
+                    },
+                    Land = new LandDto
+                    {
+                        Id = fl.Land.Id,
+                        Size = fl.Land.Size,
+                        Title = fl.Land.Title,
+                        Location = fl.Land.Location,
+                        ParentId = fl.Land.ParentId,
+                    }
+                }).ToList() // Collection of FertilizerLandDto for each Date group
             }).ToList();
 
         bool hasNextPage = false;
         if (x.Count > 0)
             hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
 
-        return new CommonResponseDto<List<FertilizerLandDto>>(x, hasNextPage);
+        return new CommonResponseDto<List<GroupedFertilizerLandDto>>(x, hasNextPage);
     }
     public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to, int pageSize, int pageNum)
     {
