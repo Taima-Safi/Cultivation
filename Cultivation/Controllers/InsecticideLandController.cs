@@ -30,6 +30,12 @@ public class InsecticideLandController : ControllerBase
         return Ok(result);
     }
     [HttpGet]
+    public async Task<IActionResult> GetLandsWhichNotUsedInDay(DateTime? date)
+    {
+        var result = await insecticideLandRepo.GetLandsWhichNotUsedInDayAsync(date);
+        return Ok(result);
+    }
+    [HttpGet]
     public async Task<IActionResult> GetById(long id)
     {
         var result = await insecticideLandRepo.GetByIdAsync(id);
