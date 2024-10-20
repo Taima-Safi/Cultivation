@@ -40,6 +40,7 @@ public class CuttingLandRepo : ICuttingLandRepo
         var x = await context.CuttingLand.AddAsync(new CuttingLandModel
         {
             Date = dto.Date,
+            IsActive = true,
             LandId = dto.LandId,
             Quantity = dto.Quantity,
             CuttingColorId = dto.CuttingColorId
@@ -48,9 +49,17 @@ public class CuttingLandRepo : ICuttingLandRepo
         return x.Entity.Id;
     }
 
+    public async Task UpdateIsActiveAsync(long id, bool isActive)
+    {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Cutting not found..");
+
+        await context.CuttingLand.Where(cl => cl.Id == id && cl.IsValid).ExecuteUpdateAsync(cl => cl.SetProperty(cl => cl.IsActive, false));
+    }
+
     public async Task<CommonResponseDto<List<CuttingLandDto>>> GetAllAsync(DateTime? date, int pageSize = 10, int pageNum = 0)
     {
-        Expression<Func<CuttingLandModel, bool>> expression = cl => (!date.HasValue || cl.Date.Date == date) && cl.IsValid;
+        Expression<Func<CuttingLandModel, bool>> expression = cl => (date.HasValue ? cl.Date.Date == date : cl.IsActive) && cl.IsValid;
 
         var result = await context.CuttingLand
             .Where(expression)

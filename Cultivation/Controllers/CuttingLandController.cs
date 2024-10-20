@@ -20,6 +20,12 @@ public class CuttingLandController : ControllerBase
         var id = await cuttingLandRepo.AddAsync(dto);
         return Ok(id);
     }
+    [HttpPost]
+    public async Task<IActionResult> UpdateIsActive(long id, bool isActive)
+    {
+        await cuttingLandRepo.UpdateIsActiveAsync(id, isActive);
+        return Ok();
+    }
     [HttpGet]
     public async Task<IActionResult> GetAll(DateTime? date, int pageSize = 10, int pageNum = 0)
     {

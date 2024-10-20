@@ -9,6 +9,7 @@ public interface ICuttingLandRepo
     Task<bool> CheckIfExistAsync(long id);
     Task<CommonResponseDto<List<CuttingLandDto>>> GetAllAsync(DateTime? date, int pageSize = 10, int pageNum = 0);
     Task<CuttingLandDto> GetByIdAsync(long id);
+    Task UpdateIsActiveAsync(long id, bool isActive);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, DateTime date, long quantity);
 }
