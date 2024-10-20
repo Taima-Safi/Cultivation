@@ -121,6 +121,32 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 
         return new(result, hasNextPage);
     }
+    public async Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? date)
+    {
+        var landModels = await context.Land.Where(l => !l.Children.Any() && l.IsValid).ToListAsync();
+
+
+        var result = await context.InsecticideLand.Where(fl => (date.HasValue ? fl.Date == date : fl.Date == DateTime.UtcNow) && fl.IsValid)
+            .Include(fl => fl.Land).Include(fl => fl.Insecticide).ToListAsync();
+
+        List<LandModel> landsNotUsed = new();
+
+        foreach (var land in landModels)
+        {
+            var isUsed = result.Where(l => l.LandId == land.Id).Any();
+            if (!isUsed)
+                landsNotUsed.Add(land);
+        }
+
+        return landsNotUsed.Select(l => new LandDto
+        {
+            Id = l.Id,
+            Size = l.Size,
+            Title = l.Title,
+            ParentId = l.ParentId,
+            Location = l.Location,
+        }).ToList();
+    }
     public async Task<InsecticideLandDto> GetByIdAsync(long id)
     {
         if (!await CheckIfExistAsync(id))

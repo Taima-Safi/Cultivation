@@ -98,6 +98,32 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
         return new CommonResponseDto<List<GroupedFertilizerLandDto>>(x, hasNextPage);
     }
+    public async Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? date)
+    {
+        var landModels = await context.Land.Where(l => !l.Children.Any() && l.IsValid).ToListAsync();
+
+
+        var result = await context.FertilizerLand.Where(fl => (date.HasValue ? fl.Date == date : fl.Date == DateTime.UtcNow) && fl.IsValid)
+            .Include(fl => fl.Land).Include(fl => fl.Fertilizer).ToListAsync();
+
+        List<LandModel> landsNotUsed = new();
+
+        foreach (var land in landModels)
+        {
+            var isUsed = result.Where(l => l.LandId == land.Id).Any();
+            if (!isUsed)
+                landsNotUsed.Add(land);
+        }
+
+        return landsNotUsed.Select(l => new LandDto
+        {
+            Id = l.Id,
+            Size = l.Size,
+            Title = l.Title,
+            ParentId = l.ParentId,
+            Location = l.Location,
+        }).ToList();
+    }
     public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to, int pageSize, int pageNum)
     {
         if (!await landRepo.CheckIfExistAsync(landId))
