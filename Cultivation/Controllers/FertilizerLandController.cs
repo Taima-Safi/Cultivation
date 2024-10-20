@@ -32,9 +32,9 @@ public class FertilizerLandController : ControllerBase
         return Ok(result);
     }
     [HttpGet]
-    public async Task<IActionResult> GetLandsWhichNotUsedInDay(DateTime? from, DateTime? to)
+    public async Task<IActionResult> GetLandsWhichNotUsedInDay(DateTime? date)
     {
-        var result = await fertilizerLandRepo.GetLandsWhichNotUsedInDayAsync(from, to);
+        var result = await fertilizerLandRepo.GetLandsWhichNotUsedInDayAsync(date);
         return Ok(result);
     }
     [HttpGet]

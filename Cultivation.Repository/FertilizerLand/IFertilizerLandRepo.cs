@@ -12,7 +12,7 @@ public interface IFertilizerLandRepo
     Task<CommonResponseDto<List<FertilizerLandDto>>> GetAllAsync(int pageSize, int pageNum);
     Task<FertilizerLandDto> GetByIdAsync(long id);
     Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to, int pageSize, int pageNum);
-    Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? from, DateTime? to);
+    Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? date);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, UpdateFertilizerLandDto dto);
 }
