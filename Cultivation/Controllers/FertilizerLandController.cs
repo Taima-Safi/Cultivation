@@ -26,9 +26,9 @@ public class FertilizerLandController : ControllerBase
         return Ok();
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(int pageSize = 10, int pageNum = 0)
+    public async Task<IActionResult> GetAll(DateTime? date, int pageSize = 10, int pageNum = 0)
     {
-        var result = await fertilizerLandRepo.GetAllAsync(pageSize, pageNum);
+        var result = await fertilizerLandRepo.GetAllAsync(date, pageSize, pageNum);
         return Ok(result);
     }
     [HttpGet]

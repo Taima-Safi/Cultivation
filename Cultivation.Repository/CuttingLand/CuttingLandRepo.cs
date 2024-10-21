@@ -57,6 +57,12 @@ public class CuttingLandRepo : ICuttingLandRepo
         await context.CuttingLand.Where(cl => cl.Id == id && cl.IsValid).ExecuteUpdateAsync(cl => cl.SetProperty(cl => cl.IsActive, false));
     }
 
+    public async Task<List<long>> GetCuttingLandIdsAsync(List<long> landIds)
+    => await context.CuttingLand.Where(c => c.IsValid && c.IsActive && landIds.Contains(c.LandId)).Select(c => c.Id).ToListAsync();
+    public async Task<long> GetCuttingLandIdAsync(long landId)
+    => await context.CuttingLand.Where(c => c.IsValid && c.IsActive && c.LandId == landId).Select(c => c.Id).FirstOrDefaultAsync();
+
+
     public async Task<CommonResponseDto<List<CuttingLandDto>>> GetAllAsync(DateTime? date, int pageSize = 10, int pageNum = 0)
     {
         Expression<Func<CuttingLandModel, bool>> expression = cl => (date.HasValue ? cl.Date.Date == date : cl.IsActive) && cl.IsValid;

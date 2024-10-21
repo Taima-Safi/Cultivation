@@ -7,6 +7,7 @@ using Cultivation.Dto.Fertilizer;
 using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
+using Cultivation.Repository.CuttingLand;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Repository.Land;
 using FourthPro.Dto.Common;
@@ -19,45 +20,52 @@ namespace Cultivation.Repository.FertilizerLand;
 public class FertilizerLandRepo : IFertilizerLandRepo
 {
     private readonly CultivationDbContext context;
+    private readonly ICuttingLandRepo cuttingLandRepo;
     private readonly IFertilizerRepo fertilizerRepo;
     private readonly ILandRepo landRepo;
     private readonly IBaseRepo<FertilizerLandModel> baseRepo;
 
-    public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo)
+    public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo, ICuttingLandRepo cuttingLandRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
         this.fertilizerRepo = fertilizerRepo;
         this.baseRepo = baseRepo;
+        this.cuttingLandRepo = cuttingLandRepo;
     }
     public async Task AddAsync(FertilizerLandFormDto dto)
     {
         if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
             throw new NotFoundException("One of lands not found..");
 
+        var cuttingLandIds = await cuttingLandRepo.GetCuttingLandIdsAsync(dto.LandIds);
+
+        if (cuttingLandIds == null)
+            throw new NotFoundException("not found..");
+
         if (!await fertilizerRepo.CheckIfExistByIdsAsync(dto.Mixes.Select(f => f.FertilizerId).ToList()))
             throw new NotFoundException("One of Fertilizers not found..");
 
         List<FertilizerLandModel> models = [];
-        foreach (var landId in dto.LandIds)
+        foreach (var cuttingLandId in cuttingLandIds)
         {
             models.AddRange(dto.Mixes.Select(f => new FertilizerLandModel
             {
                 Date = dto.Date,
-                LandId = landId,
                 Type = dto.Type,
                 Quantity = f.Quantity,
+                CuttingLandId = cuttingLandId,
                 FertilizerId = f.FertilizerId,
             }).ToList());
         }
         await context.FertilizerLand.AddRangeAsync(models);
         await context.SaveChangesAsync();
     }
-    public async Task<CommonResponseDto<List<GroupedFertilizerLandDto>>> GetAllAsync(int pageSize, int pageNum)
+    public async Task<CommonResponseDto<List<GroupedFertilizerLandDto>>> GetAllAsync(DateTime? date, int pageSize, int pageNum)
     {
-        var result = await context.FertilizerLand.Where(fl => fl.IsValid)
-            .Include(fl => fl.Land).Include(fl => fl.Fertilizer)
-            //.OrderByDescending(fl => fl.LandId)
+        var result = await context.FertilizerLand.Where(fl => (date.HasValue ? fl.Date.Date == date : fl.CuttingLand.IsActive) && fl.IsValid)
+        .Include(fl => fl.Fertilizer).Include(fl => fl.CuttingLand).ThenInclude(l => l.Land).Include(fl => fl.CuttingLand).ThenInclude(l => l.CuttingColor)
+        .OrderByDescending(fl => fl.CuttingLand.LandId)
             .ToListAsync();
 
         var x = result
@@ -81,13 +89,24 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                         PublicTitle = fl.Fertilizer.PublicTitle,
                         Description = fl.Fertilizer.Description,
                     },
-                    Land = new LandDto
+                    CuttingLand = new CuttingLandDto
                     {
-                        Id = fl.Land.Id,
-                        Size = fl.Land.Size,
-                        Title = fl.Land.Title,
-                        Location = fl.Land.Location,
-                        ParentId = fl.Land.ParentId,
+                        Id = fl.CuttingLand.Id,
+                        Date = fl.CuttingLand.Date,
+                        Quantity = fl.CuttingLand.Quantity,
+                        Land = new LandDto
+                        {
+                            Id = fl.CuttingLand.Land.Id,
+                            Size = fl.CuttingLand.Land.Size,
+                            Title = fl.CuttingLand.Land.Title,
+                            Location = fl.CuttingLand.Land.Location,
+                            ParentId = fl.CuttingLand.Land.ParentId,
+                        },
+                        CuttingColor = new CuttingColorDto
+                        {
+                            Id = fl.CuttingLand.CuttingColor.Id,
+                            Code = fl.CuttingLand.CuttingColor.Code
+                        }
                     }
                 }).ToList() // Collection of FertilizerLandDto for each Date group
             }).ToList();
@@ -102,15 +121,14 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     {
         var landModels = await context.Land.Where(l => !l.Children.Any() && l.IsValid).ToListAsync();
 
-
         var result = await context.FertilizerLand.Where(fl => (date.HasValue ? fl.Date == date : fl.Date == DateTime.UtcNow) && fl.IsValid)
-            .Include(fl => fl.Land).Include(fl => fl.Fertilizer).ToListAsync();
+            .Include(fl => fl.Fertilizer).Include(fl => fl.CuttingLand).ThenInclude(fl => fl.Land).ToListAsync();
 
         List<LandModel> landsNotUsed = new();
 
         foreach (var land in landModels)
         {
-            var isUsed = result.Where(l => l.LandId == land.Id).Any();
+            var isUsed = result.Where(l => l.CuttingLand.LandId == land.Id).Any();
             if (!isUsed)
                 landsNotUsed.Add(land);
         }
@@ -129,8 +147,15 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await landRepo.CheckIfExistAsync(landId))
             throw new NotFoundException("Land not found..");
 
-        Expression<Func<FertilizerLandModel, bool>> expression = fl => fl.LandId == landId && (!from.HasValue || fl.Date.Date >= from)
-        && (!to.HasValue || fl.Date.Date <= to) && fl.IsValid;
+        Expression<Func<FertilizerLandModel, bool>> expression = fl =>
+            //fl.CuttingLand.IsActive && fl.CuttingLand.LandId == landId && (!from.HasValue || fl.Date.Date >= from)
+            //&& (!to.HasValue || fl.Date.Date <= to) && fl.IsValid;
+            fl.CuttingLand.LandId == landId && fl.IsValid &&
+            (
+                (!from.HasValue && !to.HasValue && fl.CuttingLand.IsActive) || // If both are null, check IsActive
+                (from.HasValue && fl.Date.Date >= from) ||                     // If from has a value, check Date >= from
+                (to.HasValue && fl.Date.Date <= to)                            // If to has a value, check Date <= to
+            );
         var result = await context.FertilizerLand.Where(expression)
             .Skip(pageNum * pageSize)
             .Take(pageSize)
@@ -148,31 +173,37 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                     PublicTitle = fl.Fertilizer.PublicTitle,
                     Description = fl.Fertilizer.Description,
                 },
-                Land = new LandDto
+                CuttingLand = new CuttingLandDto
                 {
-                    Id = fl.Land.Id,
-                    Size = fl.Land.Size,
-                    Title = fl.Land.Title,
-                    Location = fl.Land.Location,
-                    ParentId = fl.Land.ParentId,
-                    CuttingLands = fl.Land.CuttingLands.Where(x => x.IsValid).Select(c => new CuttingLandDto
+                    Id = fl.CuttingLand.Id,
+                    Date = fl.CuttingLand.Date,
+                    Quantity = fl.CuttingLand.Quantity,
+                    Land = new LandDto
                     {
-                        CuttingColor = new CuttingColorDto
+                        Id = fl.CuttingLand.Land.Id,
+                        Size = fl.CuttingLand.Land.Size,
+                        Title = fl.CuttingLand.Land.Title,
+                        Location = fl.CuttingLand.Land.Location,
+                        ParentId = fl.CuttingLand.Land.ParentId,
+                    },
+                    CuttingColor = new CuttingColorDto
+                    {
+                        Id = fl.CuttingLand.CuttingColor.Id,
+                        Code = fl.CuttingLand.CuttingColor.Code,
+                        Color = new ColorDto
                         {
-                            Cutting = new CuttingDto
-                            {
-                                Id = c.CuttingColor.Cutting.Id,
-                                Type = c.CuttingColor.Cutting.Type,
-                                Title = c.CuttingColor.Cutting.Title,
-                            },
-                            Color = new ColorDto
-                            {
-                                Id = c.CuttingColor.Color.Id,
-                                Code = c.CuttingColor.Color.Code,
-                                Title = c.CuttingColor.Color.Title,
-                            }
+                            Id = fl.CuttingLand.CuttingColor.Color.Id,
+                            Code = fl.CuttingLand.CuttingColor.Color.Code,
+                            Title = fl.CuttingLand.CuttingColor.Color.Title,
+                        },
+                        Cutting = new CuttingDto
+                        {
+                            Id = fl.CuttingLand.CuttingColor.Cutting.Id,
+                            Age = fl.CuttingLand.CuttingColor.Cutting.Age,
+                            Type = fl.CuttingLand.CuttingColor.Cutting.Type,
+                            Title = fl.CuttingLand.CuttingColor.Cutting.Title,
                         }
-                    }).ToList(),
+                    }
                 }
             }).ToListAsync();
 
@@ -200,31 +231,37 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                     NPK = fl.Fertilizer.NPK,
                     PublicTitle = fl.Fertilizer.PublicTitle
                 },
-                Land = new LandDto
+                CuttingLand = new CuttingLandDto
                 {
-                    Id = fl.Land.Id,
-                    Size = fl.Land.Size,
-                    Title = fl.Land.Title,
-                    Location = fl.Land.Location,
-                    ParentId = fl.Land.ParentId,
-                    CuttingLands = fl.Land.CuttingLands.Where(x => x.IsValid).Select(c => new CuttingLandDto
+                    Id = fl.CuttingLand.Id,
+                    Date = fl.CuttingLand.Date,
+                    Quantity = fl.CuttingLand.Quantity,
+                    Land = new LandDto
                     {
-                        CuttingColor = new CuttingColorDto
+                        Id = fl.CuttingLand.Land.Id,
+                        Size = fl.CuttingLand.Land.Size,
+                        Title = fl.CuttingLand.Land.Title,
+                        Location = fl.CuttingLand.Land.Location,
+                        ParentId = fl.CuttingLand.Land.ParentId,
+                    },
+                    CuttingColor = new CuttingColorDto
+                    {
+                        Id = fl.CuttingLand.CuttingColor.Id,
+                        Code = fl.CuttingLand.CuttingColor.Code,
+                        Color = new ColorDto
                         {
-                            Cutting = new CuttingDto
-                            {
-                                Id = c.CuttingColor.Cutting.Id,
-                                Type = c.CuttingColor.Cutting.Type,
-                                Title = c.CuttingColor.Cutting.Title,
-                            },
-                            Color = new ColorDto
-                            {
-                                Id = c.CuttingColor.Color.Id,
-                                Code = c.CuttingColor.Color.Code,
-                                Title = c.CuttingColor.Color.Title,
-                            }
+                            Id = fl.CuttingLand.CuttingColor.Color.Id,
+                            Code = fl.CuttingLand.CuttingColor.Color.Code,
+                            Title = fl.CuttingLand.CuttingColor.Color.Title,
+                        },
+                        Cutting = new CuttingDto
+                        {
+                            Id = fl.CuttingLand.CuttingColor.Cutting.Id,
+                            Age = fl.CuttingLand.CuttingColor.Cutting.Age,
+                            Type = fl.CuttingLand.CuttingColor.Cutting.Type,
+                            Title = fl.CuttingLand.CuttingColor.Cutting.Title,
                         }
-                    }).ToList(),
+                    }
                 }
             }).FirstOrDefaultAsync();
     }
@@ -239,9 +276,14 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await fertilizerRepo.CheckIfExistAsync(dto.FertilizerId))
             throw new NotFoundException("Fertilizer not has this fertilizer..");
 
+        var cuttingLandId = await cuttingLandRepo.GetCuttingLandIdAsync(dto.LandId);
+
+        if (cuttingLandId == 0)
+            throw new NotFoundException("Land does not has cuttings");
+
         await context.FertilizerLand.Where(fl => fl.Id == id && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.Type, dto.Type)
         .SetProperty(fl => fl.Quantity, dto.Quantity).SetProperty(fl => fl.Date, dto.Date).SetProperty(fl => fl.FertilizerId, dto.FertilizerId)
-        .SetProperty(fl => fl.LandId, dto.LandId));
+        .SetProperty(fl => fl.CuttingLandId, cuttingLandId));
     }
     public async Task RemoveAsync(long id)
     {

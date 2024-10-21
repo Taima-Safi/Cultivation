@@ -8,6 +8,7 @@ public class CuttingLandModel : BaseModel
 
     public long LandId { get; set; }
     public LandModel Land { get; set; }
+
     public long CuttingColorId { get; set; }
     public CuttingColorModel CuttingColor { get; set; }
 }

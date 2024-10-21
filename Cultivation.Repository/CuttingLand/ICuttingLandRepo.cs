@@ -12,4 +12,6 @@ public interface ICuttingLandRepo
     Task UpdateIsActiveAsync(long id, bool isActive);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, DateTime date, long quantity);
+    Task<List<long>> GetCuttingLandIdsAsync(List<long> landId);
+    Task<long> GetCuttingLandIdAsync(long landId);
 }
