@@ -24,4 +24,22 @@ public class LandController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetById(long id)
         => Ok(await landRepo.GetByIdAsync(id));
+    [HttpPost]
+    public async Task<IActionResult> Update(long id, LandFormDto dto)
+    {
+        await landRepo.UpdateAsync(id, dto);
+        return Ok();
+    }
+    [HttpDelete]
+    public async Task<IActionResult> Remove(long id)
+    {
+        await landRepo.RemoveAsync(id);
+        return Ok();
+    }
+    [HttpDelete]
+    public async Task<IActionResult> RemoveAll()
+    {
+        await landRepo.RemoveAllAsync();
+        return Ok();
+    }
 }

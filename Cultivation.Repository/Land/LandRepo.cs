@@ -126,6 +126,14 @@ public class LandRepo : ILandRepo
 
         return parent;
     }
+    public async Task UpdateAsync(long id, LandFormDto dto)
+        => await context.Land.Where(l => l.Id == id && l.IsValid).ExecuteUpdateAsync(l => l.SetProperty(l => l.Title, dto.Title).SetProperty(l => l.Size, dto.Size)
+        .SetProperty(l => l.Location, dto.Location));
+    public async Task RemoveAsync(long id)
+        => await context.Land.Where(l => l.Id == id && l.IsValid).ExecuteUpdateAsync(l => l.SetProperty(l => l.IsValid, false));
+    public async Task RemoveAllAsync()
+        => await context.Land.Where(l => l.IsValid).ExecuteUpdateAsync(l => l.SetProperty(l => l.IsValid, false));
+
     public async Task<LandModel> GetLandModelAsync(long id)
         => await context.Land.Where(l => l.Id == id && l.IsValid).Include(l => l.Children).FirstOrDefaultAsync();
 

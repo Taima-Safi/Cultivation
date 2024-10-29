@@ -11,5 +11,8 @@ public interface ILandRepo
     Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren);
     Task<LandDto> GetByIdAsync(long id);
     Task<LandModel> GetLandModelAsync(long id);
+    Task RemoveAllAsync();
+    Task RemoveAsync(long id);
+    Task UpdateAsync(long id, LandFormDto dto);
     //Task<List<LandDto>> GetLandRecursion();
 }
