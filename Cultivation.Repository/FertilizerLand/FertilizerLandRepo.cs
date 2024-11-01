@@ -38,7 +38,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
             throw new NotFoundException("One of lands not found..");
 
-        var cuttingLandIds = await cuttingLandRepo.GetCuttingLandIdsAsync(dto.LandIds);
+        var cuttingLandIds = await cuttingLandRepo.GetActiveCuttingLandIdsAsync(dto.LandIds);
 
         if (cuttingLandIds == null)
             throw new NotFoundException("not found..");
@@ -121,7 +121,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     {
         var landModels = await context.Land.Where(l => !l.Children.Any() && l.IsValid).ToListAsync();
 
-        var result = await context.FertilizerLand.Where(fl => (date.HasValue ? fl.Date == date : fl.Date == DateTime.UtcNow) && fl.IsValid)
+        var result = await context.FertilizerLand.Where(fl => (date.HasValue ? fl.Date.Date == date : fl.Date.Date == DateTime.UtcNow.Date) && fl.IsValid)
             .Include(fl => fl.Fertilizer).Include(fl => fl.CuttingLand).ThenInclude(fl => fl.Land).ToListAsync();
 
         List<LandModel> landsNotUsed = new();
