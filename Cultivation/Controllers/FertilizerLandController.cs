@@ -26,9 +26,9 @@ public class FertilizerLandController : ControllerBase
         return Ok();
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateTime? date, int pageSize = 10, int pageNum = 0)
+    public async Task<IActionResult> GetAll(long? landId, DateTime? from, DateTime? to, int pageSize = 10, int pageNum = 0)
     {
-        var result = await fertilizerLandRepo.GetAllAsync(date, pageSize, pageNum);
+        var result = await fertilizerLandRepo.GetAllAsync(landId, from, to, pageSize, pageNum);
         return Ok(result);
     }
     [HttpGet]
@@ -37,12 +37,12 @@ public class FertilizerLandController : ControllerBase
         var result = await fertilizerLandRepo.GetLandsWhichNotUsedInDayAsync(date);
         return Ok(result);
     }
-    [HttpGet]
-    public async Task<IActionResult> GetFertilizersLand(long landId, DateTime? from, DateTime? to, int pageSize = 10, int pageNum = 0)
-    {
-        var result = await fertilizerLandRepo.GetFertilizersLandAsync(landId, from, to, pageSize, pageNum);
-        return Ok(result);
-    }
+    //[HttpGet]
+    //public async Task<IActionResult> GetFertilizersLand(long landId, DateTime? from, DateTime? to, int pageSize = 10, int pageNum = 0)
+    //{
+    //    var result = await fertilizerLandRepo.GetFertilizersLandAsync(landId, from, to, pageSize, pageNum);
+    //    return Ok(result);
+    //}
     [HttpGet]
     public async Task<IActionResult> GetById(long id)
     {

@@ -61,9 +61,16 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         await context.FertilizerLand.AddRangeAsync(models);
         await context.SaveChangesAsync();
     }
-    public async Task<CommonResponseDto<List<GroupedFertilizerLandDto>>> GetAllAsync(DateTime? date, int pageSize, int pageNum)
+    public async Task<CommonResponseDto<List<GroupedFertilizerLandDto>>> GetAllAsync(long? landId, DateTime? from, DateTime? to, int pageSize, int pageNum)
     {
-        var result = await context.FertilizerLand.Where(fl => (date.HasValue ? fl.Date.Date == date : fl.CuttingLand.IsActive) && fl.IsValid)
+        var result = await context.FertilizerLand.Where(fl =>
+         (!landId.HasValue || fl.CuttingLand.LandId == landId) &&
+            (
+                (!from.HasValue && !to.HasValue && fl.CuttingLand.IsActive) || // If both are null, check IsActive
+                (from.HasValue && fl.Date.Date >= from) ||                     // If from has a value, check Date >= from
+                (to.HasValue && fl.Date.Date <= to)                            // If to has a value, check Date <= to
+            )
+        && fl.IsValid)
         .Include(fl => fl.Fertilizer).Include(fl => fl.CuttingLand).ThenInclude(l => l.Land).Include(fl => fl.CuttingLand).ThenInclude(l => l.CuttingColor)
         .OrderByDescending(fl => fl.CuttingLand.LandId)
             .ToListAsync();
