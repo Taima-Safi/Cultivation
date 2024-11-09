@@ -9,6 +9,7 @@ using Cultivation.Repository.Base;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
+using FlowerModel = Cultivation.Database.Model.FlowerModel;
 
 namespace Cultivation.Repository.Flower;
 
@@ -22,26 +23,38 @@ public class FlowerRepo : IFlowerRepo
         this.context = context;
         this.baseRepo = baseRepo;
     }
-    public async Task<long> AddAsync(int count, string note, DateTime date, long cuttingLandId)
+    public async Task AddAsync(List<FlowerFormDto> dtos, DateTime date, long cuttingLandId)
     {
         if (!await context.CuttingLand.Where(c => c.Id == cuttingLandId && c.IsValid).AnyAsync())
             throw new NotFoundException("Cuttings not found..");
 
-        var x = await context.Flower.AddAsync(new FlowerModel
+        var x = dtos.Select(f => new FlowerModel
         {
             Date = date,
-            Note = note,
-            Count = count,
+            Note = f.Note,
+            Long = f.Long,
+            Count = f.Count,
             CuttingLandId = cuttingLandId
         });
+
+
+        //var x = await context.Flower.AddAsync(new FlowerModel
+        //{
+        //    Date = date,
+        //    Note = note,
+        //    Long = Long,
+        //    Count = count,
+        //    CuttingLandId = cuttingLandId
+        //});
+        await context.Flower.AddRangeAsync(x);
         await context.SaveChangesAsync();
-        return x.Entity.Id;
     }
     public async Task<CommonResponseDto<List<FlowerDto>>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
-        , string cuttingColorCode, string colorTitle, int pageSize, int pageNum)
+        , string cuttingColorCode, string colorTitle, double? Long, int pageSize, int pageNum)
     {
         var x = await context.Flower.Where(f => (!from.HasValue || f.Date.Date >= from)
         && (!to.HasValue || f.Date.Date <= to)
+        && (!Long.HasValue || f.Long == Long)
         && (!cuttingLandId.HasValue || f.CuttingLandId == cuttingLandId)
         && (string.IsNullOrEmpty(colorTitle) || f.CuttingLand.CuttingColor.Color.Title == colorTitle)
         && (string.IsNullOrEmpty(cuttingColorCode) || f.CuttingLand.CuttingColor.Code == cuttingColorCode)
@@ -57,6 +70,7 @@ public class FlowerRepo : IFlowerRepo
                 Id = c.Id,
                 Date = c.Date,
                 Note = c.Note,
+                Long = c.Long,
                 Count = c.Count,
                 CuttingLand = new CuttingLandDto
                 {
@@ -104,6 +118,7 @@ public class FlowerRepo : IFlowerRepo
             Id = c.Id,
             Date = c.Date,
             Note = c.Note,
+            Long = c.Long,
             Count = c.Count,
             CuttingLand = new CuttingLandDto
             {
@@ -138,13 +153,13 @@ public class FlowerRepo : IFlowerRepo
             }
         }).FirstOrDefaultAsync();
     }
-    public async Task UpdateAsync(long id, string note, int count, DateTime date)
+    public async Task UpdateAsync(long id, string note, double Long, int count, DateTime date)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Flowers not found..");
 
         await context.Flower.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Date, date)
-        .SetProperty(c => c.Note, note).SetProperty(c => c.Count, count));
+        .SetProperty(c => c.Note, note).SetProperty(c => c.Long, Long).SetProperty(c => c.Count, count));
     }
 
     public async Task RemoveAsync(long id)

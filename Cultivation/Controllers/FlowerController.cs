@@ -1,4 +1,5 @@
-﻿using Cultivation.Repository.Flower;
+﻿using Cultivation.Dto.Flower;
+using Cultivation.Repository.Flower;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers;
@@ -14,15 +15,16 @@ public class FlowerController : ControllerBase
         this.flowerRepo = flowerRepo;
     }
     [HttpPost]
-    public async Task<IActionResult> Add(int count, string note, DateTime date, long cuttingLandId)
+    public async Task<IActionResult> Add(List<FlowerFormDto> dtos, DateTime date, long cuttingLandId)
     {
-        var id = await flowerRepo.AddAsync(count, note, date, cuttingLandId);
-        return Ok(id);
+        await flowerRepo.AddAsync(dtos, date, cuttingLandId);
+        return Ok();
     }
     [HttpGet]
-    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle, string cuttingColorCode, string colorTitle, int pageSize = 10, int pageNum = 0)
+    public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle,
+        string cuttingColorCode, string colorTitle, double? Long, int pageSize = 10, int pageNum = 0)
     {
-        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle, pageSize, pageNum);
+        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle, Long, pageSize, pageNum);
         var totalCount = Data.Data.Sum(x => x.Count);
         return Ok(new { Data, totalCount });
     }
@@ -33,9 +35,9 @@ public class FlowerController : ControllerBase
         return Ok(x);
     }
     [HttpPost]
-    public async Task<IActionResult> Update(long id, string note, int count, DateTime date)
+    public async Task<IActionResult> Update(long id, string note, double Long, int count, DateTime date)
     {
-        await flowerRepo.UpdateAsync(id, note, count, date);
+        await flowerRepo.UpdateAsync(id, note, Long, count, date);
         return Ok();
     }
     [HttpDelete]
