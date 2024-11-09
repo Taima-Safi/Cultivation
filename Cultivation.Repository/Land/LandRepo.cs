@@ -1,5 +1,6 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Land;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
@@ -37,7 +38,7 @@ public class LandRepo : ILandRepo
         await context.SaveChangesAsync();
         return land.Entity.Id;
     }
-    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren)
+    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isActive)
     {
         var landModels = await context.Land.Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
@@ -56,6 +57,10 @@ public class LandRepo : ILandRepo
                     Title = l.Title,
                     Location = l.Location,
                     ParentId = l.Parent.Id,
+                }).ToList(),
+                CuttingLands = l.CuttingLands.Select(l => new CuttingLandDto
+                {
+                    IsActive = l.IsActive
                 }).ToList()
             }).ToListAsync();
         var parents = landModels.Where(l => !l.ParentId.HasValue).ToList();
@@ -66,10 +71,7 @@ public class LandRepo : ILandRepo
             result.Add(GetChildrenAsync(parent, landModels, resultWithoutChildren));
 
         if (justChildren)
-        {
-            return resultWithoutChildren;
-        }
-
+            return resultWithoutChildren.Where(l => !isActive || l.CuttingLands.Any(cl => cl.IsActive)).ToList();
         return result;
     }
 
