@@ -153,6 +153,13 @@ public class FlowerRepo : IFlowerRepo
             }
         }).FirstOrDefaultAsync();
     }
+    public async Task<double> GetFlowerAverageInDonumAsync()
+    {
+        var totalSize = await context.CuttingLand.Where(c => c.IsActive && c.IsValid).SumAsync(c => c.Land.Size); // get sum of children size for lands have cutting
+        var totalFlowerCount = await context.Flower.Where(f => f.CuttingLand.IsActive && f.CuttingLand.IsValid).SumAsync(f => f.Count);
+
+        return totalFlowerCount / totalSize;
+    }
     public async Task UpdateAsync(long id, string note, double Long, int count, DateTime date)
     {
         if (!await CheckIfExistAsync(id))

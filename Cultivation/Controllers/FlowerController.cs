@@ -34,6 +34,12 @@ public class FlowerController : ControllerBase
         var x = await flowerRepo.GetByIdAsync(id);
         return Ok(x);
     }
+    [HttpGet]
+    public async Task<IActionResult> GetFlowerAverageInDonum()
+    {
+        var avg = await flowerRepo.GetFlowerAverageInDonumAsync();
+        return Ok(avg);
+    }
     [HttpPost]
     public async Task<IActionResult> Update(long id, string note, double Long, int count, DateTime date)
     {
