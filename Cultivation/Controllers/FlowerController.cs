@@ -15,9 +15,9 @@ public class FlowerController : ControllerBase
         this.flowerRepo = flowerRepo;
     }
     [HttpPost]
-    public async Task<IActionResult> Add(List<FlowerFormDto> dtos, DateTime date, long cuttingLandId)
+    public async Task<IActionResult> Add(AddFlowerFormDto dto, long cuttingLandId)
     {
-        await flowerRepo.AddAsync(dtos, date, cuttingLandId);
+        await flowerRepo.AddAsync(dto, cuttingLandId);
         return Ok();
     }
     [HttpGet]

@@ -23,30 +23,22 @@ public class FlowerRepo : IFlowerRepo
         this.context = context;
         this.baseRepo = baseRepo;
     }
-    public async Task AddAsync(List<FlowerFormDto> dtos, DateTime date, long cuttingLandId)
+    public async Task AddAsync(AddFlowerFormDto dto, long cuttingLandId)
     {
         if (!await context.CuttingLand.Where(c => c.Id == cuttingLandId && c.IsValid).AnyAsync())
             throw new NotFoundException("Cuttings not found..");
 
-        var x = dtos.Select(f => new FlowerModel
+
+        var model = dto.Flowers.Select(f => new FlowerModel
         {
-            Date = date,
             Note = f.Note,
             Long = f.Long,
             Count = f.Count,
+            Date = dto.Date,
             CuttingLandId = cuttingLandId
         });
 
-
-        //var x = await context.Flower.AddAsync(new FlowerModel
-        //{
-        //    Date = date,
-        //    Note = note,
-        //    Long = Long,
-        //    Count = count,
-        //    CuttingLandId = cuttingLandId
-        //});
-        await context.Flower.AddRangeAsync(x);
+        await context.Flower.AddRangeAsync(model);
         await context.SaveChangesAsync();
     }
     public async Task<CommonResponseDto<List<FlowerDto>>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
