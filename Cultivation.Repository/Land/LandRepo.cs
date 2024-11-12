@@ -38,7 +38,7 @@ public class LandRepo : ILandRepo
         await context.SaveChangesAsync();
         return land.Entity.Id;
     }
-    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isActive)
+    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isNoneActive)
     {
         var landModels = await context.Land.Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
@@ -71,7 +71,7 @@ public class LandRepo : ILandRepo
             result.Add(GetChildrenAsync(parent, landModels, resultWithoutChildren));
 
         if (justChildren)
-            return resultWithoutChildren.Where(l => !isActive || l.CuttingLands.Any(cl => cl.IsActive)).ToList();
+            return resultWithoutChildren.Where(l => !isNoneActive || (l.CuttingLands.All(cl => !cl.IsActive) && !l.CuttingLands.Any())).ToList();
         return result;
     }
 

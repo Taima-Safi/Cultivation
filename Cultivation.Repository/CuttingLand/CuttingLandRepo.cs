@@ -76,6 +76,7 @@ public class CuttingLandRepo : ICuttingLandRepo
                 Id = cl.Id,
                 Date = cl.Date,
                 Quantity = cl.Quantity,
+                IsActive = cl.IsActive,
                 Land = new LandDto
                 {
                     Id = cl.Land.Id,

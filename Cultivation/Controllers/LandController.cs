@@ -19,7 +19,7 @@ public class LandController : ControllerBase
         => Ok(await landRepo.AddAsync(dto));
 
     [HttpGet]
-    public async Task<IActionResult> GetAll(string title, double? size, bool justChildren = false, bool isActive = false)
+    public async Task<IActionResult> GetAll(string title, bool isActive, double? size, bool justChildren = false)
         => Ok(await landRepo.GetAllAsync(title, size, justChildren, isActive));
     [HttpGet]
     public async Task<IActionResult> GetById(long id)
