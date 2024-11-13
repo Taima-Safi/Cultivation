@@ -49,7 +49,7 @@ public class CuttingLandRepo : ICuttingLandRepo
         return x.Entity.Id;
     }
 
-    public async Task UpdateIsActiveAsync(long id, bool isActive)
+    public async Task UpdateIsActiveAsync(long id)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Cutting not found..");
@@ -146,7 +146,7 @@ public class CuttingLandRepo : ICuttingLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Cutting for this land not found..");
 
-        await context.CuttingLand.Where(cl => cl.Id == id && cl.IsValid).ExecuteUpdateAsync(cl => cl.SetProperty(cl => cl.IsValid, false));
+        await context.CuttingLand.Where(cl => cl.Id == id && cl.IsValid).ExecuteUpdateAsync(cl => cl.SetProperty(cl => cl.IsValid, false).SetProperty(cl => cl.IsActive, false));
     }
     public async Task<bool> CheckIfExistAsync(long id)
     => await context.CuttingLand.Where(cl => cl.Id == id && cl.IsValid).AnyAsync();

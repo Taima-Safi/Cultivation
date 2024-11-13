@@ -21,9 +21,9 @@ public class CuttingLandController : ControllerBase
         return Ok(id);
     }
     [HttpPost]
-    public async Task<IActionResult> UpdateIsActive(long id, bool isActive)
+    public async Task<IActionResult> UpdateIsActive(long id)
     {
-        await cuttingLandRepo.UpdateIsActiveAsync(id, isActive);
+        await cuttingLandRepo.UpdateIsActiveAsync(id);
         return Ok();
     }
     [HttpGet]
