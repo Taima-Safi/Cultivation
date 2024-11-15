@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NPOI" Version="2.7.1" />
+	  <PackageReference Include="Microsoft.AspNetCore.App" />
+
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Cultivation.Database\Cultivation.Database.csproj" />
     <ProjectReference Include="..\Cultivation.Dto\Cultivation.Dto.csproj" />
     <ProjectReference Include="..\Cultivation.Shared\Cultivation.Shared.csproj" />

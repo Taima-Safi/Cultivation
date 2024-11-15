@@ -9,9 +9,12 @@ using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.CuttingLand;
 using Cultivation.Repository.Fertilizer;
+using Cultivation.Repository.File;
 using Cultivation.Repository.Land;
+using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -23,15 +26,35 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     private readonly ICuttingLandRepo cuttingLandRepo;
     private readonly IFertilizerRepo fertilizerRepo;
     private readonly ILandRepo landRepo;
+    private readonly IFileRepo fileRepo;
     private readonly IBaseRepo<FertilizerLandModel> baseRepo;
 
-    public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo, ICuttingLandRepo cuttingLandRepo)
+    public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo, ICuttingLandRepo cuttingLandRepo, IFileRepo fileRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
         this.fertilizerRepo = fertilizerRepo;
         this.baseRepo = baseRepo;
         this.cuttingLandRepo = cuttingLandRepo;
+        this.fileRepo = fileRepo;
+    }
+
+    public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
+    {
+        var result = await GetFertilizersLandAsync(landId, from, to);
+        var toExport = result.Data.Select(x => new ExportToExcelDto
+        {
+            Type = x.Type.ToString(),
+            Date = x.Date.ToShortDateString(),
+            Quantity = x.Quantity.ToString(),
+            NPK = x.Fertilizer.NPK,
+            Title = x.Fertilizer.Title,
+            Description = x.Fertilizer.Description,
+            PublicTitle = x.Fertilizer.PublicTitle,
+        }).ToList();
+
+        var excel = fileRepo.ExportToExcel(ExportType.LandFertilizers, fileName, new(), /*filtersPropertiesNames,*/ toExport);
+        return excel;
     }
     public async Task AddAsync(FertilizerLandFormDto dto)
     {
@@ -149,7 +172,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
             Location = l.Location,
         }).ToList();
     }
-    public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to, int pageSize, int pageNum)
+    public async Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to)
     {
         if (!await landRepo.CheckIfExistAsync(landId))
             throw new NotFoundException("Land not found..");
@@ -164,8 +187,6 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 (to.HasValue && fl.Date.Date <= to)                            // If to has a value, check Date <= to
             );
         var result = await context.FertilizerLand.Where(expression)
-            .Skip(pageNum * pageSize)
-            .Take(pageSize)
             .Select(fl => new FertilizerLandDto
             {
                 Id = fl.Id,
@@ -180,45 +201,41 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                     PublicTitle = fl.Fertilizer.PublicTitle,
                     Description = fl.Fertilizer.Description,
                 },
-                CuttingLand = new CuttingLandDto
-                {
-                    Id = fl.CuttingLand.Id,
-                    Date = fl.CuttingLand.Date,
-                    Quantity = fl.CuttingLand.Quantity,
-                    Land = new LandDto
-                    {
-                        Id = fl.CuttingLand.Land.Id,
-                        Size = fl.CuttingLand.Land.Size,
-                        Title = fl.CuttingLand.Land.Title,
-                        Location = fl.CuttingLand.Land.Location,
-                        ParentId = fl.CuttingLand.Land.ParentId,
-                    },
-                    CuttingColor = new CuttingColorDto
-                    {
-                        Id = fl.CuttingLand.CuttingColor.Id,
-                        Code = fl.CuttingLand.CuttingColor.Code,
-                        Color = new ColorDto
-                        {
-                            Id = fl.CuttingLand.CuttingColor.Color.Id,
-                            Code = fl.CuttingLand.CuttingColor.Color.Code,
-                            Title = fl.CuttingLand.CuttingColor.Color.Title,
-                        },
-                        Cutting = new CuttingDto
-                        {
-                            Id = fl.CuttingLand.CuttingColor.Cutting.Id,
-                            Age = fl.CuttingLand.CuttingColor.Cutting.Age,
-                            Type = fl.CuttingLand.CuttingColor.Cutting.Type,
-                            Title = fl.CuttingLand.CuttingColor.Cutting.Title,
-                        }
-                    }
-                }
+                //CuttingLand = new CuttingLandDto
+                //{
+                //    Id = fl.CuttingLand.Id,
+                //    Date = fl.CuttingLand.Date,
+                //    Quantity = fl.CuttingLand.Quantity,
+                //    Land = new LandDto
+                //    {
+                //        Id = fl.CuttingLand.Land.Id,
+                //        Size = fl.CuttingLand.Land.Size,
+                //        Title = fl.CuttingLand.Land.Title,
+                //        Location = fl.CuttingLand.Land.Location,
+                //        ParentId = fl.CuttingLand.Land.ParentId,
+                //    },
+                //    CuttingColor = new CuttingColorDto
+                //    {
+                //        Id = fl.CuttingLand.CuttingColor.Id,
+                //        Code = fl.CuttingLand.CuttingColor.Code,
+                //        Color = new ColorDto
+                //        {
+                //            Id = fl.CuttingLand.CuttingColor.Color.Id,
+                //            Code = fl.CuttingLand.CuttingColor.Color.Code,
+                //            Title = fl.CuttingLand.CuttingColor.Color.Title,
+                //        },
+                //        Cutting = new CuttingDto
+                //        {
+                //            Id = fl.CuttingLand.CuttingColor.Cutting.Id,
+                //            Age = fl.CuttingLand.CuttingColor.Cutting.Age,
+                //            Type = fl.CuttingLand.CuttingColor.Cutting.Type,
+                //            Title = fl.CuttingLand.CuttingColor.Cutting.Title,
+                //        }
+                //    }
+                //}
             }).ToListAsync();
 
-        bool hasNextPage = false;
-        if (result.Count > 0)
-            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
-
-        return new CommonResponseDto<List<FertilizerLandDto>>(result, hasNextPage);
+        return new CommonResponseDto<List<FertilizerLandDto>>(result);
     }
     public async Task<FertilizerLandDto> GetByIdAsync(long id)
     {

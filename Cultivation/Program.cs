@@ -5,6 +5,7 @@ using Cultivation.Repository.Cutting;
 using Cultivation.Repository.CuttingLand;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Repository.FertilizerLand;
+using Cultivation.Repository.File;
 using Cultivation.Repository.Flower;
 using Cultivation.Repository.Insecticide;
 using Cultivation.Repository.InsecticideLand;
@@ -50,6 +51,7 @@ builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
 builder.Services.AddScoped<IInsecticideRepo, InsecticideRepo>();
 builder.Services.AddScoped<IInsecticideLandRepo, InsecticideLandRepo>();
 builder.Services.AddScoped<IFlowerRepo, FlowerRepo>();
+builder.Services.AddScoped<IFileRepo, FileRepo>();
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 
 var app = builder.Build();
