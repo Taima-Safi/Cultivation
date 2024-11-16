@@ -58,19 +58,24 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     }
     public async Task AddAsync(FertilizerLandFormDto dto)
     {
-        if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
-            throw new NotFoundException("One of lands not found..");
+        //if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
+        //    throw new NotFoundException("One of lands not found..");
 
-        var cuttingLandIds = await cuttingLandRepo.GetActiveCuttingLandIdsAsync(dto.LandIds);
+        //var cuttingLandIds = await cuttingLandRepo.GetActiveCuttingLandIdsAsync(dto.LandIds);
 
-        if (cuttingLandIds == null)
-            throw new NotFoundException("not found..");
+        //if (cuttingLandIds == null)
+        //  throw new NotFoundException("not found..");
+
+
+        if (!await cuttingLandRepo.CheckIfExistByIdsAsync(dto.CuttingLandIds))
+            throw new NotFoundException("One of Cutting Lands not found..");
+
 
         if (!await fertilizerRepo.CheckIfExistByIdsAsync(dto.Mixes.Select(f => f.FertilizerId).ToList()))
             throw new NotFoundException("One of Fertilizers not found..");
 
         List<FertilizerLandModel> models = [];
-        foreach (var cuttingLandId in cuttingLandIds)
+        foreach (var cuttingLandId in dto.CuttingLandIds)
         {
             models.AddRange(dto.Mixes.Select(f => new FertilizerLandModel
             {

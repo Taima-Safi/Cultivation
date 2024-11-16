@@ -70,9 +70,6 @@ public class LandRepo : ILandRepo
         foreach (var parent in parents)
             result.Add(GetChildrenAsync(parent, landModels, resultWithoutChildren));
 
-        //var s = resultWithoutChildren.Where(l => l.CuttingLands.All(cl => !cl.IsActive)).ToList();
-        //var s2 = resultWithoutChildren.Where(l => !l.CuttingLands.Any()).ToList();
-        //var s3 = resultWithoutChildren.Where(l => !isNoneActive || (l.CuttingLands.All(cl => !cl.IsActive) || !l.CuttingLands.Any())).ToList();
         if (justChildren)
             return resultWithoutChildren.Where(l => !isNoneActive || (l.CuttingLands.All(cl => !cl.IsActive) || !l.CuttingLands.Any())).ToList();
         return result;

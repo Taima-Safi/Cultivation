@@ -150,4 +150,7 @@ public class CuttingLandRepo : ICuttingLandRepo
     }
     public async Task<bool> CheckIfExistAsync(long id)
     => await context.CuttingLand.Where(cl => cl.Id == id && cl.IsValid).AnyAsync();
+
+    public async Task<bool> CheckIfExistByIdsAsync(List<long> ids)
+    => await context.CuttingLand.AnyAsync(l => ids.Contains(l.Id) && l.IsValid);
 }
