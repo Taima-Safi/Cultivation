@@ -1,22 +1,25 @@
 ﻿using System.ComponentModel;
 
-namespace Cultivation.Dto.FertilizerLand;
+namespace Cultivation.Dto.InsecticideLand;
 
-public class ExportToExcelDto
+public class InsecticideExportToExcelDto
 {
     [DisplayName("Oygulama Tarihi")]
     public string Date { get; set; }
 
-    [DisplayName("Gübre Miktarı")]
+    [DisplayName("Ilaç Miktarı")]
     public string Quantity { get; set; } //kg
+
+    [DisplayName("Ilaç Litre")]
+    public string Liter { get; set; }
+
     [DisplayName("Sınıf")]
     public string Type { get; set; }
 
     //public LandDto Land { get; set; }
 
-    //fertilizer
-    [DisplayName("NPK")]
-    public string NPK { get; set; }
+    //insecticide
+
     [DisplayName("Bilimsel Ad")]
     public string Title { get; set; }
     [DisplayName("Tecari Ad")]

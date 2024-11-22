@@ -51,7 +51,7 @@ builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
 builder.Services.AddScoped<IInsecticideRepo, InsecticideRepo>();
 builder.Services.AddScoped<IInsecticideLandRepo, InsecticideLandRepo>();
 builder.Services.AddScoped<IFlowerRepo, FlowerRepo>();
-builder.Services.AddScoped<IFileRepo, FileRepo>();
+builder.Services.AddScoped(typeof(IFileRepo<>), typeof(FileRepo<>));
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 
 var app = builder.Build();

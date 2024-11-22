@@ -7,10 +7,13 @@ using Cultivation.Dto.InsecticideLand;
 using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.CuttingLand;
+using Cultivation.Repository.File;
 using Cultivation.Repository.Insecticide;
 using Cultivation.Repository.Land;
+using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -21,17 +24,54 @@ public class InsecticideLandRepo : IInsecticideLandRepo
     private readonly CultivationDbContext context;
     private readonly ICuttingLandRepo cuttingLandRepo;
     private readonly ILandRepo landRepo;
+    private readonly IFileRepo<InsecticideExportToExcelDto> fileRepo;
     private readonly IInsecticideRepo insecticideRepo;
     private readonly IBaseRepo<InsecticideLandModel> baseRepo;
 
-    public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo, ILandRepo landRepo, IInsecticideRepo insecticideRepo, ICuttingLandRepo cuttingLandRepo)
+    public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo, ILandRepo landRepo, IInsecticideRepo insecticideRepo,
+        ICuttingLandRepo cuttingLandRepo, IFileRepo<InsecticideExportToExcelDto> fileRepo)
     {
         this.context = context;
         this.baseRepo = baseRepo;
         this.landRepo = landRepo;
         this.insecticideRepo = insecticideRepo;
         this.cuttingLandRepo = cuttingLandRepo;
+        this.fileRepo = fileRepo;
     }
+    public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
+    {
+        var result = await GetInsecticidesLandModelAsync(landId, from, to);
+        var toExport = result.Data.Select(x => new InsecticideExportToExcelDto
+        {
+            Type = x.Insecticide.Type.ToString(),
+            Date = x.Date.ToShortDateString(),
+            Quantity = x.Quantity.ToString(),
+            Liter = x.Liter.ToString(),
+            Title = x.Insecticide.Title,
+            Description = x.Insecticide.Description,
+            PublicTitle = x.Insecticide.PublicTitle,
+        }).ToList();
+
+        var excel = fileRepo.ExportToExcel(ExportType.LandFertilizers, fileName, new(), /*filtersPropertiesNames,*/ toExport);
+        return excel;
+    }
+    public async Task<CommonResponseDto<List<InsecticideLandModel>>> GetInsecticidesLandModelAsync(long landId, DateTime? from, DateTime? to)
+    {
+        if (!await landRepo.CheckIfExistAsync(landId))
+            throw new NotFoundException("Land not found..");
+
+        Expression<Func<InsecticideLandModel, bool>> expression = il =>
+            il.CuttingLand.LandId == landId && il.IsValid &&
+            (
+                (!from.HasValue && !to.HasValue && il.CuttingLand.IsActive) || // If both are null, check IsActive
+                (from.HasValue && il.Date.Date >= from) ||                     // If from has a value, check Date >= from
+                (to.HasValue && il.Date.Date <= to)                            // If to has a value, check Date <= to
+            );
+        var result = await context.InsecticideLand.Where(expression).Include(il => il.Insecticide).ToListAsync();
+
+        return new CommonResponseDto<List<InsecticideLandModel>>(result);
+    }
+
     public async Task AddAsync(InsecticideLandFormDto dto)
     {
         if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))

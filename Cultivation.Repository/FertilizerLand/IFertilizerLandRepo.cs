@@ -1,4 +1,5 @@
 ﻿
+using Cultivation.Database.Model;
 using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.Land;
 using FourthPro.Dto.Common;
@@ -14,7 +15,7 @@ public interface IFertilizerLandRepo
     Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName);
     Task<CommonResponseDto<List<GroupedFertilizerLandDto>>> GetAllAsync(long? landId, DateTime? from, DateTime? to, int pageSize, int pageNum);
     Task<FertilizerLandDto> GetByIdAsync(long id);
-    Task<CommonResponseDto<List<FertilizerLandDto>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to);
+    Task<CommonResponseDto<List<FertilizerLandModel>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to);
     Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? date);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, UpdateFertilizerLandDto dto);

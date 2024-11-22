@@ -1,5 +1,4 @@
 ﻿using Cultivation.Database.Context;
-using Cultivation.Dto.FertilizerLand;
 using Cultivation.Shared.Enum;
 using Microsoft.AspNetCore.Http;
 using NPOI.SS.UserModel;
@@ -8,7 +7,7 @@ using System.ComponentModel;
 using System.Reflection;
 
 namespace Cultivation.Repository.File;
-public class FileRepo : IFileRepo
+public class FileRepo<T> : IFileRepo<T> where T : class
 {
     private readonly CultivationDbContext context;
 
@@ -16,7 +15,7 @@ public class FileRepo : IFileRepo
     {
         this.context = context;
     }
-    public (FormFile file, MemoryStream stream) ExportToExcel(ExportType type, string fileName, List<string> filters, List<ExportToExcelDto> dtos)
+    public (FormFile file, MemoryStream stream) ExportToExcel(ExportType type, string fileName, List<string> filters, List<T> dtos)
     {
         IWorkbook workbook = new XSSFWorkbook();
         ISheet sheet = workbook.CreateSheet("Gübre Oygulama");
@@ -26,6 +25,14 @@ public class FileRepo : IFileRepo
         IFont font = workbook.CreateFont();
         font.IsBold = true;
         headerStyle.WrapText = true;
+        font.FontHeightInPoints = 11;
+        font.FontName = "Calibri";
+
+        headerStyle.BorderBottom = BorderStyle.Thin;
+        headerStyle.BorderTop = BorderStyle.Thin;
+        headerStyle.BorderLeft = BorderStyle.Thin;
+        headerStyle.BorderRight = BorderStyle.Thin;
+
         headerStyle.FillForegroundColor = IndexedColors.Green.Index;
         headerStyle.FillPattern = FillPattern.SolidForeground;
         headerStyle.Alignment = HorizontalAlignment.Center;
@@ -36,7 +43,7 @@ public class FileRepo : IFileRepo
         switch (type)
         {
             case ExportType.LandFertilizers:
-                Type exportDtoType = typeof(ExportToExcelDto);
+                Type exportDtoType = typeof(T);
                 PropertyInfo[] exportDtoProp = exportDtoType.GetProperties();
                 IRow titleRow = sheet.CreateRow(0);
                 int columnNumber = 0;

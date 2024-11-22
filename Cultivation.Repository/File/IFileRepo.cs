@@ -1,10 +1,9 @@
-﻿using Cultivation.Dto.FertilizerLand;
-using Cultivation.Shared.Enum;
+﻿using Cultivation.Shared.Enum;
 using Microsoft.AspNetCore.Http;
 
 namespace Cultivation.Repository.File;
 
-public interface IFileRepo
+public interface IFileRepo<T> where T : class
 {
-    (FormFile file, MemoryStream stream) ExportToExcel(ExportType type, string fileName, List<string> filters, List<ExportToExcelDto> dtos);
+    (FormFile file, MemoryStream stream) ExportToExcel(ExportType type, string fileName, List<string> filters, List<T> dtos);
 }

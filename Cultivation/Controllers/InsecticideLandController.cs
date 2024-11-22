@@ -22,6 +22,12 @@ public class InsecticideLandController : ControllerBase
         await insecticideLandRepo.AddAsync(dto);
         return Ok();
     }
+    [HttpPost]
+    public async Task<IActionResult> ExportExcel(long landId, DateTime? from, DateTime? to, string fileName = "ExcelFile")
+    {
+        var excel = await insecticideLandRepo.ExportExcelAsync(landId, from, to, fileName);
+        return File(excel.stream, excel.file.ContentType, excel.file.FileName);
+    }
     [HttpGet]
     public async Task<IActionResult> GetAll(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to,
         long? landId, long? insecticideId, int pageSize = 10, int pageNum = 0)
