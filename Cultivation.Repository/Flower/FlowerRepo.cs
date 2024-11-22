@@ -35,6 +35,7 @@ public class FlowerRepo : IFlowerRepo
             Long = f.Long,
             Count = f.Count,
             Date = dto.Date,
+            Worker = dto.Worker,
             CuttingLandId = cuttingLandId
         });
 
@@ -42,13 +43,16 @@ public class FlowerRepo : IFlowerRepo
         await context.SaveChangesAsync();
     }
     public async Task<CommonResponseDto<List<FlowerDto>>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
-        , string cuttingColorCode, string colorTitle, double? Long, int pageSize, int pageNum)
+        , string cuttingColorCode, string worker, double? Long, int pageSize, int pageNum)
     {
-        var x = await context.Flower.Where(f => (!from.HasValue || f.Date.Date >= from)
-        && (!to.HasValue || f.Date.Date <= to)
+        var x = await context.Flower.Where(f =>
+         (!from.HasValue || f.Date >= from)
+        && (!to.HasValue || f.Date <= to)
+        //&&
+        // ((!from.HasValue && !to.HasValue) && f.CuttingLand.IsActive)
         && (!Long.HasValue || f.Long == Long)
         && (!cuttingLandId.HasValue || f.CuttingLandId == cuttingLandId)
-        && (string.IsNullOrEmpty(colorTitle) || f.CuttingLand.CuttingColor.Color.Title == colorTitle)
+        && (string.IsNullOrEmpty(worker) || f.Worker == worker)
         && (string.IsNullOrEmpty(cuttingColorCode) || f.CuttingLand.CuttingColor.Code == cuttingColorCode)
         && (string.IsNullOrEmpty(cuttingTitle) || f.CuttingLand.CuttingColor.Cutting.Title == cuttingTitle)
         // && (!colorId.HasValue || f.CuttingLand.CuttingColor.ColorId == colorId)
@@ -64,6 +68,7 @@ public class FlowerRepo : IFlowerRepo
                 Note = c.Note,
                 Long = c.Long,
                 Count = c.Count,
+                Worker = c.Worker,
                 CuttingLand = new CuttingLandDto
                 {
                     Id = c.CuttingLand.Id,
@@ -112,6 +117,7 @@ public class FlowerRepo : IFlowerRepo
             Note = c.Note,
             Long = c.Long,
             Count = c.Count,
+            Worker = c.Worker,
             CuttingLand = new CuttingLandDto
             {
                 Id = c.CuttingLand.Id,
@@ -152,13 +158,13 @@ public class FlowerRepo : IFlowerRepo
 
         return totalFlowerCount / totalSize;
     }
-    public async Task UpdateAsync(long id, string note, double Long, int count, DateTime date)
+    public async Task UpdateAsync(long id, string note, string worker, double Long, int count, DateTime date)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Flowers not found..");
 
         await context.Flower.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Date, date)
-        .SetProperty(c => c.Note, note).SetProperty(c => c.Long, Long).SetProperty(c => c.Count, count));
+        .SetProperty(c => c.Note, note).SetProperty(c => c.Worker, worker).SetProperty(c => c.Long, Long).SetProperty(c => c.Count, count));
     }
 
     public async Task RemoveAsync(long id)

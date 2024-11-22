@@ -9,6 +9,7 @@ public class FlowerDto
     public int Count { get; set; }
     public double Long { get; set; }
     public DateTime Date { get; set; }
+    public string Worker { get; set; }
 
     public CuttingLandDto CuttingLand { get; set; }
 }

@@ -22,9 +22,9 @@ public class FlowerController : ControllerBase
     }
     [HttpGet]
     public async Task<IActionResult> GetAll(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle,
-        string cuttingColorCode, string colorTitle, double? Long, int pageSize = 10, int pageNum = 0)
+        string cuttingColorCode, string worker, double? Long, int pageSize = 10, int pageNum = 0)
     {
-        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, colorTitle, Long, pageSize, pageNum);
+        var Data = await flowerRepo.GetAllAsync(from, to, cuttingLandId, cuttingTitle, cuttingColorCode, worker, Long, pageSize, pageNum);
         var totalCount = Data.Data.Sum(x => x.Count);
         return Ok(new { Data, totalCount });
     }
@@ -41,9 +41,9 @@ public class FlowerController : ControllerBase
         return Ok(avg);
     }
     [HttpPost]
-    public async Task<IActionResult> Update(long id, string note, double Long, int count, DateTime date)
+    public async Task<IActionResult> Update(long id, string note, string worker, double Long, int count, DateTime date)
     {
-        await flowerRepo.UpdateAsync(id, note, Long, count, date);
+        await flowerRepo.UpdateAsync(id, note, worker, Long, count, date);
         return Ok();
     }
     [HttpDelete]
