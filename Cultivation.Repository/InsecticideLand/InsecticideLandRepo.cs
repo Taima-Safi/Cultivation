@@ -241,7 +241,7 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this insecticide...");
 
-        if (!await CheckIfExistAsync(dto.CuttingLandId))
+        if (!await cuttingLandRepo.CheckIfExistAsync(dto.CuttingLandId))
             throw new NotFoundException("cutting not found..");
 
         if (!await insecticideRepo.CheckIfExistAsync(dto.InsecticideId))

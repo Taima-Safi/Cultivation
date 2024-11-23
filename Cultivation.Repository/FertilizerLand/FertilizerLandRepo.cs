@@ -300,7 +300,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this fertilizer..");
 
-        if (!await CheckIfExistAsync(dto.CuttingLandId))
+        if (!await cuttingLandRepo.CheckIfExistAsync(dto.CuttingLandId))
             throw new NotFoundException("Cutting not found..");
 
         if (!await fertilizerRepo.CheckIfExistAsync(dto.FertilizerId))
