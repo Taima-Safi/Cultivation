@@ -7,6 +7,6 @@ public class UpdateInsecticideLandFormDto
     public double Liter { get; set; } //kg
     public double? Quantity { get; set; } //kg
 
-    public long LandId { get; set; }
+    public long CuttingLandId { get; set; }
     public long InsecticideId { get; set; }
 }

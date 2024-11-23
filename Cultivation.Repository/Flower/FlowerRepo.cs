@@ -87,6 +87,7 @@ public class FlowerRepo : IFlowerRepo
                         Color = new ColorDto
                         {
                             Id = c.CuttingLand.CuttingColor.Color.Id,
+                            Code = c.CuttingLand.CuttingColor.Color.Code,
                             Title = c.CuttingLand.CuttingColor.Color.Title,
                         },
                         Cutting = new CuttingDto
@@ -155,6 +156,9 @@ public class FlowerRepo : IFlowerRepo
     {
         var totalSize = await context.CuttingLand.Where(c => c.IsActive && c.IsValid).SumAsync(c => c.Land.Size); // get sum of children size for lands have cutting
         var totalFlowerCount = await context.Flower.Where(f => f.CuttingLand.IsActive && f.CuttingLand.IsValid).SumAsync(f => f.Count);
+
+        if (totalFlowerCount <= 0)
+            throw new NotFoundException("no flowers..");
 
         return totalFlowerCount / totalSize;
     }

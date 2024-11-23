@@ -74,19 +74,15 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 
     public async Task AddAsync(InsecticideLandFormDto dto)
     {
-        if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
-            throw new NotFoundException("One of lands not found..");
 
-        var cuttingLandIds = await cuttingLandRepo.GetActiveCuttingLandIdsAsync(dto.LandIds);
-
-        if (cuttingLandIds == null)
-            throw new NotFoundException("not found..");
+        if (!await cuttingLandRepo.CheckIfExistByIdsAsync(dto.CuttingLandIds))
+            throw new NotFoundException("One of Cutting Lands not found..");
 
         if (!await insecticideRepo.CheckIfExistByIdsAsync(dto.Mixes.Select(x => x.InsecticideId).ToList()))
             throw new NotFoundException("One of insecticides not found..");
 
         List<InsecticideLandModel> models = [];
-        foreach (var cuttingLandId in cuttingLandIds)
+        foreach (var cuttingLandId in dto.CuttingLandIds)
         {
             models.AddRange(dto.Mixes.Select(i => new InsecticideLandModel
             {
@@ -245,20 +241,15 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this insecticide...");
 
-        if (!await landRepo.CheckIfExistAsync(dto.LandId))
-            throw new NotFoundException("Land not found..");
+        if (!await CheckIfExistAsync(dto.CuttingLandId))
+            throw new NotFoundException("cutting not found..");
 
         if (!await insecticideRepo.CheckIfExistAsync(dto.InsecticideId))
             throw new NotFoundException("Fertilizer not has this fertilizer..");
 
-        var cuttingLandId = await cuttingLandRepo.GetCuttingLandIdAsync(dto.LandId);
-
-        if (cuttingLandId == 0)
-            throw new NotFoundException("Land does not has cuttings");
-
         await context.InsecticideLand.Where(il => il.Id == id && il.IsValid).ExecuteUpdateAsync(il => il.SetProperty(il => il.Note, dto.Note)
         .SetProperty(il => il.Quantity, dto.Quantity).SetProperty(il => il.Liter, dto.Liter).SetProperty(il => il.Date, dto.Date)
-        .SetProperty(il => il.InsecticideId, dto.InsecticideId).SetProperty(il => il.CuttingLandId, cuttingLandId));
+        .SetProperty(il => il.InsecticideId, dto.InsecticideId).SetProperty(il => il.CuttingLandId, dto.CuttingLandId));
     }
     public async Task RemoveAsync(long id)
     {

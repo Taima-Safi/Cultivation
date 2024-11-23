@@ -300,20 +300,16 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this fertilizer..");
 
-        if (!await landRepo.CheckIfExistAsync(dto.LandId))
-            throw new NotFoundException("Land not found..");
+        if (!await CheckIfExistAsync(dto.CuttingLandId))
+            throw new NotFoundException("Cutting not found..");
 
         if (!await fertilizerRepo.CheckIfExistAsync(dto.FertilizerId))
             throw new NotFoundException("Fertilizer not has this fertilizer..");
 
-        var cuttingLandId = await cuttingLandRepo.GetCuttingLandIdAsync(dto.LandId);
-
-        if (cuttingLandId == 0)
-            throw new NotFoundException("Land does not has cuttings");
 
         await context.FertilizerLand.Where(fl => fl.Id == id && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.Type, dto.Type)
         .SetProperty(fl => fl.Quantity, dto.Quantity).SetProperty(fl => fl.Date, dto.Date).SetProperty(fl => fl.FertilizerId, dto.FertilizerId)
-        .SetProperty(fl => fl.CuttingLandId, cuttingLandId));
+        .SetProperty(fl => fl.CuttingLandId, dto.CuttingLandId));
     }
     public async Task RemoveAsync(long id)
     {
