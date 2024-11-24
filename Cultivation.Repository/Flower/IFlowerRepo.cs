@@ -1,4 +1,5 @@
 ﻿
+using Cultivation.Database.Model;
 using Cultivation.Dto.Flower;
 using FourthPro.Dto.Common;
 
@@ -12,6 +13,8 @@ public interface IFlowerRepo
         , string cuttingColorCode, string worker, double? Long, int pageSize, int pageNum);
     Task<FlowerDto> GetByIdAsync(long id);
     Task<double> GetFlowerAverageInDonumAsync();
+    Task<List<FlowerStoreModel>> GetFlowerStoreModelsByCodesAsync(List<string> cods);
+    Task<List<FlowerModel>> GetModelsByIdsAsync(List<long> ids);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, string note, string worker, double Long, int count, DateTime date);
 }

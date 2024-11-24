@@ -34,9 +34,9 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         this.context = context;
         this.baseRepo = baseRepo;
         this.landRepo = landRepo;
+        this.fileRepo = fileRepo;
         this.insecticideRepo = insecticideRepo;
         this.cuttingLandRepo = cuttingLandRepo;
-        this.fileRepo = fileRepo;
     }
     public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
     {

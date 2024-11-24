@@ -4,6 +4,7 @@ using Cultivation.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cultivation.Database.Migrations
 {
     [DbContext(typeof(CultivationDbContext))]
-    partial class CultivationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241124170406_FixOrderModels")]
+    partial class FixOrderModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,6 +301,9 @@ namespace Cultivation.Database.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RemainedCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
@@ -325,7 +331,7 @@ namespace Cultivation.Database.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("FlowerStoreId")
+                    b.Property<long>("FlowerId")
                         .HasColumnType("bigint");
 
                     b.Property<bool>("IsValid")
@@ -339,45 +345,11 @@ namespace Cultivation.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FlowerStoreId");
+                    b.HasIndex("FlowerId");
 
                     b.HasIndex("OrderId");
 
                     b.ToTable("FlowerOrder");
-                });
-
-            modelBuilder.Entity("Cultivation.Database.Model.FlowerStoreModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("FlowerLong")
-                        .HasColumnType("float");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("RemainedCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("FlowerStore");
                 });
 
             modelBuilder.Entity("Cultivation.Database.Model.InsecticideLandModel", b =>
@@ -597,9 +569,9 @@ namespace Cultivation.Database.Migrations
 
             modelBuilder.Entity("Cultivation.Database.Model.FlowerOrderModel", b =>
                 {
-                    b.HasOne("Cultivation.Database.Model.FlowerStoreModel", "FlowerStore")
+                    b.HasOne("Cultivation.Database.Model.FlowerModel", "Flower")
                         .WithMany("FlowerOrders")
-                        .HasForeignKey("FlowerStoreId")
+                        .HasForeignKey("FlowerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -609,7 +581,7 @@ namespace Cultivation.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("FlowerStore");
+                    b.Navigation("Flower");
 
                     b.Navigation("Order");
                 });
@@ -687,7 +659,7 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("FertilizerLands");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.FlowerStoreModel", b =>
+            modelBuilder.Entity("Cultivation.Database.Model.FlowerModel", b =>
                 {
                     b.Navigation("FlowerOrders");
                 });
