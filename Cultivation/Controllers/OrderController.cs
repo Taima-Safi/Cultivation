@@ -20,4 +20,16 @@ public class OrderController : ControllerBase
         await orderRepo.AddAsync(dto);
         return Ok();
     }
+    [HttpPost]
+    public async Task<IActionResult> UpdateOrderStatus(long orderId, DateTime boughtDate)
+    {
+        await orderRepo.UpdateOrderStatusAsync(orderId, boughtDate);
+        return Ok();
+    }
+    [HttpPost]
+    public async Task<IActionResult> Remove(long id)
+    {
+        await orderRepo.RemoveAsync(id);
+        return Ok();
+    }
 }

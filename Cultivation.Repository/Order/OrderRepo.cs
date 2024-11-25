@@ -4,6 +4,7 @@ using Cultivation.Dto.Order;
 using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Flower;
 using FourthPro.Shared.Exception;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cultivation.Repository.Order;
 
@@ -37,7 +38,9 @@ public class OrderRepo : IOrderRepo
             var order = new OrderModel
             {
                 ClientId = dto.ClientId,
-                IsBought = dto.IsBought
+                IsBought = dto.IsBought,
+                OrderDate = dto.OrderDate,
+                BoughtDate = dto.BoughtDate,
             };
             var orderModel = await context.Order.AddAsync(order);
             await context.SaveChangesAsync();
@@ -63,30 +66,37 @@ public class OrderRepo : IOrderRepo
             //        });
             //    }
             //}
-            foreach (var flower in dto.FlowerOrders)
+            List<Tuple<string, double>> faildFlowerLongs = [];
+            foreach (var flowerOrder in dto.FlowerOrders)
             {
-                if (!dicFlowerStoreModel.TryGetValue(flower.Code, out var possibleStores))
-                    throw new NotFoundException($"Flower with Code {flower.Code} not found");
+                if (!dicFlowerStoreModel.TryGetValue(flowerOrder.Code, out var possibleStores))
+                    throw new NotFoundException($"Flower with Code {flowerOrder.Code} not found");
 
-                var matchingStore = possibleStores.FirstOrDefault(f => f.FlowerLong == flower.Long);
+                var matchingStore = possibleStores.FirstOrDefault(f => f.FlowerLong == flowerOrder.Long);
                 if (matchingStore == null)
-                    throw new NotFoundException($"Flower with Code {flower.Code} and Long {flower.Long} not found in the store.");
-
-                if (matchingStore.Count < flower.Count)
-                    throw new NotFoundException($"Insufficient count for flower with Code {flower.Code} and Long {flower.Long}.");
-
-                if (dto.IsBought)
-                    matchingStore.RemainedCount = matchingStore.RemainedCount - flower.Count;
-
-                matchingStore.Count = matchingStore.Count - flower.Count;
-
-                flowerOrderModels.Add(new FlowerOrderModel
                 {
-                    Count = flower.Count,
-                    OrderId = orderModel.Entity.Id,
-                    FlowerStoreId = matchingStore.Id,
-                });
+                    throw new NotFoundException($"Flower with Code {flowerOrder.Code} and Long {flowerOrder.Long} not found in the store.");
+                }
+                else
+                {
+                    if (matchingStore.Count < flowerOrder.Count)
+                        throw new NotFoundException($"Insufficient count for flower with Code {flowerOrder.Code} and Long {flowerOrder.Long}.");
+
+                    if (dto.IsBought)
+                        matchingStore.RemainedCount -= flowerOrder.Count;
+
+                    matchingStore.Count -= flowerOrder.Count;
+
+                    flowerOrderModels.Add(new FlowerOrderModel
+                    {
+                        Count = flowerOrder.Count,
+                        OrderId = orderModel.Entity.Id,
+                        FlowerStoreId = matchingStore.Id,
+                    });
+                }
+
             }
+
             await context.FlowerOrder.AddRangeAsync(flowerOrderModels);
 
             await dbRepo.SaveChangesAsync();
@@ -98,6 +108,12 @@ public class OrderRepo : IOrderRepo
             throw;
         }
     }
+    public async Task UpdateOrderStatusAsync(long orderId, DateTime boughtDate)
+       => await context.Order.Where(o => o.Id == orderId && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsBought, true)
+       .SetProperty(o => o.BoughtDate, boughtDate));
+
+    public async Task RemoveAsync(long id)
+       => await context.Order.Where(o => o.Id == id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsValid, false));
 
     public string GetBillNumber(long id)
     {
