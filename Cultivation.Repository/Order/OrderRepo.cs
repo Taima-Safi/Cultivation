@@ -100,12 +100,12 @@ public class OrderRepo : IOrderRepo
             if (failedFlowerLongs.Count != 0)
             {
                 var x = string.Join(", ", failedFlowerLongs.Select(c => $"Code: {c.Item1}, Long: {c.Item2} "));
-                errorMessages.Add($"Flower with Code and Long not found in the store {x}");
+                errorMessages.Add($"Aşağıdaki kodlu ve nolu çiçekler depoda yoktur\n {x}");
             }
             if (failedFlowerCount.Count != 0)
             {
                 var x = string.Join(", ", failedFlowerCount.Select(c => $"Code: {c.Item1}, Stored Count: {c.Item2}, Ordered Count: {c.Item3} "));
-                errorMessages.Add($"Insufficient count for flower with Code and Long {x}");
+                errorMessages.Add($"Insufficient count for flower with Code and Long\n {x}");
             }
             if (errorMessages.Count > 0)
                 throw new NotFoundException(string.Join(" | ", errorMessages));
