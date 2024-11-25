@@ -48,8 +48,6 @@ public class OrderRepo : IOrderRepo
             dto.Number = GetBillNumber(order.Id);
             order.Number = dto.Number;
 
-            List<FlowerOrderModel> flowerOrderModels = [];
-
             //foreach(var x in flowerStoreModel)
             //{
             //    foreach (var flower in dto.FlowerOrders)
@@ -66,7 +64,9 @@ public class OrderRepo : IOrderRepo
             //        });
             //    }
             //}
-            List<Tuple<string, double>> faildFlowerLongs = [];
+            List<FlowerOrderModel> flowerOrderModels = new();
+            List<Tuple<string, double>> failedFlowerLongs = new();
+            List<Tuple<string, int, int>> failedFlowerCount = new();
             foreach (var flowerOrder in dto.FlowerOrders)
             {
                 if (!dicFlowerStoreModel.TryGetValue(flowerOrder.Code, out var possibleStores))
@@ -75,13 +75,14 @@ public class OrderRepo : IOrderRepo
                 var matchingStore = possibleStores.FirstOrDefault(f => f.FlowerLong == flowerOrder.Long);
                 if (matchingStore == null)
                 {
-                    throw new NotFoundException($"Flower with Code {flowerOrder.Code} and Long {flowerOrder.Long} not found in the store.");
+                    failedFlowerLongs.Add(new Tuple<string, double>(flowerOrder.Code, flowerOrder.Long));
+                }
+                else if (matchingStore.Count < flowerOrder.Count)
+                {
+                    failedFlowerCount.Add(new Tuple<string, int, int>(flowerOrder.Code, matchingStore.Count, flowerOrder.Count));
                 }
                 else
                 {
-                    if (matchingStore.Count < flowerOrder.Count)
-                        throw new NotFoundException($"Insufficient count for flower with Code {flowerOrder.Code} and Long {flowerOrder.Long}.");
-
                     if (dto.IsBought)
                         matchingStore.RemainedCount -= flowerOrder.Count;
 
@@ -94,8 +95,20 @@ public class OrderRepo : IOrderRepo
                         FlowerStoreId = matchingStore.Id,
                     });
                 }
-
             }
+            var errorMessages = new List<string>();
+            if (failedFlowerLongs.Count != 0)
+            {
+                var x = string.Join(", ", failedFlowerLongs.Select(c => $"Code: {c.Item1}, Long: {c.Item2} "));
+                errorMessages.Add($"Flower with Code and Long not found in the store {x}");
+            }
+            if (failedFlowerCount.Count != 0)
+            {
+                var x = string.Join(", ", failedFlowerCount.Select(c => $"Code: {c.Item1}, Stored Count: {c.Item2}, Ordered Count: {c.Item3} "));
+                errorMessages.Add($"Insufficient count for flower with Code and Long {x}");
+            }
+            if (errorMessages.Count > 0)
+                throw new NotFoundException(string.Join(" | ", errorMessages));
 
             await context.FlowerOrder.AddRangeAsync(flowerOrderModels);
 
