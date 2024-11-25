@@ -11,6 +11,7 @@ public interface IFlowerRepo
     Task<bool> CheckIfExistAsync(long id);
     Task<CommonResponseDto<List<FlowerDto>>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
         , string cuttingColorCode, string worker, double? Long, int pageSize, int pageNum);
+    Task<CommonResponseDto<List<FlowerStoreDto>>> GetAllFlowerStoreAsync(string code, int pageSize, int pageNum);
     Task<FlowerDto> GetByIdAsync(long id);
     Task<double> GetFlowerAverageInDonumAsync();
     Task<List<FlowerStoreModel>> GetFlowerStoreModelsByCodesAsync(List<string> cods);

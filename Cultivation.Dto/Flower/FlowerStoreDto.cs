@@ -1,12 +1,12 @@
-﻿namespace Cultivation.Database.Model;
+﻿namespace Cultivation.Dto.Flower;
 
-public class FlowerStoreModel : BaseModel
+public class FlowerStoreDto
 {
+    public long Id { get; set; }
     public int Count { get; set; } // before send order
     public string Code { get; set; }
     public int TotalCount { get; set; } // const
     public int RemainedCount { get; set; }// after send order
     public double FlowerLong { get; set; }
-    public ICollection<FlowerOrderModel> FlowerOrders { get; set; }
-
+    //public List<FlowerOrderModel> FlowerOrders { get; set; } =[];
 }

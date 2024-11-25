@@ -72,8 +72,13 @@ public class OrderRepo : IOrderRepo
                 if (matchingStore == null)
                     throw new NotFoundException($"Flower with Code {flower.Code} and Long {flower.Long} not found in the store.");
 
-                if (matchingStore.RemainedCount < flower.Count)
+                if (matchingStore.Count < flower.Count)
                     throw new NotFoundException($"Insufficient count for flower with Code {flower.Code} and Long {flower.Long}.");
+
+                if (dto.IsBought)
+                    matchingStore.RemainedCount = matchingStore.RemainedCount - flower.Count;
+
+                matchingStore.Count = matchingStore.Count - flower.Count;
 
                 flowerOrderModels.Add(new FlowerOrderModel
                 {

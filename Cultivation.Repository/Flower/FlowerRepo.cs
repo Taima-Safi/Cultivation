@@ -57,12 +57,14 @@ public class FlowerRepo : IFlowerRepo
                         Code = cuttingCode,
                         Count = item.Count,
                         FlowerLong = item.Long,
+                        TotalCount = item.Count,
                         RemainedCount = item.Count,
                     });
                 }
                 else
                 {
                     existingStore.Count = existingStore.Count + item.Count;
+                    existingStore.TotalCount = existingStore.TotalCount + item.Count;
                     existingStore.RemainedCount = existingStore.RemainedCount + item.Count;
 
                     // await context.FlowerStore.Where(s =>  s.Code == cuttingCode && s.FlowerLong == item.Long && s.IsValid).ExecuteUpdateAsync(s =>
@@ -222,6 +224,27 @@ public class FlowerRepo : IFlowerRepo
     public async Task<bool> CheckIfExistAsync(long id)
      => await context.Flower.Where(c => c.Id == id && c.IsValid).AnyAsync();
 
+    public async Task<CommonResponseDto<List<FlowerStoreDto>>> GetAllFlowerStoreAsync(string code, int pageSize, int pageNum)
+    {
+        var x = await context.FlowerStore.Where(c => (string.IsNullOrEmpty(code) || c.Code.Contains(code)) && c.IsValid)
+        .Skip(pageNum * pageSize)
+        .Take(pageSize)
+        .Select(c => new FlowerStoreDto
+        {
+            Id = c.Id,
+            Code = c.Code,
+            Count = c.Count,
+            FlowerLong = c.FlowerLong,
+            TotalCount = c.TotalCount,
+            RemainedCount = c.RemainedCount
+        }).ToListAsync();
+
+        bool hasNextPage = false;
+        if (x.Count > 0)
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
+
+        return new CommonResponseDto<List<FlowerStoreDto>>(x, hasNextPage);
+    }
     public async Task<List<FlowerStoreModel>> GetFlowerStoreModelsByCodesAsync(List<string> codes)
         => await context.FlowerStore.Where(fs => codes.Contains(fs.Code) && fs.IsValid).ToListAsync();
 }
