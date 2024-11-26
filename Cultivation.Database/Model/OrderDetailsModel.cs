@@ -1,6 +1,6 @@
 ﻿namespace Cultivation.Database.Model;
 
-public class FlowerOrderModel : BaseModel
+public class OrderDetailModel : BaseModel
 {
     public int Count { get; set; }
 

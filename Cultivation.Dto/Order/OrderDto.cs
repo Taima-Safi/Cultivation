@@ -9,5 +9,5 @@ public class OrderDto
     public bool IsBought { get; set; }
 
     public ClientDto Client { get; set; }
-    //public List<FlowerOrderModel> FlowerOrders { get; set; }
+    public List<OrderDetailDto> OrderDetails { get; set; } = [];
 }

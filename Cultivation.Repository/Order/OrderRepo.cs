@@ -1,10 +1,14 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.Client;
 using Cultivation.Dto.Order;
+using Cultivation.Repository.Base;
 using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Flower;
+using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Cultivation.Repository.Order;
 
@@ -13,12 +17,14 @@ public class OrderRepo : IOrderRepo
     private readonly CultivationDbContext context;
     private readonly IFlowerRepo flowerRepo;
     private readonly IDbRepo dbRepo;
+    private readonly IBaseRepo<OrderModel> baseRepo;
 
-    public OrderRepo(CultivationDbContext context, IFlowerRepo flowerRepo, IDbRepo dbRepo)
+    public OrderRepo(CultivationDbContext context, IFlowerRepo flowerRepo, IDbRepo dbRepo, IBaseRepo<OrderModel> baseRepo)
     {
         this.context = context;
         this.flowerRepo = flowerRepo;
         this.dbRepo = dbRepo;
+        this.baseRepo = baseRepo;
     }
     public async Task AddAsync(OrderFormDto dto)
     {
@@ -27,7 +33,7 @@ public class OrderRepo : IOrderRepo
         try
         {
             // var flowerModels = await flowerRepo.GetModelsByIdsAsync(dto.FlowerOrders.Select(f => f.FlowerId).ToList());
-            var flowerStoreModel = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.FlowerOrders.Select(f => f.Code).ToList());
+            var flowerStoreModel = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.OrderDetails.Select(f => f.Code).ToList());
 
             var dicFlowerStoreModel = flowerStoreModel.GroupBy(f => f.Code).ToDictionary(x => x.Key, x => x.ToList());
 
@@ -64,10 +70,10 @@ public class OrderRepo : IOrderRepo
             //        });
             //    }
             //}
-            List<FlowerOrderModel> flowerOrderModels = new();
+            List<OrderDetailModel> flowerOrderModels = new();
             List<Tuple<string, double>> failedFlowerLongs = new();
             List<Tuple<string, int, int>> failedFlowerCount = new();
-            foreach (var flowerOrder in dto.FlowerOrders)
+            foreach (var flowerOrder in dto.OrderDetails)
             {
                 if (!dicFlowerStoreModel.TryGetValue(flowerOrder.Code, out var possibleStores))
                     throw new NotFoundException($"Flower with Code {flowerOrder.Code} not found");
@@ -88,7 +94,7 @@ public class OrderRepo : IOrderRepo
 
                     matchingStore.Count -= flowerOrder.Count;
 
-                    flowerOrderModels.Add(new FlowerOrderModel
+                    flowerOrderModels.Add(new OrderDetailModel
                     {
                         Count = flowerOrder.Count,
                         OrderId = orderModel.Entity.Id,
@@ -110,7 +116,7 @@ public class OrderRepo : IOrderRepo
             if (errorMessages.Count > 0)
                 throw new NotFoundException(string.Join(" | ", errorMessages));
 
-            await context.FlowerOrder.AddRangeAsync(flowerOrderModels);
+            await context.OrderDetail.AddRangeAsync(flowerOrderModels);
 
             await dbRepo.SaveChangesAsync();
             await dbRepo.CommitTransactionAsync();
@@ -120,6 +126,40 @@ public class OrderRepo : IOrderRepo
             await dbRepo.RollbackTransactionAsync();
             throw;
         }
+    }
+    public async Task<CommonResponseDto<List<OrderDto>>> GetAllAsync(bool isBought, DateTime? from, DateTime? to, int pageSize, int pageNum)
+    {
+        Expression<Func<OrderModel, bool>> expression = o =>
+        isBought ? ((!from.HasValue || o.BoughtDate >= from) && (!to.HasValue || o.BoughtDate >= to))
+        : ((!from.HasValue || o.OrderDate >= from) && (!to.HasValue || o.OrderDate >= to))
+        && o.IsValid;
+
+        var x = await context.Order.Where(expression)
+            .Skip(pageNum * pageSize)
+            .Take(pageSize).Select(o => new OrderDto
+            {
+                Id = o.Id,
+                IsBought = isBought,
+                Number = o.Number,
+                Client = new ClientDto
+                {
+                    Id = o.Client.Id,
+                    Name = o.Client.Name,
+                    IsLocal = o.Client.IsLocal
+                },
+                OrderDetails = o.OrderDetails.Select(od => new OrderDetailDto
+                {
+                    Count = od.Count,
+                    Code = od.FlowerStore.Code,
+                    Long = od.FlowerStore.FlowerLong
+                }).ToList()
+            }).ToListAsync();
+
+        bool hasNextPage = false;
+        if (x.Count > 0)
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(expression, pageSize, pageNum);
+
+        return new CommonResponseDto<List<OrderDto>>(x, hasNextPage);
     }
     public async Task UpdateOrderStatusAsync(long orderId, DateTime boughtDate)
        => await context.Order.Where(o => o.Id == orderId && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsBought, true)

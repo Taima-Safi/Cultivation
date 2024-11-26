@@ -20,6 +20,12 @@ public class OrderController : ControllerBase
         await orderRepo.AddAsync(dto);
         return Ok();
     }
+    [HttpGet]
+    public async Task<IActionResult> GetAll(bool isBought, DateTime? from, DateTime? to, int pageSize = 10, int pageNum = 0)
+    {
+        var result = await orderRepo.GetAllAsync(isBought, from, to, pageSize, pageNum);
+        return Ok(result);
+    }
     [HttpPost]
     public async Task<IActionResult> UpdateOrderStatus(long orderId, DateTime boughtDate)
     {

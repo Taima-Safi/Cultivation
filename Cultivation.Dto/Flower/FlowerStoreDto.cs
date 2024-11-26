@@ -8,5 +8,5 @@ public class FlowerStoreDto
     public int TotalCount { get; set; } // const
     public int RemainedCount { get; set; }// after send order
     public double FlowerLong { get; set; }
-    //public List<FlowerOrderModel> FlowerOrders { get; set; } =[];
+    //public List<OrderDetailModel> OrderDetails { get; set; } =[];
 }

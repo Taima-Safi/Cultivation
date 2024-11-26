@@ -9,5 +9,5 @@ public class OrderModel : BaseModel
 
     public long ClientId { get; set; }
     public ClientModel Client { get; set; }
-    public ICollection<FlowerOrderModel> FlowerOrders { get; set; }
+    public ICollection<OrderDetailModel> OrderDetails { get; set; }
 }

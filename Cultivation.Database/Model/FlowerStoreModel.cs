@@ -7,6 +7,6 @@ public class FlowerStoreModel : BaseModel
     public int TotalCount { get; set; } // const
     public int RemainedCount { get; set; }// after send order
     public double FlowerLong { get; set; }
-    public ICollection<FlowerOrderModel> FlowerOrders { get; set; }
+    public ICollection<OrderDetailModel> OrderDetails { get; set; }
 
 }

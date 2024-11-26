@@ -26,7 +26,7 @@ public class CultivationDbContext : DbContext
     public DbSet<InsecticideLandModel> InsecticideLand { get; set; }
     public DbSet<OrderModel> Order { get; set; }
     public DbSet<ClientModel> Client { get; set; }
-    public DbSet<FlowerOrderModel> FlowerOrder { get; set; }
+    public DbSet<OrderDetailModel> OrderDetail { get; set; }
     public DbSet<FlowerStoreModel> FlowerStore { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
