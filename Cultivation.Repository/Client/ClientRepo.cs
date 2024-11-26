@@ -55,17 +55,23 @@ public class ClientRepo : IClientRepo
         return new CommonResponseDto<List<ClientDto>>(x, hasNextPage);
     }
 
-    public async Task UpdateAsync(long id, string phone, string codePhone, string name)
+    public async Task UpdateAsync(long id, ClientFormDto dto)
     {
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Client not found..");
 
-        await context.Client.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Name, name)
-        .SetProperty(c => c.PhoneNumber, phone).SetProperty(c => c.CodePhoneNumber, codePhone));
+        await context.Client.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Name, dto.Name)
+        .SetProperty(c => c.IsLocal, dto.IsLocal).SetProperty(c => c.PhoneNumber, dto.PhoneNumber)
+        .SetProperty(c => c.CodePhoneNumber, dto.CodePhoneNumber));
     }
 
     public async Task RemoveAsync(long id)
-     => await context.Client.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Client not found..");
+
+        await context.Client.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.IsValid, false));
+    }
     public async Task<bool> CheckIfExistAsync(long id)
      => await context.Client.Where(c => c.Id == id && c.IsValid).AnyAsync();
 }

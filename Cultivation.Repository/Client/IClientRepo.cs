@@ -9,5 +9,5 @@ public interface IClientRepo
     Task<bool> CheckIfExistAsync(long id);
     Task<CommonResponseDto<List<ClientDto>>> GetAllAsync(bool? isLocal, string name, int pageSize, int pageNum);
     Task RemoveAsync(long id);
-    Task UpdateAsync(long id, string phone, string codePhone, string name);
+    Task UpdateAsync(long id, ClientFormDto dto);
 }

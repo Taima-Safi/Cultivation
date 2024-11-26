@@ -141,6 +141,8 @@ public class OrderRepo : IOrderRepo
                 Id = o.Id,
                 IsBought = isBought,
                 Number = o.Number,
+                OrderDate = o.OrderDate,
+                BoughtDate = o.BoughtDate,
                 Client = new ClientDto
                 {
                     Id = o.Client.Id,
@@ -162,12 +164,32 @@ public class OrderRepo : IOrderRepo
         return new CommonResponseDto<List<OrderDto>>(x, hasNextPage);
     }
     public async Task UpdateOrderStatusAsync(long orderId, DateTime boughtDate)
-       => await context.Order.Where(o => o.Id == orderId && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsBought, true)
+    {
+        if (!await CheckIfExistAsync(orderId))
+            throw new NotFoundException("order not found..");
+
+        await context.Order.Where(o => o.Id == orderId && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsBought, true)
        .SetProperty(o => o.BoughtDate, boughtDate));
+    }
+    public async Task UpdateAsync(UpdateOrderDto dto)
+    {
+        if (!await CheckIfExistAsync(dto.Id))
+            throw new NotFoundException("order not found..");
 
+        await context.Order.Where(o => o.Id == dto.Id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.ClientId, dto.ClientId)
+       .SetProperty(o => o.OrderDate, dto.OrderDate));
+    }
+    //Update orderDetails
     public async Task RemoveAsync(long id)
-       => await context.Order.Where(o => o.Id == id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsValid, false));
+    {
+        if (!await CheckIfExistAsync(id))
+            throw new NotFoundException("Order not found..");
 
+        await context.Order.Where(o => o.Id == id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsValid, false));
+    }
+
+    public async Task<bool> CheckIfExistAsync(long id)
+ => await context.Order.Where(c => c.Id == id && c.IsValid).AnyAsync();
     public string GetBillNumber(long id)
     {
         string newString = id.ToString();

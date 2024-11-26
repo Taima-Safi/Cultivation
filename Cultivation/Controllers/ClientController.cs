@@ -27,9 +27,9 @@ public class ClientController : ControllerBase
         return Ok(clients);
     }
     [HttpPost]
-    public async Task<IActionResult> Update(long id, string phone, string codePhone, string name)
+    public async Task<IActionResult> Update(long id, ClientFormDto dto)
     {
-        await clientRepo.UpdateAsync(id, phone, codePhone, name);
+        await clientRepo.UpdateAsync(id, dto);
         return Ok();
     }
     [HttpDelete]
