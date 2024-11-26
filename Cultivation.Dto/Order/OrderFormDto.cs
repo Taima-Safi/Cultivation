@@ -8,5 +8,5 @@ public class OrderFormDto
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
     public DateTime? BoughtDate { get; set; }
 
-    public List<OrderDetailDto> OrderDetails { get; set; } = [];
+    public List<FlowerOrderDetailDto> FlowerOrderDetails { get; set; } = [];
 }

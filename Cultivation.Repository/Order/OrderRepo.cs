@@ -33,7 +33,7 @@ public class OrderRepo : IOrderRepo
         try
         {
             // var flowerModels = await flowerRepo.GetModelsByIdsAsync(dto.FlowerOrders.Select(f => f.FlowerId).ToList());
-            var flowerStoreModel = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.OrderDetails.Select(f => f.Code).ToList());
+            var flowerStoreModel = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.FlowerOrderDetails.Select(f => f.Code).ToList());
 
             var dicFlowerStoreModel = flowerStoreModel.GroupBy(f => f.Code).ToDictionary(x => x.Key, x => x.ToList());
 
@@ -73,7 +73,7 @@ public class OrderRepo : IOrderRepo
             List<OrderDetailModel> flowerOrderModels = new();
             List<Tuple<string, double>> failedFlowerLongs = new();
             List<Tuple<string, int, int>> failedFlowerCount = new();
-            foreach (var flowerOrder in dto.OrderDetails)
+            foreach (var flowerOrder in dto.FlowerOrderDetails)
             {
                 if (!dicFlowerStoreModel.TryGetValue(flowerOrder.Code, out var possibleStores))
                     throw new NotFoundException($"Flower with Code {flowerOrder.Code} not found");
