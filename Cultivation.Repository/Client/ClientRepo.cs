@@ -4,6 +4,7 @@ using Cultivation.Dto.Client;
 using Cultivation.Repository.Base;
 using FourthPro.Dto.Common;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Cultivation.Repository.Client;
 
@@ -31,22 +32,24 @@ public class ClientRepo : IClientRepo
     }
     public async Task<CommonResponseDto<List<ClientDto>>> GetAllAsync(bool? isLocal, string name, int pageSize, int pageNum)
     {
-        var x = await context.Client.Where(c => (string.IsNullOrEmpty(name) || c.Name.Contains(name))
+        Expression<Func<ClientModel, bool>> expression = c => (string.IsNullOrEmpty(name) || c.Name.Contains(name))
         && (!isLocal.HasValue || c.IsLocal == isLocal)
-        && c.IsValid)
-            .Skip(pageNum * pageSize)
-            .Take(pageSize).Select(c => new ClientDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                IsLocal = c.IsLocal,
-                PhoneNumber = c.PhoneNumber,
-                CodePhoneNumber = c.CodePhoneNumber
-            }).ToListAsync();
+        && c.IsValid;
+
+        var x = await context.Client.Where(expression)
+                    .Skip(pageNum * pageSize)
+                    .Take(pageSize).Select(c => new ClientDto
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        IsLocal = c.IsLocal,
+                        PhoneNumber = c.PhoneNumber,
+                        CodePhoneNumber = c.CodePhoneNumber
+                    }).ToListAsync();
 
         bool hasNextPage = false;
         if (x.Count > 0)
-            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(fl => fl.IsValid, pageSize, pageNum);
+            hasNextPage = await baseRepo.CheckIfHasNextPageAsync(expression, pageSize, pageNum);
 
         return new CommonResponseDto<List<ClientDto>>(x, hasNextPage);
     }
