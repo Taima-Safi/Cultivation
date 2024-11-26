@@ -1,6 +1,7 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Client;
+using Cultivation.Dto.Flower;
 using Cultivation.Dto.Order;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.DataBase;
@@ -151,9 +152,14 @@ public class OrderRepo : IOrderRepo
                 },
                 OrderDetails = o.OrderDetails.Select(od => new OrderDetailDto
                 {
+                    Id = od.Id,
                     Count = od.Count,
-                    Code = od.FlowerStore.Code,
-                    Long = od.FlowerStore.FlowerLong
+                    FlowerStore = new FlowerStoreDto
+                    {
+                        Id = od.FlowerStore.Id,
+                        Code = od.FlowerStore.Code,
+                        FlowerLong = od.FlowerStore.FlowerLong,
+                    }
                 }).ToList()
             }).ToListAsync();
 
