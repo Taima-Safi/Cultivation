@@ -26,4 +26,16 @@ public class ClientController : ControllerBase
         var clients = await clientRepo.GetAllAsync(isLocal, name, pageSize, pageNum);
         return Ok(clients);
     }
+    [HttpPost]
+    public async Task<IActionResult> Update(long id, string phone, string codePhone, string name)
+    {
+        await clientRepo.UpdateAsync(id, phone, codePhone, name);
+        return Ok();
+    }
+    [HttpDelete]
+    public async Task<IActionResult> Remove(long id)
+    {
+        await clientRepo.RemoveAsync(id);
+        return Ok();
+    }
 }
