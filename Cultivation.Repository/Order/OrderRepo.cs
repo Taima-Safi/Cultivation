@@ -34,9 +34,9 @@ public class OrderRepo : IOrderRepo
         try
         {
             // var flowerModels = await flowerRepo.GetModelsByIdsAsync(dto.FlowerOrders.Select(f => f.FlowerId).ToList());
-            var flowerStoreModel = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.FlowerOrderDetails.Select(f => f.Code).ToList());
+            var flowerStoreModels = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.FlowerOrderDetails.Select(f => f.Code).ToList());
 
-            var dicFlowerStoreModel = flowerStoreModel.GroupBy(f => f.Code).ToDictionary(x => x.Key, x => x.ToList());
+            var dicFlowerStoreModel = flowerStoreModels.GroupBy(f => f.Code).ToDictionary(x => x.Key, x => x.ToList());
 
             //  var failingOrders = dto.FlowerOrders.Where(fo => !flowerStoreModel.Any(f => f.Code == fo.Code && f.FlowerLong == fo.Long)).Select(x => x.Code).ToList();
             //  if (failingOrders.Any())
@@ -174,6 +174,40 @@ public class OrderRepo : IOrderRepo
         if (!await CheckIfExistAsync(orderId))
             throw new NotFoundException("order not found..");
 
+        var orderModel = await GetModelByIdAsync(orderId);
+        var storeModels = await flowerRepo.GetStoreModelsByIdsAsync(orderModel.OrderDetails.Select(od => od.FlowerStoreId).ToList());
+
+        var storeAvailability = storeModels.ToDictionary(store => store.Code, store => store.RemainedCount + store.ExternalCount);
+        var missingFlowers = new List<(string StoreCode, int MissingCount)>();
+        foreach (var detail in orderModel.OrderDetails)
+        {
+            if (storeAvailability.TryGetValue(detail.FlowerStore.Code, out var availableCount))
+            {
+                if (availableCount < detail.Count)
+                {
+                    int missingCount = detail.Count - availableCount;
+                    missingFlowers.Add((detail.FlowerStore.Code, missingCount));
+                }
+                else
+                {
+
+                }
+            }
+        }
+        //    foreach (var store in storeModels)
+        //{
+        //    if (detail.FlowerStore.Code == store.Code)
+        //        if ((store.RemainedCount + store.ExternalCount) < detail.Count)
+        //            throw new NotFoundException($"You have {detail.Count - (store.RemainedCount + store.ExternalCount)} flower not found ");
+        //}
+        if (missingFlowers.Any())
+        {
+            var missingDetails = missingFlowers
+                .Select(m => $"Store {m.StoreCode}: {m.MissingCount} flowers not found")
+                .ToList();
+
+            throw new NotFoundException(string.Join(", ", missingDetails));
+        }
         await context.Order.Where(o => o.Id == orderId && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsBought, true)
        .SetProperty(o => o.BoughtDate, boughtDate));
     }
@@ -193,6 +227,9 @@ public class OrderRepo : IOrderRepo
 
         await context.Order.Where(o => o.Id == id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsValid, false));
     }
+
+    public async Task<OrderModel> GetModelByIdAsync(long id)
+     => await context.Order.Where(o => o.Id == id && o.IsValid).Include(o => o.OrderDetails).FirstOrDefaultAsync();
 
     public async Task<bool> CheckIfExistAsync(long id)
  => await context.Order.Where(c => c.Id == id && c.IsValid).AnyAsync();

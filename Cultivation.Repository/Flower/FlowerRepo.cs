@@ -204,6 +204,8 @@ public class FlowerRepo : IFlowerRepo
 
     public async Task<List<FlowerModel>> GetModelsByIdsAsync(List<long> ids)
         => await context.Flower.Where(f => ids.Contains(f.Id) && f.IsValid).ToListAsync();
+    public async Task<FlowerModel> GetModelByIdAsync(long id)
+        => await context.Flower.Where(f => f.Id == id && f.IsValid).FirstOrDefaultAsync();
     public async Task UpdateAsync(long id, string note, string worker, double Long, int count, DateTime date)
     {
         if (!await CheckIfExistAsync(id))
@@ -247,4 +249,29 @@ public class FlowerRepo : IFlowerRepo
     }
     public async Task<List<FlowerStoreModel>> GetFlowerStoreModelsByCodesAsync(List<string> codes)
         => await context.FlowerStore.Where(fs => codes.Contains(fs.Code) && fs.IsValid).ToListAsync();
+
+
+    public async Task<List<FlowerStoreModel>> GetStoreModelsByIdsAsync(List<long> ids)
+        => await context.FlowerStore.Where(f => ids.Contains(f.Id) && f.IsValid).ToListAsync();
+
+    public async Task AddTrashedFlowerAsync(long flowerStoreId, int trashedCount)
+    {
+        if (!await context.FlowerStore.Where(fs => fs.Id == flowerStoreId && fs.IsValid).AnyAsync())
+            throw new NotFoundException("This code not found in store");
+
+        var storeModel = await context.FlowerStore.FirstOrDefaultAsync(fs => fs.Id == flowerStoreId && fs.IsValid);
+
+        if (storeModel.RemainedCount < trashedCount)
+            throw new NotFoundException("This code of flower count not found in store");
+
+        storeModel.Count -= trashedCount;
+        storeModel.RemainedCount -= trashedCount;
+        storeModel.TrashedCount += trashedCount;
+        await context.SaveChangesAsync();
+    }
+
+    public async Task AddExternalFlower(long flowerStoreId, int count)
+    {
+        await context.FlowerStore.
+    }
 }

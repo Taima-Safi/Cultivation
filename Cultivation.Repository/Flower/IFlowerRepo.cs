@@ -15,7 +15,10 @@ public interface IFlowerRepo
     Task<FlowerDto> GetByIdAsync(long id);
     Task<double> GetFlowerAverageInDonumAsync();
     Task<List<FlowerStoreModel>> GetFlowerStoreModelsByCodesAsync(List<string> cods);
+    Task<FlowerModel> GetModelByIdAsync(long id);
     Task<List<FlowerModel>> GetModelsByIdsAsync(List<long> ids);
+    Task<FlowerStoreModel> GetStoreModelByIdAsync(long id);
+    Task<List<FlowerStoreModel>> GetStoreModelsByIdsAsync(List<long> ids);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, string note, string worker, double Long, int count, DateTime date);
 }
