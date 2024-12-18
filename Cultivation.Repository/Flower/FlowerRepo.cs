@@ -238,7 +238,9 @@ public class FlowerRepo : IFlowerRepo
             Count = c.Count,
             FlowerLong = c.FlowerLong,
             TotalCount = c.TotalCount,
-            RemainedCount = c.RemainedCount
+            TrashedCount = c.TrashedCount,
+            RemainedCount = c.RemainedCount,
+            ExternalCount = c.ExternalCount
         }).ToListAsync();
 
         bool hasNextPage = false;
@@ -272,6 +274,6 @@ public class FlowerRepo : IFlowerRepo
 
     public async Task AddExternalFlower(long flowerStoreId, int count)
     {
-        await context.FlowerStore.
+        await context.FlowerStore.Where(c => c.Id == flowerStoreId && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.ExternalCount, count));
     }
 }

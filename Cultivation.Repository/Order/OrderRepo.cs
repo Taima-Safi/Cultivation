@@ -77,7 +77,7 @@ public class OrderRepo : IOrderRepo
             foreach (var flowerOrder in dto.FlowerOrderDetails)
             {
                 if (!dicFlowerStoreModel.TryGetValue(flowerOrder.Code, out var possibleStores))
-                    throw new NotFoundException($"Flower with Code {flowerOrder.Code} not found");
+                    throw new NotFoundException($"Flower with Code {flowerOrder.Code} not found"); //TODO :should choice if he want <Continue>
 
                 var matchingStore = possibleStores.FirstOrDefault(f => f.FlowerLong == flowerOrder.Long);
                 if (matchingStore == null)
