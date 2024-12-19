@@ -24,7 +24,7 @@ builder.Services.AddTransient<ErrorHandlerMiddleware>();
 builder.Services.AddHttpContextAccessor();
 
 #region Database
-var connectionString = builder.Configuration.GetConnectionString(builder.Environment.IsProduction() ? "MonsterServer" : "MonsterServer");
+var connectionString = builder.Configuration.GetConnectionString(builder.Environment.IsProduction() ? "StagingMonsterServer" : "StagingMonsterServer");
 builder.Services.AddDbContext<CultivationDbContext>(options =>
 {
     options.UseSqlServer(connectionString/*, ServerVersion.AutoDetect(connectionString)*/);
