@@ -33,14 +33,9 @@ public class OrderRepo : IOrderRepo
         await dbRepo.BeginTransactionAsync();
         try
         {
-            // var flowerModels = await flowerRepo.GetModelsByIdsAsync(dto.FlowerOrders.Select(f => f.FlowerId).ToList());
             var flowerStoreModels = await flowerRepo.GetFlowerStoreModelsByCodesAsync(dto.FlowerOrderDetails.Select(f => f.Code).ToList());
 
             var dicFlowerStoreModel = flowerStoreModels.GroupBy(f => f.Code).ToDictionary(x => x.Key, x => x.ToList());
-
-            //  var failingOrders = dto.FlowerOrders.Where(fo => !flowerStoreModel.Any(f => f.Code == fo.Code && f.FlowerLong == fo.Long)).Select(x => x.Code).ToList();
-            //  if (failingOrders.Any())
-            //      throw new NotFoundException($"The following flowers do not have sufficient remaining count: {string.Join(", ", failingOrders)}");
 
             var order = new OrderModel
             {
@@ -55,22 +50,6 @@ public class OrderRepo : IOrderRepo
             dto.Number = GetBillNumber(order.Id);
             order.Number = dto.Number;
 
-            //foreach(var x in flowerStoreModel)
-            //{
-            //    foreach (var flower in dto.FlowerOrders)
-            //    {
-            //        if(x.Code == flower.Code && x.FlowerLong == flower.Long)
-            //            if (x.Count < flower.Count)
-            //                throw new NotFoundException("Count not found");
-
-            //        flowerOrderModels.Add(new FlowerOrderModel
-            //        {
-            //            Count = flower.Count,
-            //            FlowerStoreId = x.Id,
-            //            OrderId = orderModel.Entity.Id,
-            //        });
-            //    }
-            //}
             List<OrderDetailModel> flowerOrderModels = new();
             List<Tuple<string, double>> failedFlowerLongs = new();
             List<Tuple<string, int, int>> failedFlowerCount = new();
@@ -177,7 +156,7 @@ public class OrderRepo : IOrderRepo
         var orderModel = await GetModelByIdAsync(orderId);
         var storeModels = await flowerRepo.GetStoreModelsByIdsAsync(orderModel.OrderDetails.Select(od => od.FlowerStoreId).ToList());
 
-        var storeAvailability = storeModels.ToDictionary(store => store.Code, store => store.RemainedCount + store.ExternalCount);
+        var storeAvailability = storeModels.ToDictionary(store => store.Code, store => store.RemainedCount /*+ store.ExternalCount*/);
         var missingFlowers = new List<(string StoreCode, int MissingCount)>();
         foreach (var detail in orderModel.OrderDetails)
         {
@@ -188,18 +167,8 @@ public class OrderRepo : IOrderRepo
                     int missingCount = detail.Count - availableCount;
                     missingFlowers.Add((detail.FlowerStore.Code, missingCount));
                 }
-                else
-                {
-
-                }
             }
         }
-        //    foreach (var store in storeModels)
-        //{
-        //    if (detail.FlowerStore.Code == store.Code)
-        //        if ((store.RemainedCount + store.ExternalCount) < detail.Count)
-        //            throw new NotFoundException($"You have {detail.Count - (store.RemainedCount + store.ExternalCount)} flower not found ");
-        //}
         if (missingFlowers.Any())
         {
             var missingDetails = missingFlowers
@@ -222,10 +191,28 @@ public class OrderRepo : IOrderRepo
     //Update orderDetails
     public async Task RemoveAsync(long id)
     {
-        if (!await CheckIfExistAsync(id))
-            throw new NotFoundException("Order not found..");
+        await dbRepo.BeginTransactionAsync();
+        try
+        {
+            if (!await CheckIfExistAsync(id))
+                throw new NotFoundException("Order not found..");
+            var orderModel = await context.Order.Include(o => o.OrderDetails).ThenInclude(od => od.Order)
+                .Include(o => o.OrderDetails).ThenInclude(od => od.FlowerStore).Where(o => o.Id == id && o.IsValid).FirstOrDefaultAsync();
 
-        await context.Order.Where(o => o.Id == id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsValid, false));
+            if (!orderModel.IsBought)
+                foreach (var detail in orderModel.OrderDetails)
+                    detail.FlowerStore.Count += detail.Count;
+
+            await context.Order.Where(o => o.Id == id && o.IsValid).ExecuteUpdateAsync(o => o.SetProperty(o => o.IsValid, false));
+
+            await dbRepo.SaveChangesAsync();
+            await dbRepo.CommitTransactionAsync();
+        }
+        catch (Exception)
+        {
+            await dbRepo.RollbackTransactionAsync();
+            throw;
+        }
     }
 
     public async Task<OrderModel> GetModelByIdAsync(long id)

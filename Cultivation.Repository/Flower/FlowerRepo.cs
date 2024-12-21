@@ -226,6 +226,7 @@ public class FlowerRepo : IFlowerRepo
     public async Task<bool> CheckIfExistAsync(long id)
      => await context.Flower.Where(c => c.Id == id && c.IsValid).AnyAsync();
 
+    #region FlowerStore
     public async Task<CommonResponseDto<List<FlowerStoreDto>>> GetAllFlowerStoreAsync(string code, int pageSize, int pageNum)
     {
         var x = await context.FlowerStore.Where(c => (string.IsNullOrEmpty(code) || c.Code.Contains(code)) && c.IsValid)
@@ -256,12 +257,22 @@ public class FlowerRepo : IFlowerRepo
     public async Task<List<FlowerStoreModel>> GetStoreModelsByIdsAsync(List<long> ids)
         => await context.FlowerStore.Where(f => ids.Contains(f.Id) && f.IsValid).ToListAsync();
 
+    public async Task AddExternalFlower(long flowerStoreId, int count)
+    {
+        var model = await context.FlowerStore.Where(c => c.Id == flowerStoreId && c.IsValid).FirstOrDefaultAsync();
+
+        model.Count += count;
+        model.RemainedCount += count;
+        model.ExternalCount += count;
+
+        await context.SaveChangesAsync();
+    }
+
     public async Task AddTrashedFlowerAsync(long flowerStoreId, int trashedCount)
     {
-        if (!await context.FlowerStore.Where(fs => fs.Id == flowerStoreId && fs.IsValid).AnyAsync())
-            throw new NotFoundException("This code not found in store");
-
         var storeModel = await context.FlowerStore.FirstOrDefaultAsync(fs => fs.Id == flowerStoreId && fs.IsValid);
+        if (storeModel == null)
+            throw new NotFoundException("This code not found in store");
 
         if (storeModel.RemainedCount < trashedCount)
             throw new NotFoundException("This code of flower count not found in store");
@@ -272,8 +283,5 @@ public class FlowerRepo : IFlowerRepo
         await context.SaveChangesAsync();
     }
 
-    public async Task AddExternalFlower(long flowerStoreId, int count)
-    {
-        await context.FlowerStore.Where(c => c.Id == flowerStoreId && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.ExternalCount, count));
-    }
+    #endregion
 }

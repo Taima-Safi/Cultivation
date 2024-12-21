@@ -33,6 +33,12 @@ public class OrderController : ControllerBase
         return Ok();
     }
     [HttpPost]
+    public async Task<IActionResult> UpdateOrderStatus(UpdateOrderDto dto)
+    {
+        await orderRepo.UpdateAsync(dto);
+        return Ok();
+    }
+    [HttpPost]
     public async Task<IActionResult> Remove(long id)
     {
         await orderRepo.RemoveAsync(id);
