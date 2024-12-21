@@ -1,8 +1,10 @@
 using Cultivation.Database.Context;
 using Cultivation.Repository.Base;
+using Cultivation.Repository.Client;
 using Cultivation.Repository.Color;
 using Cultivation.Repository.Cutting;
 using Cultivation.Repository.CuttingLand;
+using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Repository.FertilizerLand;
 using Cultivation.Repository.File;
@@ -10,6 +12,7 @@ using Cultivation.Repository.Flower;
 using Cultivation.Repository.Insecticide;
 using Cultivation.Repository.InsecticideLand;
 using Cultivation.Repository.Land;
+using Cultivation.Repository.Order;
 using FourthPro.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -51,6 +54,9 @@ builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
 builder.Services.AddScoped<IInsecticideRepo, InsecticideRepo>();
 builder.Services.AddScoped<IInsecticideLandRepo, InsecticideLandRepo>();
 builder.Services.AddScoped<IFlowerRepo, FlowerRepo>();
+builder.Services.AddScoped<IOrderRepo, OrderRepo>();
+builder.Services.AddScoped<IClientRepo, ClientRepo>();
+builder.Services.AddScoped<IDbRepo, DbRepo>();
 builder.Services.AddScoped(typeof(IFileRepo<>), typeof(FileRepo<>));
 builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
 

@@ -52,4 +52,13 @@ public class FlowerController : ControllerBase
         await flowerRepo.RemoveAsync(id);
         return Ok();
     }
+    #region FlowerStore
+
+    [HttpGet]
+    public async Task<IActionResult> GetAllFlowerStore(string code, int pageSize = 10, int pageNum = 0)
+    {
+        var result = await flowerRepo.GetAllFlowerStoreAsync(code, pageSize, pageNum);
+        return Ok(result);
+    }
+    #endregion
 }

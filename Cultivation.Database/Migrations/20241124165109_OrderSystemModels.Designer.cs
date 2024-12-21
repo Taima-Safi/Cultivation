@@ -4,6 +4,7 @@ using Cultivation.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cultivation.Database.Migrations
 {
     [DbContext(typeof(CultivationDbContext))]
-    partial class CultivationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241124165109_OrderSystemModels")]
+    partial class OrderSystemModels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,6 +301,9 @@ namespace Cultivation.Database.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RemainedCount")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
@@ -311,7 +317,7 @@ namespace Cultivation.Database.Migrations
                     b.ToTable("Flower");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.FlowerStoreModel", b =>
+            modelBuilder.Entity("Cultivation.Database.Model.FlowerOrderModel", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -319,33 +325,27 @@ namespace Cultivation.Database.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("FlowerLong")
-                        .HasColumnType("float");
+                    b.Property<long>("FlowerId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsValid")
                         .HasColumnType("bit");
 
-                    b.Property<int>("RemainedCount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalCount")
-                        .HasColumnType("int");
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("FlowerStore");
+                    b.ToTable("FlowerOrder");
                 });
 
             modelBuilder.Entity("Cultivation.Database.Model.InsecticideLandModel", b =>
@@ -462,41 +462,6 @@ namespace Cultivation.Database.Migrations
                     b.ToTable("Land");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.OrderDetailModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("FlowerStoreId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<long>("OrderId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlowerStoreId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderDetail");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.OrderModel", b =>
                 {
                     b.Property<long>("Id")
@@ -504,9 +469,6 @@ namespace Cultivation.Database.Migrations
                         .HasColumnType("bigint");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime?>("BoughtDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<long>("ClientId")
                         .HasColumnType("bigint");
@@ -523,9 +485,6 @@ namespace Cultivation.Database.Migrations
                     b.Property<string>("Number")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
 
@@ -534,6 +493,36 @@ namespace Cultivation.Database.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("Order");
+                });
+
+            modelBuilder.Entity("FlowerModelFlowerOrderModel", b =>
+                {
+                    b.Property<long>("FlowerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("FlowerOrdersId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("FlowerId", "FlowerOrdersId");
+
+                    b.HasIndex("FlowerOrdersId");
+
+                    b.ToTable("FlowerModelFlowerOrderModel");
+                });
+
+            modelBuilder.Entity("FlowerOrderModelOrderModel", b =>
+                {
+                    b.Property<long>("FlowerOrdersId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("OrderId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("FlowerOrdersId", "OrderId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("FlowerOrderModelOrderModel");
                 });
 
             modelBuilder.Entity("Cultivation.Database.Model.CuttingColorModel", b =>
@@ -632,25 +621,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.OrderDetailModel", b =>
-                {
-                    b.HasOne("Cultivation.Database.Model.FlowerStoreModel", "FlowerStore")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("FlowerStoreId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Cultivation.Database.Model.OrderModel", "Order")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FlowerStore");
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.OrderModel", b =>
                 {
                     b.HasOne("Cultivation.Database.Model.ClientModel", "Client")
@@ -660,6 +630,36 @@ namespace Cultivation.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("FlowerModelFlowerOrderModel", b =>
+                {
+                    b.HasOne("Cultivation.Database.Model.FlowerModel", null)
+                        .WithMany()
+                        .HasForeignKey("FlowerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cultivation.Database.Model.FlowerOrderModel", null)
+                        .WithMany()
+                        .HasForeignKey("FlowerOrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FlowerOrderModelOrderModel", b =>
+                {
+                    b.HasOne("Cultivation.Database.Model.FlowerOrderModel", null)
+                        .WithMany()
+                        .HasForeignKey("FlowerOrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Cultivation.Database.Model.OrderModel", null)
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Cultivation.Database.Model.ClientModel", b =>
@@ -696,11 +696,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("FertilizerLands");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.FlowerStoreModel", b =>
-                {
-                    b.Navigation("OrderDetails");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.InsecticideModel", b =>
                 {
                     b.Navigation("InsecticideLands");
@@ -711,11 +706,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("Children");
 
                     b.Navigation("CuttingLands");
-                });
-
-            modelBuilder.Entity("Cultivation.Database.Model.OrderModel", b =>
-                {
-                    b.Navigation("OrderDetails");
                 });
 #pragma warning restore 612, 618
         }
