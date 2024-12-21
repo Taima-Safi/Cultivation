@@ -328,6 +328,9 @@ namespace Cultivation.Database.Migrations
                     b.Property<DateTime>("CreateDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ExternalCount")
+                        .HasColumnType("int");
+
                     b.Property<double>("FlowerLong")
                         .HasColumnType("float");
 
@@ -338,6 +341,9 @@ namespace Cultivation.Database.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("TotalCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrashedCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdateDate")

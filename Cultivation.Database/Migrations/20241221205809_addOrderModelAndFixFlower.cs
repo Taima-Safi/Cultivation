@@ -1,23 +1,15 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Cultivation.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class OrderSystemModels : Migration
+    public partial class addOrderModelAndFixFlower : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "RemainedCount",
-                table: "Flower",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.CreateTable(
                 name: "Client",
                 columns: table => new
@@ -38,21 +30,25 @@ namespace Cultivation.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FlowerOrder",
+                name: "FlowerStore",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Count = table.Column<int>(type: "int", nullable: false),
-                    FlowerId = table.Column<long>(type: "bigint", nullable: false),
-                    OrderId = table.Column<long>(type: "bigint", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TotalCount = table.Column<int>(type: "int", nullable: false),
+                    RemainedCount = table.Column<int>(type: "int", nullable: false),
+                    FlowerLong = table.Column<double>(type: "float", nullable: false),
+                    TrashedCount = table.Column<int>(type: "int", nullable: false),
+                    ExternalCount = table.Column<int>(type: "int", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsValid = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FlowerOrder", x => x.Id);
+                    table.PrimaryKey("PK_FlowerStore", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -63,6 +59,8 @@ namespace Cultivation.Database.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Number = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsBought = table.Column<bool>(type: "bit", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BoughtDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ClientId = table.Column<long>(type: "bigint", nullable: false),
                     CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -80,47 +78,29 @@ namespace Cultivation.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FlowerModelFlowerOrderModel",
+                name: "OrderDetail",
                 columns: table => new
                 {
-                    FlowerId = table.Column<long>(type: "bigint", nullable: false),
-                    FlowerOrdersId = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Count = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<long>(type: "bigint", nullable: false),
+                    FlowerStoreId = table.Column<long>(type: "bigint", nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsValid = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FlowerModelFlowerOrderModel", x => new { x.FlowerId, x.FlowerOrdersId });
+                    table.PrimaryKey("PK_OrderDetail", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_FlowerModelFlowerOrderModel_FlowerOrder_FlowerOrdersId",
-                        column: x => x.FlowerOrdersId,
-                        principalTable: "FlowerOrder",
+                        name: "FK_OrderDetail_FlowerStore_FlowerStoreId",
+                        column: x => x.FlowerStoreId,
+                        principalTable: "FlowerStore",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_FlowerModelFlowerOrderModel_Flower_FlowerId",
-                        column: x => x.FlowerId,
-                        principalTable: "Flower",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "FlowerOrderModelOrderModel",
-                columns: table => new
-                {
-                    FlowerOrdersId = table.Column<long>(type: "bigint", nullable: false),
-                    OrderId = table.Column<long>(type: "bigint", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FlowerOrderModelOrderModel", x => new { x.FlowerOrdersId, x.OrderId });
-                    table.ForeignKey(
-                        name: "FK_FlowerOrderModelOrderModel_FlowerOrder_FlowerOrdersId",
-                        column: x => x.FlowerOrdersId,
-                        principalTable: "FlowerOrder",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_FlowerOrderModelOrderModel_Order_OrderId",
+                        name: "FK_OrderDetail_Order_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Order",
                         principalColumn: "Id",
@@ -128,42 +108,35 @@ namespace Cultivation.Database.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_FlowerModelFlowerOrderModel_FlowerOrdersId",
-                table: "FlowerModelFlowerOrderModel",
-                column: "FlowerOrdersId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FlowerOrderModelOrderModel_OrderId",
-                table: "FlowerOrderModelOrderModel",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Order_ClientId",
                 table: "Order",
                 column: "ClientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderDetail_FlowerStoreId",
+                table: "OrderDetail",
+                column: "FlowerStoreId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderDetail_OrderId",
+                table: "OrderDetail",
+                column: "OrderId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "FlowerModelFlowerOrderModel");
+                name: "OrderDetail");
 
             migrationBuilder.DropTable(
-                name: "FlowerOrderModelOrderModel");
-
-            migrationBuilder.DropTable(
-                name: "FlowerOrder");
+                name: "FlowerStore");
 
             migrationBuilder.DropTable(
                 name: "Order");
 
             migrationBuilder.DropTable(
                 name: "Client");
-
-            migrationBuilder.DropColumn(
-                name: "RemainedCount",
-                table: "Flower");
         }
     }
 }
