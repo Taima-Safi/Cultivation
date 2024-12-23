@@ -83,6 +83,7 @@ public class FertilizerRepo : IFertilizerRepo
             Description = f.Description,
         }).FirstOrDefaultAsync();
     }
+
     public async Task UpdateAsync(long id, FertilizerFormDto dto)
     {
         if (!await CheckIfExistAsync(id))

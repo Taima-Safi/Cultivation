@@ -19,4 +19,6 @@ public class BaseRepo<T> : IBaseRepo<T> where T : class
         ++pageNum;
         return totalRecords > (pageSize * pageNum);
     }
+    public async Task<bool> CheckIfExistAsync(Expression<Func<T, bool>> expression)
+    => await Entity.Where(expression).AnyAsync();
 }

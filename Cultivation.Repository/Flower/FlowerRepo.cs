@@ -31,6 +31,7 @@ public class FlowerRepo : IFlowerRepo
         await dbRepo.BeginTransactionAsync();
         try
         {
+            //ToDo: send from front cuttingColor code with landId
             var cuttingCode = await context.CuttingLand.Where(c => c.Id == cuttingLandId && c.IsValid)
                 .Select(c => c.CuttingColor.Code).FirstOrDefaultAsync()
                 ?? throw new NotFoundException("Cuttings not found.");

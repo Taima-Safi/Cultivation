@@ -1,5 +1,7 @@
 ﻿using Cultivation.Dto.Fertilizer;
 using Cultivation.Repository.Fertilizer;
+using Cultivation.Repository.FertilizerMix;
+using Cultivation.Shared.Enum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers;
@@ -9,10 +11,12 @@ namespace Cultivation.Controllers;
 public class FertilizerController : ControllerBase
 {
     private readonly IFertilizerRepo fertilizerRepo;
+    private readonly IFertilizerMixRepo mixRepo;
 
-    public FertilizerController(IFertilizerRepo fertilizerRepo)
+    public FertilizerController(IFertilizerRepo fertilizerRepo, IFertilizerMixRepo mixRepo)
     {
         this.fertilizerRepo = fertilizerRepo;
+        this.mixRepo = mixRepo;
     }
 
     [HttpPost]
@@ -45,4 +49,36 @@ public class FertilizerController : ControllerBase
         await fertilizerRepo.RemoveAsync(id);
         return Ok();
     }
+    #region Mix
+    [HttpPost]
+    public async Task<IActionResult> AddMix(FertilizerMixFormDto dto)
+    {
+        await mixRepo.AddAsync(dto);
+        return Ok();
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetAllMixes(string title, int pageSize = 10, int pageNum = 0)
+    {
+        var mixes = await mixRepo.GetAllAsync(title, pageSize, pageNum);
+        return Ok(mixes);
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetMixById(long id)
+    {
+        var mix = await mixRepo.GetByIdAsync(id);
+        return Ok(mix);
+    }
+    [HttpPost]
+    public async Task<IActionResult> UpdateMix(long id, string title, FertilizerType type)
+    {
+        await mixRepo.UpdateAsync(id, title, type);
+        return Ok();
+    }
+    [HttpDelete]
+    public async Task<IActionResult> RemoveMix(long id)
+    {
+        await mixRepo.RemoveAsync(id);
+        return Ok();
+    }
+    #endregion
 }
