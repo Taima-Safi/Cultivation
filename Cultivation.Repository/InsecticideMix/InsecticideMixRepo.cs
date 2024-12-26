@@ -43,6 +43,7 @@ public class InsecticideMixRepo : IInsecticideMixRepo
 
             await context.InsecticideMixDetail.AddRangeAsync(dto.Mixes.Select(md => new InsecticideMixDetailModel
             {
+                Liter = md.Liter,
                 Quantity = md.Quantity,
                 InsecticideId = md.InsecticideId,
                 InsecticideMixId = mixModel.Entity.Id,
