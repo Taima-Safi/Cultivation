@@ -4,6 +4,7 @@ using Cultivation.Database.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Cultivation.Database.Migrations
 {
     [DbContext(typeof(CultivationDbContext))]
-    partial class CultivationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241229172610_FertilizerMixLand")]
+    partial class FertilizerMixLand
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -496,72 +499,6 @@ namespace Cultivation.Database.Migrations
                     b.ToTable("InsecticideLand");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideMixDetailModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("InsecticideId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("InsecticideMixId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<double>("Liter")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("Quantity")
-                        .HasColumnType("float");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InsecticideId");
-
-                    b.HasIndex("InsecticideMixId");
-
-                    b.ToTable("InsecticideMixDetail");
-                });
-
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideMixModel", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreateDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsValid")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InsecticideMix");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.InsecticideModel", b =>
                 {
                     b.Property<long>("Id")
@@ -831,25 +768,6 @@ namespace Cultivation.Database.Migrations
                     b.Navigation("Insecticide");
                 });
 
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideMixDetailModel", b =>
-                {
-                    b.HasOne("Cultivation.Database.Model.InsecticideModel", "Insecticide")
-                        .WithMany()
-                        .HasForeignKey("InsecticideId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Cultivation.Database.Model.InsecticideMixModel", "InsecticideMix")
-                        .WithMany("InsecticideMixDetails")
-                        .HasForeignKey("InsecticideMixId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Insecticide");
-
-                    b.Navigation("InsecticideMix");
-                });
-
             modelBuilder.Entity("Cultivation.Database.Model.LandModel", b =>
                 {
                     b.HasOne("Cultivation.Database.Model.LandModel", "Parent")
@@ -935,11 +853,6 @@ namespace Cultivation.Database.Migrations
             modelBuilder.Entity("Cultivation.Database.Model.FlowerStoreModel", b =>
                 {
                     b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("Cultivation.Database.Model.InsecticideMixModel", b =>
-                {
-                    b.Navigation("InsecticideMixDetails");
                 });
 
             modelBuilder.Entity("Cultivation.Database.Model.InsecticideModel", b =>

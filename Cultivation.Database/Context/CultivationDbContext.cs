@@ -32,6 +32,7 @@ public class CultivationDbContext : DbContext
     public DbSet<FertilizerMixDetailModel> FertilizerMixDetail { get; set; }
     public DbSet<InsecticideMixModel> InsecticideMix { get; set; }
     public DbSet<InsecticideMixDetailModel> InsecticideMixDetail { get; set; }
+    public DbSet<FertilizerMixLandModel> FertilizerMixLand { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

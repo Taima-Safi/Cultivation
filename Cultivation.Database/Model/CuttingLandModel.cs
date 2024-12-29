@@ -15,4 +15,5 @@ public class CuttingLandModel : BaseModel
     public ICollection<FlowerModel> Flowers { get; set; }
     public ICollection<FertilizerLandModel> FertilizerLands { get; set; }
     public ICollection<InsecticideLandModel> InsecticideLands { get; set; }
+    public ICollection<FertilizerMixLandModel> FertilizerMixLands { get; set; }
 }

@@ -1,6 +1,8 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.CuttingLand;
+using Cultivation.Dto.Fertilizer;
+using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.Land;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
@@ -60,7 +62,18 @@ public class LandRepo : ILandRepo
                 }).ToList(),
                 CuttingLands = l.CuttingLands.Select(l => new CuttingLandDto
                 {
-                    IsActive = l.IsActive
+                    IsActive = l.IsActive,
+                    FertilizerMixLands = l.FertilizerMixLands.Select(m => new FertilizerMixLandDto
+                    {
+                        Date = m.Date,
+                        FertilizerMix = new GetFertilizerMixDto
+                        {
+                            Id = m.FertilizerMix.Id,
+                            Type = m.FertilizerMix.Type,
+                            Title = m.FertilizerMix.Title,
+                            //MixDetails = 
+                        }
+                    }).ToList(),
                 }).ToList()
             }).ToListAsync();
         var parents = landModels.Where(l => !l.ParentId.HasValue).ToList();
