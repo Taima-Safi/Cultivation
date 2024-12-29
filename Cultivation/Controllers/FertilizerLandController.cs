@@ -87,7 +87,21 @@ public class FertilizerLandController : ControllerBase
         await fertilizerLandRepo.RemoveAsync(id);
         return Ok();
     }
+    #region MixLand
+    [HttpPost]
+    public async Task<IActionResult> AddMixLand(long mixId, long cuttingLandId)
+    {
+        await fertilizerLandRepo.AddMixLandAsync(mixId, cuttingLandId);
+        return Ok();
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetMixLands(long mixId, long cuttingLandId)
+    {
+        await fertilizerLandRepo.AddMixLandAsync(mixId, cuttingLandId);
+        return Ok();
+    }
 
+    #endregion
     //    private static (FormFile file, MemoryStream stream) ExportToExcel(ExportType type, string fileName, List<string> filters, List<FertilizerExportToExcelDto> dtos)
     //    {
     //        IWorkbook workbook = new XSSFWorkbook();

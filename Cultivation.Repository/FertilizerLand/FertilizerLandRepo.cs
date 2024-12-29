@@ -28,9 +28,11 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     private readonly ILandRepo landRepo;
     private readonly IFileRepo<FertilizerExportToExcelDto> fileRepo;
     private readonly IBaseRepo<FertilizerLandModel> baseRepo;
+    private readonly IBaseRepo<FertilizerMixModel> mixBaseRepo;
+    private readonly IBaseRepo<CuttingLandModel> cuttingLandBaseRepo;
 
     public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo,
-        ICuttingLandRepo cuttingLandRepo, IFileRepo<FertilizerExportToExcelDto> fileRepo)
+        ICuttingLandRepo cuttingLandRepo, IFileRepo<FertilizerExportToExcelDto> fileRepo, IBaseRepo<FertilizerMixModel> mixRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
@@ -38,6 +40,8 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         this.baseRepo = baseRepo;
         this.cuttingLandRepo = cuttingLandRepo;
         this.fileRepo = fileRepo;
+        this.mixBaseRepo = mixRepo;
+        this.cuttingLandBaseRepo = cuttingLandBaseRepo;
     }
 
     public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
@@ -321,4 +325,42 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
     public async Task<bool> CheckIfExistAsync(long id)
         => await context.FertilizerLand.Where(fl => fl.Id == id && fl.IsValid).AnyAsync();
+
+    #region MixLand
+
+    public async Task AddMixLandAsync(long mixId, long cuttingLandId)
+    {
+        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId))
+            throw new NotFoundException("mix not found..");
+
+        if (!await cuttingLandBaseRepo.CheckIfExistAsync(m => m.Id == cuttingLandId))
+            throw new NotFoundException("cutting land not found..");
+
+        await context.FertilizerMixLand.AddAsync(new FertilizerMixLandModel
+        {
+            Date = DateTime.UtcNow,
+            FertilizerMixId = mixId,
+            CuttingLandId = cuttingLandId
+        });
+        await context.SaveChangesAsync();
+    }
+    //public async Task<> GetMixLandsAsync()
+    //{
+    //    //var lands = await context.Land.Where(l => l.IsValid).ToListAsync();
+    //    var lands = await landRepo.GetAllAsync(null, null, false, true);
+    //    var mixLand = await context.FertilizerMixLand.Include(c => c.CuttingLand).Include(l => l.CuttingLand).ToListAsync();
+
+    //    var mixedLandIds = mixLand.Select(m => m.CuttingLand.LandId).ToList();
+    //    var mixedLands = lands.Where(l => mixLand.Any(m => m.CuttingLand.LandId == l.Id));
+
+    //    await context.Land.Where(m => m.IsValid).Select(cl => new LandDto
+    //    {
+    //        FertilizerMixLands = cl.FertilizerMixLands.Select(fml => new FertilizerMixLandDto
+    //        {
+
+    //        })
+    //    }).ToListAsync();
+    //    await context.SaveChangesAsync();
+    //}
+    #endregion
 }

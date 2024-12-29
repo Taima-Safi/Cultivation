@@ -30,6 +30,7 @@ public class CultivationDbContext : DbContext
     public DbSet<FlowerStoreModel> FlowerStore { get; set; }
     public DbSet<FertilizerMixModel> FertilizerMix { get; set; }
     public DbSet<FertilizerMixDetailModel> FertilizerMixDetail { get; set; }
+    public DbSet<FertilizerMixLandModel> FertilizerMixLand { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
