@@ -95,10 +95,10 @@ public class FertilizerLandController : ControllerBase
         return Ok();
     }
     [HttpGet]
-    public async Task<IActionResult> GetMixLands(long mixId, long cuttingLandId)
+    public async Task<IActionResult> GetMixLands(string landTitle, string mixTitle, DateTime mixedDate)
     {
-        await fertilizerLandRepo.AddMixLandAsync(mixId, cuttingLandId);
-        return Ok();
+        var result = await fertilizerLandRepo.GetMixLandsAsync(landTitle, mixTitle, mixedDate);
+        return Ok(result);
     }
 
     #endregion

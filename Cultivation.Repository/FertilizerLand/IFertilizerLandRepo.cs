@@ -18,6 +18,7 @@ public interface IFertilizerLandRepo
     Task<FertilizerLandDto> GetByIdAsync(long id);
     Task<CommonResponseDto<List<FertilizerLandModel>>> GetFertilizersLandAsync(long landId, DateTime? from, DateTime? to);
     Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? date);
+    Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime mixedDate);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, UpdateFertilizerLandDto dto);
 }

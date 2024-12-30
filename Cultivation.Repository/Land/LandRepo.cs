@@ -40,7 +40,7 @@ public class LandRepo : ILandRepo
         await context.SaveChangesAsync();
         return land.Entity.Id;
     }
-    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isNoneActive)
+    public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isNoneActive, bool forMix)
     {
         var landModels = await context.Land.Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
@@ -63,7 +63,7 @@ public class LandRepo : ILandRepo
                 CuttingLands = l.CuttingLands.Select(l => new CuttingLandDto
                 {
                     IsActive = l.IsActive,
-                    FertilizerMixLands = l.FertilizerMixLands.Select(m => new FertilizerMixLandDto
+                    FertilizerMixLands = l.FertilizerMixLands/*.Where(fml => fml.Date )*/.Select(m => new FertilizerMixLandDto
                     {
                         Date = m.Date,
                         FertilizerMix = new GetFertilizerMixDto
@@ -83,8 +83,12 @@ public class LandRepo : ILandRepo
         foreach (var parent in parents)
             result.Add(GetChildrenAsync(parent, landModels, resultWithoutChildren));
 
+        if (forMix) // to take grandFather && land has no children
+            return landModels.Where(l => l.ParentId == null || !l.Children.Any()).ToList();
+
         if (justChildren)
             return resultWithoutChildren.Where(l => !isNoneActive || (l.CuttingLands.All(cl => !cl.IsActive) || !l.CuttingLands.Any())).ToList();
+
         return result;
     }
 

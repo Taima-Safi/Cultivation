@@ -344,23 +344,14 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         });
         await context.SaveChangesAsync();
     }
-    //public async Task<> GetMixLandsAsync()
-    //{
-    //    //var lands = await context.Land.Where(l => l.IsValid).ToListAsync();
-    //    var lands = await landRepo.GetAllAsync(null, null, false, true);
-    //    var mixLand = await context.FertilizerMixLand.Include(c => c.CuttingLand).Include(l => l.CuttingLand).ToListAsync();
+    public async Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime mixedDate)
+    {
+        var mixedLands = await landRepo.GetAllAsync(landTitle, null, false, true, true);
 
-    //    var mixedLandIds = mixLand.Select(m => m.CuttingLand.LandId).ToList();
-    //    var mixedLands = lands.Where(l => mixLand.Any(m => m.CuttingLand.LandId == l.Id));
-
-    //    await context.Land.Where(m => m.IsValid).Select(cl => new LandDto
-    //    {
-    //        FertilizerMixLands = cl.FertilizerMixLands.Select(fml => new FertilizerMixLandDto
-    //        {
-
-    //        })
-    //    }).ToListAsync();
-    //    await context.SaveChangesAsync();
-    //}
+        var x = mixedLands.Where(m => m.CuttingLands.Any(m => m.FertilizerMixLands
+                                                        .Any(fm => (string.IsNullOrEmpty(mixTitle) || mixTitle.Contains(fm.FertilizerMix.Title))
+                                                                && fm.Date.Date == mixedDate.Date))).ToList();
+        return x;
+    }
     #endregion
 }
