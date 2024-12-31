@@ -40,6 +40,7 @@ public class FertilizerMixRepo : IFertilizerMixRepo
             {
                 Type = dto.Type,
                 Title = dto.Title,
+                Color = dto.Color,
             });
             await dbRepo.SaveChangesAsync();
 
@@ -73,6 +74,7 @@ public class FertilizerMixRepo : IFertilizerMixRepo
                 Id = f.Id,
                 Type = f.Type,
                 Title = f.Title,
+                Color = f.Color,
                 MixDetails = f.FertilizerMixDetails.Select(fm => new FertilizerMixDetailDto
                 {
                     Quantity = fm.Quantity,
@@ -103,6 +105,7 @@ public class FertilizerMixRepo : IFertilizerMixRepo
             Id = f.Id,
             Type = f.Type,
             Title = f.Title,
+            Color = f.Color,
             MixDetails = f.FertilizerMixDetails.Select(fm => new FertilizerMixDetailDto
             {
                 Quantity = fm.Quantity,
@@ -118,12 +121,12 @@ public class FertilizerMixRepo : IFertilizerMixRepo
         }).FirstOrDefaultAsync();
     }
 
-    public async Task UpdateAsync(long id, string title, FertilizerType type)
+    public async Task UpdateAsync(long id, string title, FertilizerType type, ColorType color)
     {
         if (!await baseRepo.CheckIfExistAsync(x => x.Id == id && x.IsValid))
             throw new NotFoundException("Mix not found..");
 
-        await context.FertilizerMix.Where(f => f.Id == id && f.IsValid).ExecuteUpdateAsync(f => f.SetProperty(f => f.Title, title).SetProperty(f => f.Type, type));
+        await context.FertilizerMix.Where(f => f.Id == id && f.IsValid).ExecuteUpdateAsync(f => f.SetProperty(f => f.Title, title).SetProperty(f => f.Type, type).SetProperty(f => f.Color, color));
     }
 
     public async Task RemoveAsync(long id)

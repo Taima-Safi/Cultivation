@@ -20,7 +20,7 @@ public class LandController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAll(string title, bool isActive, double? size, bool justChildren = false)
-        => Ok(await landRepo.GetAllAsync(title, size, justChildren, isActive));
+        => Ok(await landRepo.GetAllAsync(title, size, justChildren, isActive, false));
     [HttpGet]
     public async Task<IActionResult> GetById(long id)
         => Ok(await landRepo.GetByIdAsync(id));

@@ -10,5 +10,5 @@ public interface IFertilizerMixRepo
     Task<CommonResponseDto<List<GetFertilizerMixDto>>> GetAllAsync(string title, int pageSize, int pageNum);
     Task<GetFertilizerMixDto> GetByIdAsync(long id);
     Task RemoveAsync(long id);
-    Task UpdateAsync(long id, string title, FertilizerType type);
+    Task UpdateAsync(long id, string title, FertilizerType type, ColorType color);
 }

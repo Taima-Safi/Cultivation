@@ -69,9 +69,9 @@ public class FertilizerController : ControllerBase
         return Ok(mix);
     }
     [HttpPost]
-    public async Task<IActionResult> UpdateMix(long id, string title, FertilizerType type)
+    public async Task<IActionResult> UpdateMix(long id, string title, FertilizerType type, ColorType color)
     {
-        await mixRepo.UpdateAsync(id, title, type);
+        await mixRepo.UpdateAsync(id, title, type, color);
         return Ok();
     }
     [HttpDelete]
