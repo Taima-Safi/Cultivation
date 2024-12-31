@@ -353,7 +353,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                                                                 && fm.Date.Date == mixedDate.Date))).ToList();
         return x;
     }
-    public async Task RemoveColorMixLandsAsync(long mixLandId) //ToDo: 
-     => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.));
+    //public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
+    // => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.));
     #endregion
 }
