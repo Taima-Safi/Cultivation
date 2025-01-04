@@ -2,10 +2,11 @@
 
 public enum ColorType
 {
+    White,
     Red,
     Blue,
     Green,
     Yellow,
-    Gray,
-    Move
+    Purple,
+    Orange
 }
