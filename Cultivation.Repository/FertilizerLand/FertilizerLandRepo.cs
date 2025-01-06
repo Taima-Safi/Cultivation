@@ -348,10 +348,10 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     {
         var mixedLands = await landRepo.GetAllAsync(landTitle, null, false, true, true);
 
-        var x = mixedLands.Where(m => m.CuttingLands.Any(m => m.FertilizerMixLands
+        var x = mixedLands.Where(m => string.IsNullOrEmpty(mixTitle) || m.CuttingLands.Any(m => m.FertilizerMixLands
                                                         .Any(fm => (string.IsNullOrEmpty(mixTitle) || mixTitle.Contains(fm.FertilizerMix.Title))
                                                                 && fm.Date.Date == mixedDate.Date))).ToList();
-        return x;
+        return x.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList();
     }
     //public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
     // => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.));

@@ -62,6 +62,7 @@ public class LandRepo : ILandRepo
                 }).ToList(),
                 CuttingLands = l.CuttingLands.Select(l => new CuttingLandDto
                 {
+                    Id = l.Id,
                     IsActive = l.IsActive,
                     FertilizerMixLands = l.FertilizerMixLands/*.Where(fml => fml.Date )*/.Select(m => new FertilizerMixLandDto
                     {
@@ -79,19 +80,24 @@ public class LandRepo : ILandRepo
         var parents = landModels.Where(l => !l.ParentId.HasValue).ToList();
         var result = new List<LandDto>();
         List<LandDto> resultWithoutChildren = [];
+        List<LandDto> grandWithChild = [];
+        LandDto grand = new();
 
         foreach (var parent in parents)
-            result.Add(GetChildrenAsync(parent, landModels, resultWithoutChildren));
-
+        {
+            result.Add(GetChildrenAsync(parent, grand, landModels, resultWithoutChildren, grandWithChild));
+        }
+        //grandWithChild.AddRange(parents.Where(x => x.CuttingLands.Any(x => x.IsActive)));
+        //grandWithChild.AddRange(resultWithoutChildren.Where(x => grandWithChild.Any(v => v.Id != x.Id) && x.CuttingLands.Any(x => x.IsActive)));
         if (forMix) // to take grandFather && land has no children
-            return landModels.Where(l => l.ParentId == null || !l.Children.Any()).ToList();
+            return grandWithChild;
+        //return landModels.Where(l => l.ParentId == null || !l.Children.Any()).ToList();
 
         if (justChildren)
             return resultWithoutChildren.Where(l => !isNoneActive || (l.CuttingLands.All(cl => !cl.IsActive) || !l.CuttingLands.Any())).ToList();
 
         return result;
     }
-
     public async Task<LandDto> GetByIdAsync(long id)
     {
         if (!await CheckIfExistAsync(id))
@@ -118,29 +124,43 @@ public class LandRepo : ILandRepo
 
         var parent = landModels.Where(l => l.Id == id).FirstOrDefault();
 
-        var result = GetChildrenAsync(parent, landModels, new());
+        var result = GetChildrenAsync(parent, new(), landModels, new(), new());
         return result;
     }
-    //public async Task<List<LandDto>> GetLandRecursion()
-    //{
-    //    var models = await GetAllAsync();
-    //    var parents = models.Where(l => !l.ParentId.HasValue).ToList();
-    //    var result = new List<LandDto>();
-    //    foreach (var parent in parents)
-    //    {
-    //        result.Add(GetChildrenAsync(parent, models));
-    //    }
-    //    return result;
-    //}
-    private LandDto GetChildrenAsync(LandDto parent, List<LandDto> allLands, List<LandDto> resultWithoutChildren)
+    private LandDto GetChildrenAsync(LandDto parent, LandDto grand, List<LandDto> allLands, List<LandDto> resultWithoutChildren, List<LandDto> grandWithChild)
     {
         var children = allLands.Where(a => a.ParentId == parent.Id).ToList();
+
+        if (parent.ParentId == null)
+        {
+            //grand = parent;
+            grand = new LandDto
+            {
+                Id = parent.Id,
+                Location = parent.Location,
+                ParentId = parent.ParentId,
+                Size = parent.Size,
+                Title = parent.Title,
+                Children = [],
+                CuttingLands = parent.CuttingLands.Where(x => x.IsActive).ToList(),
+            };
+            //grand.Children.Clear();
+            grandWithChild.Add(grand);
+        }
+
         if (children.Count == 0)
             resultWithoutChildren.Add(parent);
+
         parent.Children = children;
+
         foreach (var child in children)
         {
-            GetChildrenAsync(child, allLands, resultWithoutChildren);
+            if (child.Children.Count == 0 && child.CuttingLands.Any(x => x.IsActive))
+            {
+                var grandx = grandWithChild.LastOrDefault(x => x.ParentId == null);
+                grandx.Children.Add(child);
+            }
+            GetChildrenAsync(child, grand, allLands, resultWithoutChildren, grandWithChild);
         }
 
         return parent;
