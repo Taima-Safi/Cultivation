@@ -351,7 +351,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         var x = mixedLands.Where(m => string.IsNullOrEmpty(mixTitle) || m.CuttingLands.Any(m => m.FertilizerMixLands
                                                         .Any(fm => (string.IsNullOrEmpty(mixTitle) || mixTitle.Contains(fm.FertilizerMix.Title))
                                                                 && fm.Date.Date == mixedDate.Date))).ToList();
-        return x.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList();
+        return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
     }
     //public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
     // => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.));
