@@ -71,8 +71,8 @@ public class LandRepo : ILandRepo
                         {
                             Id = m.FertilizerMix.Id,
                             Type = m.FertilizerMix.Type,
+                            Color = m.FertilizerMix.Color,
                             Title = m.FertilizerMix.Title,
-                            //MixDetails = 
                         }
                     }).ToList(),
                 }).ToList()
