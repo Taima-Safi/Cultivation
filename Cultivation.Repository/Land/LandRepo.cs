@@ -42,7 +42,9 @@ public class LandRepo : ILandRepo
     }
     public async Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isNoneActive, bool forMix)
     {
-        var landModels = await context.Land.Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
+        var landModels = await context.Land.Include(l => l.CuttingLands)
+            .ThenInclude(cl => cl.FertilizerMixLands).ThenInclude(fml => fml.FertilizerMix)
+            .Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
         && l.IsValid)
             .Select(l => new LandDto

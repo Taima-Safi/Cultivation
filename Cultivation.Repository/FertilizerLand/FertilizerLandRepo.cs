@@ -344,16 +344,30 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         });
         await context.SaveChangesAsync();
     }
-    public async Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime mixedDate)
+    public async Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime? mixedDate)
     {
         var mixedLands = await landRepo.GetAllAsync(landTitle, null, false, true, true);
 
-        var x = mixedLands.Where(m => string.IsNullOrEmpty(mixTitle) || m.CuttingLands.Any(m => m.FertilizerMixLands
-                                                        .Any(fm => (string.IsNullOrEmpty(mixTitle) || mixTitle.Contains(fm.FertilizerMix.Title))
-                                                                && fm.Date.Date == mixedDate.Date))).ToList();
-        return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
+        //ToDo: fix filter..
+        var x = mixedLands.Where(l => string.IsNullOrEmpty(mixTitle) || l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.FertilizerMixLands
+                                                        .Any(fml => fml.FertilizerMix.Title.Contains(mixTitle)
+                                                               && (!mixedDate.HasValue || fml.Date.Date == mixedDate?.Date))))).ToList();
+        var x1 = mixedLands.Where(l =>
+    string.IsNullOrEmpty(mixTitle) ||
+    l.CuttingLands.Any(cl => cl.FertilizerMixLands.Any(fml =>
+        fml.FertilizerMix.Title.Contains(mixTitle) &&
+        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
+    )) ||
+    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.FertilizerMixLands.Any(fml =>
+        fml.FertilizerMix.Title.Contains(mixTitle) &&
+        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
+    )))
+).ToList();
+
+        return x1;
+        // return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
     }
-    //public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
-    // => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.));
+    public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
+     => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.IsValid, false));
     #endregion
 }
