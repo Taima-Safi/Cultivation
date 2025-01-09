@@ -59,4 +59,26 @@ public class InsecticideLandController : ControllerBase
         await insecticideLandRepo.RemoveAsync(id);
         return Ok();
     }
+    #region MixLand
+    [HttpPost]
+    public async Task<IActionResult> AddMixLand(long mixId, long cuttingLandId)
+    {
+        await insecticideLandRepo.AddMixLandAsync(mixId, cuttingLandId);
+        return Ok();
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetMixLands(string landTitle, string mixTitle, DateTime? mixedDate)
+    {
+        var result = await insecticideLandRepo.GetMixLandsAsync(landTitle, mixTitle, mixedDate);
+        return Ok(result);
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> RemoveMixLands(long mixLandId)
+    {
+        await insecticideLandRepo.RemoveMixLandsAsync(mixLandId);
+        return Ok();
+    }
+
+    #endregion
 }

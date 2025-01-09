@@ -4,6 +4,7 @@ using Cultivation.Dto.Insecticide;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Insecticide;
+using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
@@ -38,6 +39,7 @@ public class InsecticideMixRepo : IInsecticideMixRepo
             {
                 Note = dto.Note,
                 Title = dto.Title,
+                Color = dto.Color,
             });
             await dbRepo.SaveChangesAsync();
 
@@ -73,6 +75,7 @@ public class InsecticideMixRepo : IInsecticideMixRepo
                 Id = i.Id,
                 Note = i.Note,
                 Title = i.Title,
+                Color = i.Color,
                 MixDetails = i.InsecticideMixDetails.Select(im => new InsecticideMixDetailDto
                 {
                     Quantity = im.Quantity,
@@ -104,6 +107,7 @@ public class InsecticideMixRepo : IInsecticideMixRepo
             Id = f.Id,
             Note = f.Note,
             Title = f.Title,
+            Color = f.Color,
             MixDetails = f.InsecticideMixDetails.Select(im => new InsecticideMixDetailDto
             {
                 Quantity = im.Quantity,
@@ -120,12 +124,13 @@ public class InsecticideMixRepo : IInsecticideMixRepo
         }).FirstOrDefaultAsync();
     }
 
-    public async Task UpdateAsync(long id, string title, string note)
+    public async Task UpdateAsync(long id, string title, string note, ColorType color)
     {
         if (!await baseRepo.CheckIfExistAsync(x => x.Id == id && x.IsValid))
             throw new NotFoundException("Mix not found..");
 
-        await context.InsecticideMix.Where(f => f.Id == id && f.IsValid).ExecuteUpdateAsync(f => f.SetProperty(f => f.Title, title).SetProperty(f => f.Note, note));
+        await context.InsecticideMix.Where(f => f.Id == id && f.IsValid).ExecuteUpdateAsync(f => f.SetProperty(f => f.Title, title)
+        .SetProperty(f => f.Color, color).SetProperty(f => f.Note, note));
     }
 
     public async Task RemoveAsync(long id)

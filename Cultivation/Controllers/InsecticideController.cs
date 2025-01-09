@@ -69,9 +69,9 @@ public class InsecticideController : ControllerBase
         return Ok(mix);
     }
     [HttpPost]
-    public async Task<IActionResult> UpdateMix(long id, string title, string note)
+    public async Task<IActionResult> UpdateMix(long id, string title, string note, ColorType color)
     {
-        await mixRepo.UpdateAsync(id, title, note);
+        await mixRepo.UpdateAsync(id, title, note, color);
         return Ok();
     }
     [HttpDelete]

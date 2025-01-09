@@ -1,5 +1,6 @@
 ﻿
 using Cultivation.Dto.Insecticide;
+using Cultivation.Shared.Enum;
 using FourthPro.Dto.Common;
 
 namespace Cultivation.Repository.InsecticideMix;
@@ -10,5 +11,5 @@ public interface IInsecticideMixRepo
     Task<CommonResponseDto<List<GetInsecticideMixDto>>> GetAllAsync(string title, string note, int pageSize, int pageNum);
     Task<GetInsecticideMixDto> GetByIdAsync(long id);
     Task RemoveAsync(long id);
-    Task UpdateAsync(long id, string title, string note);
+    Task UpdateAsync(long id, string title, string note, ColorType color);
 }

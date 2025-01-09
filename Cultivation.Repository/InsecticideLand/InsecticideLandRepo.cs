@@ -27,9 +27,12 @@ public class InsecticideLandRepo : IInsecticideLandRepo
     private readonly IFileRepo<InsecticideExportToExcelDto> fileRepo;
     private readonly IInsecticideRepo insecticideRepo;
     private readonly IBaseRepo<InsecticideLandModel> baseRepo;
+    private readonly IBaseRepo<InsecticideMixLandModel> mixBaseRepo;
+    private readonly IBaseRepo<CuttingLandModel> cuttingLandBaseRepo;
+
 
     public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo, ILandRepo landRepo, IInsecticideRepo insecticideRepo,
-        ICuttingLandRepo cuttingLandRepo, IFileRepo<InsecticideExportToExcelDto> fileRepo)
+        ICuttingLandRepo cuttingLandRepo, IFileRepo<InsecticideExportToExcelDto> fileRepo, IBaseRepo<InsecticideMixLandModel> mixBaseRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo)
     {
         this.context = context;
         this.baseRepo = baseRepo;
@@ -37,6 +40,8 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         this.fileRepo = fileRepo;
         this.insecticideRepo = insecticideRepo;
         this.cuttingLandRepo = cuttingLandRepo;
+        this.mixBaseRepo = mixBaseRepo;
+        this.cuttingLandBaseRepo = cuttingLandBaseRepo;
     }
     public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
     {
@@ -261,4 +266,49 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 
     public async Task<bool> CheckIfExistAsync(long id)
         => await context.InsecticideLand.AnyAsync(il => il.Id == id && il.IsValid);
+
+    #region MixLand
+
+    public async Task AddMixLandAsync(long mixId, long cuttingLandId)
+    {
+        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId))
+            throw new NotFoundException("mix not found..");
+
+        if (!await cuttingLandBaseRepo.CheckIfExistAsync(m => m.Id == cuttingLandId))
+            throw new NotFoundException("cutting land not found..");
+
+        await context.InsecticideMixLand.AddAsync(new InsecticideMixLandModel
+        {
+            Date = DateTime.UtcNow,
+            InsecticideMixId = mixId,
+            CuttingLandId = cuttingLandId
+        });
+        await context.SaveChangesAsync();
+    }
+    public async Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime? mixedDate)
+    {
+        var mixedLands = await landRepo.GetAllAsync(landTitle, null, false, true, true);
+
+        //ToDo: fix filter..
+        var x = mixedLands.Where(l => string.IsNullOrEmpty(mixTitle) || l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands
+                                                        .Any(fml => fml.InsecticideMix.Title.Contains(mixTitle)
+                                                               && (!mixedDate.HasValue || fml.Date.Date == mixedDate?.Date))))).ToList();
+        var x1 = mixedLands.Where(l =>
+    string.IsNullOrEmpty(mixTitle) ||
+    l.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
+        fml.InsecticideMix.Title.Contains(mixTitle) &&
+        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
+    )) ||
+    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
+        fml.InsecticideMix.Title.Contains(mixTitle) &&
+        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
+    )))
+).ToList();
+
+        return x;
+        // return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
+    }
+    public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
+     => await context.InsecticideMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.IsValid, false));
+    #endregion
 }

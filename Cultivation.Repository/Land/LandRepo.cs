@@ -3,6 +3,8 @@ using Cultivation.Database.Model;
 using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Fertilizer;
 using Cultivation.Dto.FertilizerLand;
+using Cultivation.Dto.Insecticide;
+using Cultivation.Dto.InsecticideLand;
 using Cultivation.Dto.Land;
 using FourthPro.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +46,7 @@ public class LandRepo : ILandRepo
     {
         var landModels = await context.Land.Include(l => l.CuttingLands)
             .ThenInclude(cl => cl.FertilizerMixLands).ThenInclude(fml => fml.FertilizerMix)
+            .Include(l => l.CuttingLands).ThenInclude(cl => cl.InsecticideMixLands).ThenInclude(iml => iml.InsecticideMix)
             .Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
         && l.IsValid)
@@ -77,6 +80,17 @@ public class LandRepo : ILandRepo
                             Title = m.FertilizerMix.Title,
                         }
                     }).ToList(),
+                    InsecticideMixLands = l.InsecticideMixLands.Select(i => new InsecticideMixLandDto
+                    {
+                        Date = i.Date,
+                        InsecticideMix = new GetInsecticideMixDto
+                        {
+                            Id = i.InsecticideMix.Id,
+                            Note = i.InsecticideMix.Note,
+                            Title = i.InsecticideMix.Title,
+                            Color = i.InsecticideMix.Color,
+                        }
+                    }).ToList()
                 }).ToList()
             }).ToListAsync();
         var parents = landModels.Where(l => !l.ParentId.HasValue).ToList();

@@ -101,6 +101,13 @@ public class FertilizerLandController : ControllerBase
         return Ok(result);
     }
 
+    [HttpDelete]
+    public async Task<IActionResult> RemoveMixLands(long mixLandId)
+    {
+        await fertilizerLandRepo.RemoveMixLandsAsync(mixLandId);
+        return Ok();
+    }
+
     #endregion
     //    private static (FormFile file, MemoryStream stream) ExportToExcel(ExportType type, string fileName, List<string> filters, List<FertilizerExportToExcelDto> dtos)
     //    {
