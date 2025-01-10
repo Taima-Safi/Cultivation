@@ -5,6 +5,7 @@ namespace Cultivation.Dto.FertilizerLand;
 
 public class FertilizerMixLandDto
 {
+    public long Id { get; set; }
     public DateTime Date { get; set; }
 
     public CuttingLandDto CuttingLand { get; set; }

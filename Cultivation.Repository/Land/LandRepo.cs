@@ -71,6 +71,7 @@ public class LandRepo : ILandRepo
                     IsActive = l.IsActive,
                     FertilizerMixLands = l.FertilizerMixLands/*.Where(fml => fml.Date )*/.Select(m => new FertilizerMixLandDto
                     {
+                        Id = m.Id,
                         Date = m.Date,
                         FertilizerMix = new GetFertilizerMixDto
                         {
@@ -82,6 +83,7 @@ public class LandRepo : ILandRepo
                     }).ToList(),
                     InsecticideMixLands = l.InsecticideMixLands.Select(i => new InsecticideMixLandDto
                     {
+                        Id = i.Id,
                         Date = i.Date,
                         InsecticideMix = new GetInsecticideMixDto
                         {
