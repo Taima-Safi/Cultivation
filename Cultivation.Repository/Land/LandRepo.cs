@@ -69,7 +69,7 @@ public class LandRepo : ILandRepo
                 {
                     Id = l.Id,
                     IsActive = l.IsActive,
-                    FertilizerMixLands = l.FertilizerMixLands/*.Where(fml => fml.Date )*/.Select(m => new FertilizerMixLandDto
+                    FertilizerMixLands = l.FertilizerMixLands.Where(fml => fml.IsValid).Select(m => new FertilizerMixLandDto
                     {
                         Id = m.Id,
                         Date = m.Date,
@@ -81,7 +81,7 @@ public class LandRepo : ILandRepo
                             Title = m.FertilizerMix.Title,
                         }
                     }).ToList(),
-                    InsecticideMixLands = l.InsecticideMixLands.Select(i => new InsecticideMixLandDto
+                    InsecticideMixLands = l.InsecticideMixLands.Where(iml => iml.IsValid).Select(i => new InsecticideMixLandDto
                     {
                         Id = i.Id,
                         Date = i.Date,
