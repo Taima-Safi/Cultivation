@@ -27,12 +27,12 @@ public class InsecticideLandRepo : IInsecticideLandRepo
     private readonly IFileRepo<InsecticideExportToExcelDto> fileRepo;
     private readonly IInsecticideRepo insecticideRepo;
     private readonly IBaseRepo<InsecticideLandModel> baseRepo;
-    private readonly IBaseRepo<InsecticideMixLandModel> mixBaseRepo;
+    private readonly IBaseRepo<InsecticideMixModel> mixBaseRepo;
     private readonly IBaseRepo<CuttingLandModel> cuttingLandBaseRepo;
 
 
     public InsecticideLandRepo(CultivationDbContext context, IBaseRepo<InsecticideLandModel> baseRepo, ILandRepo landRepo, IInsecticideRepo insecticideRepo,
-        ICuttingLandRepo cuttingLandRepo, IFileRepo<InsecticideExportToExcelDto> fileRepo, IBaseRepo<InsecticideMixLandModel> mixBaseRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo)
+        ICuttingLandRepo cuttingLandRepo, IFileRepo<InsecticideExportToExcelDto> fileRepo, IBaseRepo<InsecticideMixModel> mixBaseRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo)
     {
         this.context = context;
         this.baseRepo = baseRepo;
@@ -294,16 +294,16 @@ public class InsecticideLandRepo : IInsecticideLandRepo
                                                         .Any(fml => fml.InsecticideMix.Title.Contains(mixTitle)
                                                                && (!mixedDate.HasValue || fml.Date.Date == mixedDate?.Date))))).ToList();
         var x1 = mixedLands.Where(l =>
-    string.IsNullOrEmpty(mixTitle) ||
-    l.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
-        fml.InsecticideMix.Title.Contains(mixTitle) &&
-        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
-    )) ||
-    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
-        fml.InsecticideMix.Title.Contains(mixTitle) &&
-        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
-    )))
-).ToList();
+            string.IsNullOrEmpty(mixTitle) ||
+            l.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
+                fml.InsecticideMix.Title.Contains(mixTitle) &&
+                (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
+            )) ||
+            l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
+                fml.InsecticideMix.Title.Contains(mixTitle) &&
+                (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
+            )))
+            ).ToList();
 
         return x;
         // return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
