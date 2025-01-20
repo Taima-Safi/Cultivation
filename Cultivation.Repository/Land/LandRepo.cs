@@ -71,7 +71,7 @@ public class LandRepo : ILandRepo
                     Id = l.Id,
                     IsActive = l.IsActive,
                     FertilizerMixLands = l.FertilizerMixLands.Where(fml => (!isFertilizer.HasValue || (string.IsNullOrEmpty(mixTitle) || fml.FertilizerMix.Title.Contains(mixTitle))
-                    && (!mixedDate.HasValue || fml.Date == mixedDate))
+                   && (!mixedDate.HasValue || fml.Date == mixedDate))
                     && fml.IsValid).Select(m => new FertilizerMixLandDto
                     {
                         Id = m.Id,

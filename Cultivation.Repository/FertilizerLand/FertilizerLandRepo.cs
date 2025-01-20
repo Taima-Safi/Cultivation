@@ -386,8 +386,12 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         //        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
         //    )))
         //).ToList();
-
-        return mixedLands;
+        var x1 = mixedLands.Where(l =>
+    string.IsNullOrEmpty(mixTitle) ||
+    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.FertilizerMixLands.Any()
+    ))
+    ).ToList();
+        return x1;
         // return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
     }
     public async Task RemoveMixLandAsync(long mixLandId) //ToDo: 

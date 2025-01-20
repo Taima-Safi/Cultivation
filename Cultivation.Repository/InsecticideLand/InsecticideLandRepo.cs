@@ -293,19 +293,15 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         //var x = mixedLands.Where(l => string.IsNullOrEmpty(mixTitle) || l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands
         //                                                .Any(fml => fml.InsecticideMix.Title.Contains(mixTitle)
         //                                                       && (!mixedDate.HasValue || fml.Date.Date == mixedDate?.Date))))).ToList();
-        //var x1 = mixedLands.Where(l =>
-        //    string.IsNullOrEmpty(mixTitle) ||
-        //    l.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
-        //        fml.InsecticideMix.Title.Contains(mixTitle) &&
-        //        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
-        //    )) ||
-        //    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands.Any(fml =>
-        //        fml.InsecticideMix.Title.Contains(mixTitle) &&
-        //        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
-        //    )))
-        //    ).ToList();
+        var x1 = mixedLands.Where(l =>
+            string.IsNullOrEmpty(mixTitle) ||
+            //l.CuttingLands.Any(cl => cl.InsecticideMixLands.Any()
+            //) ||
+            l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.InsecticideMixLands.Any()
+            ))
+            ).ToList();
 
-        return mixedLands;
+        return x1;
         // return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
     }
     public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
