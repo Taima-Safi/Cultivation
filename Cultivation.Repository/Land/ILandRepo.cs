@@ -8,7 +8,8 @@ public interface ILandRepo
     Task<long> AddAsync(LandFormDto dto);
     Task<bool> CheckIfExistAsync(long id);
     Task<bool> CheckIfExistByIdsAsync(List<long> ids);
-    Task<List<LandDto>> GetAllAsync(string title, double? size, bool justChildren, bool isActive, bool forMix);
+    Task<List<LandDto>> GetAllAsync(string title, string mixTitle, DateTime? mixedDate, bool isFertilizer,
+        double? size, bool justChildren, bool isNoneActive, bool forMix);
     Task<LandDto> GetByIdAsync(long id);
     Task<LandModel> GetLandModelAsync(long id);
     Task RemoveAllAsync();

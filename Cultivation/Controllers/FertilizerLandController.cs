@@ -94,17 +94,30 @@ public class FertilizerLandController : ControllerBase
         await fertilizerLandRepo.AddMixLandAsync(mixId, cuttingLandId);
         return Ok();
     }
-    [HttpGet]
-    public async Task<IActionResult> GetMixLands(string landTitle, string mixTitle, DateTime? mixedDate)
+    [HttpPost]
+    public async Task<IActionResult> AddMixLands(long mixId, List<long> cuttingLandIds)
     {
-        var result = await fertilizerLandRepo.GetMixLandsAsync(landTitle, mixTitle, mixedDate);
+        await fertilizerLandRepo.AddMixLandsAsync(mixId, cuttingLandIds);
+        return Ok();
+    }
+    [HttpGet]
+    public async Task<IActionResult> GetMixLands(string landTitle, string fertilizerMixTitle, string mixTitle, DateTime? mixedDate)
+    {
+        var result = await fertilizerLandRepo.GetMixLandsAsync(landTitle, fertilizerMixTitle, mixTitle, mixedDate);
         return Ok(result);
     }
 
     [HttpDelete]
-    public async Task<IActionResult> RemoveMixLands(long mixLandId)
+    public async Task<IActionResult> RemoveMixLand(long mixLandId)
     {
-        await fertilizerLandRepo.RemoveMixLandsAsync(mixLandId);
+        await fertilizerLandRepo.RemoveMixLandAsync(mixLandId);
+        return Ok();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> RemoveMixLands(List<long> mixLandIds)
+    {
+        await fertilizerLandRepo.RemoveMixLandsAsync(mixLandIds);
         return Ok();
     }
 
