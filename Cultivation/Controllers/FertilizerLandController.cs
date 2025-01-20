@@ -103,7 +103,7 @@ public class FertilizerLandController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMixLands(string landTitle, string fertilizerMixTitle, string mixTitle, DateTime? mixedDate)
     {
-        var result = await fertilizerLandRepo.GetMixLandsAsync(landTitle, fertilizerMixTitle, mixTitle, mixedDate);
+        var result = await fertilizerLandRepo.GetMixLandsAsync(landTitle, mixTitle, mixedDate);
         return Ok(result);
     }
 

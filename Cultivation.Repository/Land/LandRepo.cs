@@ -42,7 +42,7 @@ public class LandRepo : ILandRepo
         await context.SaveChangesAsync();
         return land.Entity.Id;
     }
-    public async Task<List<LandDto>> GetAllAsync(string title, string mixTitle, DateTime? mixedDate, bool isFertilizer,
+    public async Task<List<LandDto>> GetAllAsync(string title, string mixTitle, DateTime? mixedDate, bool? isFertilizer,
         double? size, bool justChildren, bool isNoneActive, bool forMix)
     {
         var landModels = await context.Land.Include(l => l.CuttingLands)
@@ -70,7 +70,7 @@ public class LandRepo : ILandRepo
                 {
                     Id = l.Id,
                     IsActive = l.IsActive,
-                    FertilizerMixLands = l.FertilizerMixLands.Where(fml => (!isFertilizer || (string.IsNullOrEmpty(mixTitle) || fml.FertilizerMix.Title.Contains(mixTitle))
+                    FertilizerMixLands = l.FertilizerMixLands.Where(fml => (!isFertilizer.HasValue || (string.IsNullOrEmpty(mixTitle) || fml.FertilizerMix.Title.Contains(mixTitle))
                     && (!mixedDate.HasValue || fml.Date == mixedDate))
                     && fml.IsValid).Select(m => new FertilizerMixLandDto
                     {
@@ -84,7 +84,7 @@ public class LandRepo : ILandRepo
                             Title = m.FertilizerMix.Title,
                         }
                     }).ToList(),
-                    InsecticideMixLands = l.InsecticideMixLands.Where(iml => (isFertilizer || (string.IsNullOrEmpty(mixTitle) || iml.InsecticideMix.Title.Contains(mixTitle))
+                    InsecticideMixLands = l.InsecticideMixLands.Where(iml => (isFertilizer.HasValue || (string.IsNullOrEmpty(mixTitle) || iml.InsecticideMix.Title.Contains(mixTitle))
                     && (!mixedDate.HasValue || iml.Date == mixedDate)) && iml.IsValid).Select(i => new InsecticideMixLandDto
                     {
                         Id = i.Id,

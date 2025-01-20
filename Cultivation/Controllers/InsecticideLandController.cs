@@ -67,9 +67,9 @@ public class InsecticideLandController : ControllerBase
         return Ok();
     }
     [HttpGet]
-    public async Task<IActionResult> GetMixLands(string landTitle, string insecticideMixTitle, string mixTitle, DateTime? mixedDate)
+    public async Task<IActionResult> GetMixLands(string landTitle, string mixTitle, DateTime? mixedDate)
     {
-        var result = await insecticideLandRepo.GetMixLandsAsync(landTitle, insecticideMixTitle, mixTitle, mixedDate);
+        var result = await insecticideLandRepo.GetMixLandsAsync(landTitle, mixTitle, mixedDate);
         return Ok(result);
     }
 
