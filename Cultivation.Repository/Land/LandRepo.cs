@@ -45,8 +45,8 @@ public class LandRepo : ILandRepo
     public async Task<List<LandDto>> GetAllAsync(string title, string mixTitle, DateTime? mixedDate, bool? isFertilizer,
         double? size, bool justChildren, bool isNoneActive, bool forMix)
     {
-        var landModels = await context.Land.Include(l => l.CuttingLands)
-            .ThenInclude(cl => cl.FertilizerMixLands).ThenInclude(fml => fml.FertilizerMix)
+        var landModels = await context.Land
+            .Include(cl => cl.FertilizerMixLands).ThenInclude(fml => fml.FertilizerMix)
             .Include(l => l.CuttingLands).ThenInclude(cl => cl.InsecticideMixLands).ThenInclude(iml => iml.InsecticideMix)
             .Where(l => (string.IsNullOrEmpty(title) || l.Title.Contains(title))
         && (!size.HasValue || l.Size == size)
@@ -66,24 +66,25 @@ public class LandRepo : ILandRepo
                     Location = l.Location,
                     ParentId = l.Parent.Id,
                 }).ToList(),
+                FertilizerMixLands = l.FertilizerMixLands.Where(fml => (!isFertilizer.HasValue || (string.IsNullOrEmpty(mixTitle) || fml.FertilizerMix.Title.Contains(mixTitle))
+                && (!mixedDate.HasValue || fml.Date == mixedDate))
+                && fml.IsValid).Select(m => new FertilizerMixLandDto
+                {
+                    Id = m.Id,
+                    Date = m.Date,
+                    FertilizerMix = new GetFertilizerMixDto
+                    {
+                        Id = m.FertilizerMix.Id,
+                        Type = m.FertilizerMix.Type,
+                        Color = m.FertilizerMix.Color,
+                        Title = m.FertilizerMix.Title,
+                    }
+                }).ToList(),
                 CuttingLands = l.CuttingLands.Select(l => new CuttingLandDto
                 {
                     Id = l.Id,
                     IsActive = l.IsActive,
-                    FertilizerMixLands = l.FertilizerMixLands.Where(fml => (!isFertilizer.HasValue || (string.IsNullOrEmpty(mixTitle) || fml.FertilizerMix.Title.Contains(mixTitle))
-                   && (!mixedDate.HasValue || fml.Date == mixedDate))
-                    && fml.IsValid).Select(m => new FertilizerMixLandDto
-                    {
-                        Id = m.Id,
-                        Date = m.Date,
-                        FertilizerMix = new GetFertilizerMixDto
-                        {
-                            Id = m.FertilizerMix.Id,
-                            Type = m.FertilizerMix.Type,
-                            Color = m.FertilizerMix.Color,
-                            Title = m.FertilizerMix.Title,
-                        }
-                    }).ToList(),
+
                     InsecticideMixLands = l.InsecticideMixLands.Where(iml => (isFertilizer.HasValue || (string.IsNullOrEmpty(mixTitle) || iml.InsecticideMix.Title.Contains(mixTitle))
                     && (!mixedDate.HasValue || iml.Date == mixedDate)) && iml.IsValid).Select(i => new InsecticideMixLandDto
                     {
@@ -165,6 +166,7 @@ public class LandRepo : ILandRepo
                 Title = parent.Title,
                 Children = [],
                 CuttingLands = parent.CuttingLands.Where(x => x.IsActive).ToList(),
+                FertilizerMixLands = parent.FertilizerMixLands.ToList(),
             };
             //grand.Children.Clear();
             grandWithChild.Add(grand);

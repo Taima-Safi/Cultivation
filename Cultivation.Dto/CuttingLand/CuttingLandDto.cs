@@ -1,5 +1,4 @@
 ﻿using Cultivation.Dto.Cutting;
-using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.InsecticideLand;
 using Cultivation.Dto.Land;
 
@@ -14,6 +13,6 @@ public class CuttingLandDto
 
     public LandDto Land { get; set; }
     public CuttingColorDto CuttingColor { get; set; }
-    public List<FertilizerMixLandDto> FertilizerMixLands { get; set; } = [];
+    //  public List<FertilizerMixLandDto> FertilizerMixLands { get; set; } = [];
     public List<InsecticideMixLandDto> InsecticideMixLands { get; set; } = [];
 }

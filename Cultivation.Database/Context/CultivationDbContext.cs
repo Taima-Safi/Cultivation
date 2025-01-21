@@ -47,6 +47,12 @@ public class CultivationDbContext : DbContext
             .HasOne(x => x.Parent)
             .WithMany(x => x.Children)
             .HasForeignKey(x => x.ParentId);
+
+        builder.Entity<FertilizerMixLandModel>()
+    .HasOne(fm => fm.Land)
+    .WithMany(l => l.FertilizerMixLands)
+    .HasForeignKey(fm => fm.LandId)
+    .OnDelete(DeleteBehavior.Cascade);
     }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

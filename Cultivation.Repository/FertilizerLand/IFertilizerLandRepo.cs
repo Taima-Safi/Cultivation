@@ -11,7 +11,7 @@ namespace Cultivation.Repository.FertilizerLand;
 public interface IFertilizerLandRepo
 {
     Task AddAsync(FertilizerLandFormDto dto);
-    Task AddMixLandAsync(long mixId, long cuttingLandId);
+    Task AddMixLandAsync(long mixId, long landId);
     Task AddMixLandsAsync(long mixId, List<long> cuttingLandIds);
     Task<bool> CheckIfExistAsync(long id);
     Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName);

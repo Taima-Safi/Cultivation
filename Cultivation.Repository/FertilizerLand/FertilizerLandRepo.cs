@@ -30,9 +30,10 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     private readonly IBaseRepo<FertilizerLandModel> baseRepo;
     private readonly IBaseRepo<FertilizerMixModel> mixBaseRepo;
     private readonly IBaseRepo<CuttingLandModel> cuttingLandBaseRepo;
+    private readonly IBaseRepo<LandModel> landBaseRepo;
 
     public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo,
-        ICuttingLandRepo cuttingLandRepo, IFileRepo<FertilizerExportToExcelDto> fileRepo, IBaseRepo<FertilizerMixModel> mixRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo)
+        ICuttingLandRepo cuttingLandRepo, IFileRepo<FertilizerExportToExcelDto> fileRepo, IBaseRepo<FertilizerMixModel> mixRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo, IBaseRepo<LandModel> landBaseRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
@@ -42,6 +43,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         this.fileRepo = fileRepo;
         this.mixBaseRepo = mixRepo;
         this.cuttingLandBaseRepo = cuttingLandBaseRepo;
+        this.landBaseRepo = landBaseRepo;
     }
 
     public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
@@ -328,34 +330,34 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
     #region MixLand
 
-    public async Task AddMixLandAsync(long mixId, long cuttingLandId)
+    public async Task AddMixLandAsync(long mixId, long landId)
     {
         if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId))
             throw new NotFoundException("mix not found..");
 
-        if (!await cuttingLandBaseRepo.CheckIfExistAsync(m => m.Id == cuttingLandId))
-            throw new NotFoundException("cutting land not found..");
+        if (!await landBaseRepo.CheckIfExistAsync(m => m.Id == landId))
+            throw new NotFoundException("land not found..");
 
         await context.FertilizerMixLand.AddAsync(new FertilizerMixLandModel
         {
+            LandId = landId,
             Date = DateTime.UtcNow,
             FertilizerMixId = mixId,
-            CuttingLandId = cuttingLandId
         });
         await context.SaveChangesAsync();
     }
-    public async Task AddMixLandsAsync(long mixId, List<long> cuttingLandIds)
+    public async Task AddMixLandsAsync(long mixId, List<long> landIds)
     {
         if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId))
             throw new NotFoundException("mix not found..");
 
-        if (!await cuttingLandBaseRepo.CheckIfExistAsync(m => cuttingLandIds.Contains(m.Id)))
-            throw new NotFoundException("one of cutting lands not found..");
+        if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id)))
+            throw new NotFoundException("one of lands not found..");
         List<FertilizerMixLandModel> models = [];
-        foreach (var id in cuttingLandIds)
+        foreach (var id in landIds)
             models.Add(new FertilizerMixLandModel
             {
-                CuttingLandId = id,
+                LandId = id,
                 Date = DateTime.UtcNow,
                 FertilizerMixId = mixId
             });
@@ -366,33 +368,11 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     {
         var mixedLands = await landRepo.GetAllAsync(landTitle, mixTitle, mixedDate, true, null, false, true, true);
 
-        //ToDo: fix filter..
-        var x = mixedLands.Where(l => string.IsNullOrEmpty(mixTitle) || l.Children.Any(ch => ch.CuttingLands
-                                                    //      .Any(cl => cl.FertilizerMixLands
-                                                    .Any()
-                                                        //.Any(fml => fml.FertilizerMix.Title.Contains(mixTitle)
-                                                        //       && (!mixedDate.HasValue || fml.Date.Date == mixedDate?.Date)
-                                                        //)
-                                                        )
-        ).ToList();
-        //        var x1 = mixedLands.Where(l =>
-        //    string.IsNullOrEmpty(mixTitle) ||
-        //    l.CuttingLands.Any(cl => cl.FertilizerMixLands.Any(fml =>
-        //        fml.FertilizerMix.Title.Contains(mixTitle) &&
-        //        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
-        //    )) ||
-        //    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.FertilizerMixLands.Any(fml =>
-        //        fml.FertilizerMix.Title.Contains(mixTitle) &&
-        //        (!mixedDate.HasValue || fml.Date.Date == mixedDate.Value.Date)
-        //    )))
-        //).ToList();
-        var x1 = mixedLands.Where(l =>
-    string.IsNullOrEmpty(mixTitle) ||
-    l.Children.Any(ch => ch.CuttingLands.Any(cl => cl.FertilizerMixLands.Any()
-    ))
-    ).ToList();
+        var x1 = mixedLands.Where(l => string.IsNullOrEmpty(mixTitle)
+            || l.FertilizerMixLands.Any()
+            || l.Children.Any(ch => ch.FertilizerMixLands.Any())).ToList();
+
         return x1;
-        // return x/*.Where(x => x.ParentId == null && x.Children.Count == 0 && x.CuttingLands.Count != 0).ToList()*/;
     }
     public async Task RemoveMixLandAsync(long mixLandId) //ToDo: 
      => await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.IsValid, false));

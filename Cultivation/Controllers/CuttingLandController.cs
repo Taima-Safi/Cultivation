@@ -17,8 +17,8 @@ public class CuttingLandController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add(CuttingLandFormDto dto)
     {
-        var id = await cuttingLandRepo.AddAsync(dto);
-        return Ok(id);
+        await cuttingLandRepo.AddAsync(dto);
+        return Ok();
     }
     [HttpPost]
     public async Task<IActionResult> UpdateIsActive(long id)

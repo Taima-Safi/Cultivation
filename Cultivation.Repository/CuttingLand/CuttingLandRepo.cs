@@ -18,35 +18,40 @@ public class CuttingLandRepo : ICuttingLandRepo
 {
     private readonly CultivationDbContext context;
     private readonly IBaseRepo<CuttingLandModel> baseRepo;
+    private readonly IBaseRepo<CuttingColorModel> baseCuttingColorRepo;
     private readonly ILandRepo landRepo;
     private readonly ICuttingRepo cuttingRepo;
 
-    public CuttingLandRepo(CultivationDbContext context, ILandRepo landRepo, ICuttingRepo cuttingRepo, IBaseRepo<CuttingLandModel> baseRepo)
+    public CuttingLandRepo(CultivationDbContext context, ILandRepo landRepo, ICuttingRepo cuttingRepo, IBaseRepo<CuttingLandModel> baseRepo, IBaseRepo<CuttingColorModel> baseCuttingColorRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
         this.cuttingRepo = cuttingRepo;
         this.baseRepo = baseRepo;
+        this.baseCuttingColorRepo = baseCuttingColorRepo;
     }
 
-    public async Task<long> AddAsync(CuttingLandFormDto dto)
+    public async Task AddAsync(CuttingLandFormDto dto)
     {
         if (!await landRepo.CheckIfExistAsync(dto.LandId))
             throw new NotFoundException("Land not found..");
 
-        if (!await cuttingRepo.CheckCuttingColorIfExistAsync(dto.CuttingColorId))
-            throw new NotFoundException("Cutting not found..");
-
-        var x = await context.CuttingLand.AddAsync(new CuttingLandModel
+        if (!await baseCuttingColorRepo.CheckIfExistAsync(c => dto.Cuttings.Select(x => x.CuttingColorId).Contains(c.Id)))
+            throw new NotFoundException("One of cuttings not found..");
+        List<CuttingLandModel> cuttingLands = new List<CuttingLandModel>();
+        foreach (var cutting in dto.Cuttings)
         {
-            Date = dto.Date,
-            IsActive = true,
-            LandId = dto.LandId,
-            Quantity = dto.Quantity,
-            CuttingColorId = dto.CuttingColorId
-        });
+            cuttingLands.Add(new CuttingLandModel
+            {
+                Date = dto.Date,
+                IsActive = true,
+                LandId = dto.LandId,
+                Quantity = cutting.Quantity,
+                CuttingColorId = cutting.CuttingColorId,
+            });
+        }
+        await context.CuttingLand.AddRangeAsync(cuttingLands);
         await context.SaveChangesAsync();
-        return x.Entity.Id;
     }
 
     public async Task UpdateIsActiveAsync(long id)

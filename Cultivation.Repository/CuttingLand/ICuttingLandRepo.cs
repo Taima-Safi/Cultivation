@@ -5,7 +5,7 @@ namespace Cultivation.Repository.CuttingLand;
 
 public interface ICuttingLandRepo
 {
-    Task<long> AddAsync(CuttingLandFormDto dto);
+    Task AddAsync(CuttingLandFormDto dto);
     Task<bool> CheckIfExistAsync(long id);
     Task<CommonResponseDto<List<CuttingLandDto>>> GetAllAsync(DateTime? date, int pageSize = 10, int pageNum = 0);
     Task<CuttingLandDto> GetByIdAsync(long id);
