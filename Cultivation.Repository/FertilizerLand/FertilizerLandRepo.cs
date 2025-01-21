@@ -332,10 +332,10 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
     public async Task AddMixLandAsync(long mixId, long landId)
     {
-        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId))
+        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
             throw new NotFoundException("mix not found..");
 
-        if (!await landBaseRepo.CheckIfExistAsync(m => m.Id == landId))
+        if (!await landBaseRepo.CheckIfExistAsync(m => m.Id == landId && m.IsValid))
             throw new NotFoundException("land not found..");
 
         await context.FertilizerMixLand.AddAsync(new FertilizerMixLandModel
@@ -348,10 +348,10 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     }
     public async Task AddMixLandsAsync(long mixId, List<long> landIds)
     {
-        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId))
+        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
             throw new NotFoundException("mix not found..");
 
-        if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id)))
+        if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id) && m.IsValid))
             throw new NotFoundException("one of lands not found..");
         List<FertilizerMixLandModel> models = [];
         foreach (var id in landIds)
@@ -369,8 +369,8 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         var mixedLands = await landRepo.GetAllAsync(landTitle, mixTitle, mixedDate, true, null, false, true, true);
 
         var x1 = mixedLands.Where(l => string.IsNullOrEmpty(mixTitle)
-            || l.FertilizerMixLands.Any()
-            || l.Children.Any(ch => ch.FertilizerMixLands.Any())).ToList();
+            || l.FertilizerMixLands.Count == 0
+            || l.Children.Any(ch => ch.FertilizerMixLands.Count == 0)).ToList();
 
         return x1;
     }
