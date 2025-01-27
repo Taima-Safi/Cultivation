@@ -8,7 +8,7 @@ namespace Cultivation.Repository.InsecticideLand;
 public interface IInsecticideLandRepo
 {
     Task AddAsync(InsecticideLandFormDto dto);
-    Task AddMixLandAsync(long mixId, long cuttingLandId);
+    Task AddMixLandAsync(long mixId, long landId);
     Task AddMixLandsAsync(long mixId, List<long> landIds);
     Task<bool> CheckIfExistAsync(long id);
     Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName);
