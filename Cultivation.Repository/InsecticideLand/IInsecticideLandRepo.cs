@@ -9,6 +9,7 @@ public interface IInsecticideLandRepo
 {
     Task AddAsync(InsecticideLandFormDto dto);
     Task AddMixLandAsync(long mixId, long cuttingLandId);
+    Task AddMixLandsAsync(long mixId, List<long> landIds);
     Task<bool> CheckIfExistAsync(long id);
     Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName);
     Task<CommonResponseDto<List<GroupedInsecticideLandDto>>> GetAllAsync(/*DateTime? date, */string note, double? liter, double? quantity, DateTime? from, DateTime? to

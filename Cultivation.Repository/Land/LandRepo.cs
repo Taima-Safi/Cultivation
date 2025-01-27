@@ -93,7 +93,7 @@ public class LandRepo : ILandRepo
                         Color = i.InsecticideMix.Color,
                     }
                 }).ToList(),
-                CuttingLands = l.CuttingLands.Select(l => new CuttingLandDto
+                CuttingLands = l.CuttingLands.Where(c => c.IsValid).Select(l => new CuttingLandDto
                 {
                     Id = l.Id,
                     IsActive = l.IsActive,

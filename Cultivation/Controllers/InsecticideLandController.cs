@@ -66,6 +66,12 @@ public class InsecticideLandController : ControllerBase
         await insecticideLandRepo.AddMixLandAsync(mixId, cuttingLandId);
         return Ok();
     }
+    [HttpPost]
+    public async Task<IActionResult> AddMixLands(long mixId, List<long> landIds)
+    {
+        await insecticideLandRepo.AddMixLandsAsync(mixId, landIds);
+        return Ok();
+    }
     [HttpGet]
     public async Task<IActionResult> GetMixLands(string landTitle, string mixTitle, DateTime? mixedDate)
     {

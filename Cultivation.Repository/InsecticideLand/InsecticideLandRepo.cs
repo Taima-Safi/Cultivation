@@ -287,6 +287,24 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         });
         await context.SaveChangesAsync();
     }
+    public async Task AddMixLandsAsync(long mixId, List<long> landIds)
+    {
+        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
+            throw new NotFoundException("mix not found..");
+
+        if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id) && m.IsValid))
+            throw new NotFoundException("one of lands not found..");
+        List<InsecticideMixLandModel> models = [];
+        foreach (var id in landIds)
+            models.Add(new InsecticideMixLandModel
+            {
+                LandId = id,
+                Date = DateTime.UtcNow,
+                InsecticideMixId = mixId
+            });
+        await context.InsecticideMixLand.AddRangeAsync(models);
+        await context.SaveChangesAsync();
+    }
     public async Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime? mixedDate)
     {
         var mixedLands = await landRepo.GetAllAsync(landTitle, mixTitle, mixedDate, false, null, false, true, true);

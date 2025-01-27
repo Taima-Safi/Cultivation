@@ -95,9 +95,9 @@ public class FertilizerLandController : ControllerBase
         return Ok();
     }
     [HttpPost]
-    public async Task<IActionResult> AddMixLands(long mixId, List<long> cuttingLandIds)
+    public async Task<IActionResult> AddMixLands(long mixId, List<long> landIds)
     {
-        await fertilizerLandRepo.AddMixLandsAsync(mixId, cuttingLandIds);
+        await fertilizerLandRepo.AddMixLandsAsync(mixId, landIds);
         return Ok();
     }
     [HttpGet]
