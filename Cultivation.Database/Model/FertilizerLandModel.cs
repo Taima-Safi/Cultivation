@@ -8,8 +8,8 @@ public class FertilizerLandModel : BaseModel
     public double Quantity { get; set; } //kg
     public FertilizerType Type { get; set; }
 
-    public long CuttingLandId { get; set; }
-    public CuttingLandModel CuttingLand { get; set; }
+    public long LandId { get; set; }
+    public LandModel Land { get; set; }
     public long FertilizerId { get; set; }
     public FertilizerModel Fertilizer { get; set; }
 }

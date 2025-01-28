@@ -10,9 +10,9 @@ public class LandModel : BaseModel
     public LandModel Parent { get; set; }
     public ICollection<LandModel> Children { get; set; }
     public ICollection<CuttingLandModel> CuttingLands { get; set; }
+    public ICollection<FertilizerLandModel> FertilizerLands { get; set; }
     public ICollection<FertilizerMixLandModel> FertilizerMixLands { get; set; }
     public ICollection<InsecticideMixLandModel> InsecticideMixLands { get; set; }
 
-    //public ICollection<FertilizerLandModel> FertilizerLands { get; set; }
     //public ICollection<InsecticideLandModel> InsecticideLands { get; set; }
 }
