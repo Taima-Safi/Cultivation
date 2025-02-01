@@ -68,9 +68,9 @@ public class InsecticideLandRepo : IInsecticideLandRepo
             throw new NotFoundException("Land not found..");
 
         Expression<Func<InsecticideLandModel, bool>> expression = il =>
-            il.CuttingLand.LandId == landId && il.IsValid &&
+            il.LandId == landId && il.IsValid &&
             (
-                (!from.HasValue && !to.HasValue && il.CuttingLand.IsActive) || // If both are null, check IsActive
+                (!from.HasValue && !to.HasValue && il.Land.CuttingLands.Any(c => c.IsActive)) || // If both are null, check IsActive
                 (from.HasValue && il.Date.Date >= from) ||                     // If from has a value, check Date >= from
                 (to.HasValue && il.Date.Date <= to)                            // If to has a value, check Date <= to
             );
@@ -82,22 +82,22 @@ public class InsecticideLandRepo : IInsecticideLandRepo
     public async Task AddAsync(InsecticideLandFormDto dto)
     {
 
-        if (!await cuttingLandRepo.CheckIfExistByIdsAsync(dto.CuttingLandIds))
-            throw new NotFoundException("One of Cutting Lands not found..");
+        if (!await landRepo.CheckIfExistByIdsAsync(dto.LandIds))
+            throw new NotFoundException("One of Lands not found..");
 
         if (!await insecticideRepo.CheckIfExistByIdsAsync(dto.Mixes.Select(x => x.InsecticideId).ToList()))
             throw new NotFoundException("One of insecticides not found..");
 
         List<InsecticideLandModel> models = [];
-        foreach (var cuttingLandId in dto.CuttingLandIds)
+        foreach (var landId in dto.LandIds)
         {
             models.AddRange(dto.Mixes.Select(i => new InsecticideLandModel
             {
                 Date = dto.Date,
                 Liter = i.Liter,
                 Note = dto.Note,
+                LandId = landId,
                 Quantity = i.Quantity,
-                CuttingLandId = cuttingLandId,
                 InsecticideId = i.InsecticideId,
             }).ToList());
         }
@@ -111,18 +111,17 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         && (!quantity.HasValue || il.Quantity == quantity) && (!liter.HasValue || il.Liter == liter)
         && (string.IsNullOrEmpty(note) || il.Note.Contains(note)) && il.IsValid
 
-        && (!landId.HasValue || il.CuttingLand.LandId == landId) && il.IsValid &&
+        && (!landId.HasValue || il.LandId == landId) && il.IsValid &&
             (
-                (!from.HasValue && !to.HasValue && il.CuttingLand.IsActive) || // If both are null, check IsActive
+                (!from.HasValue && !to.HasValue && il.Land.CuttingLands.Any(c => c.IsActive)) || // If both are null, check IsActive
                 (from.HasValue && il.Date.Date >= from) ||                     // If from has a value, check Date >= from
                 (to.HasValue && il.Date.Date <= to)                            // If to has a value, check Date <= to
             );
         /*  && (!from.HasValue || il.Date.Date >= from) && (!to.HasValue || il.Date.Date <= to)*/
 
         var x = await context.InsecticideLand.Where(expression)
-            .Include(il => il.CuttingLand).ThenInclude(il => il.Land).Include(il => il.CuttingLand).ThenInclude(il => il.CuttingColor)
-            .Include(il => il.Insecticide)
-            .OrderByDescending(il => il.CuttingLand.LandId).ToListAsync();
+            .Include(il => il.Insecticide).Include(il => il.Land).ThenInclude(il => il.CuttingLands).ThenInclude(il => il.CuttingColor)
+            .OrderByDescending(il => il.LandId).ToListAsync();
 
         var result = x
             .GroupBy(group => group.Date)
@@ -139,26 +138,45 @@ public class InsecticideLandRepo : IInsecticideLandRepo
                     Note = il.Note,
                     Liter = il.Liter,
                     Quantity = il.Quantity,
-                    //File = il.File,
-                    CuttingLand = new CuttingLandDto
+                    Land = new LandDto
                     {
-                        Id = il.CuttingLand.Id,
-                        Date = il.CuttingLand.Date,
-                        Quantity = il.CuttingLand.Quantity,
-                        Land = new LandDto
+                        Id = il.Land.Id,
+                        Size = il.Land.Size,
+                        Title = il.Land.Title,
+                        ParentId = il.Land.ParentId,
+                        Location = il.Land.Location,
+                        CuttingLands = il.Land.CuttingLands.Where(cl => cl.IsValid).Select(cl => new CuttingLandDto
                         {
-                            Id = il.CuttingLand.Land.Id,
-                            Size = il.CuttingLand.Land.Size,
-                            Title = il.CuttingLand.Land.Title,
-                            Location = il.CuttingLand.Land.Location,
-                            ParentId = il.CuttingLand.Land.ParentId,
-                        },
-                        CuttingColor = new CuttingColorDto
-                        {
-                            Id = il.CuttingLand.CuttingColor.Id,
-                            Code = il.CuttingLand.CuttingColor.Code,
-                        }
+                            Id = cl.Id,
+                            Date = cl.Date,
+                            Quantity = cl.Quantity,
+                            IsActive = cl.IsActive,
+                            CuttingColor = new CuttingColorDto
+                            {
+                                Id = cl.CuttingColor.Id,
+                                Code = cl.CuttingColor.Code
+                            },
+                        }).ToList()
                     },
+                    //CuttingLand = new CuttingLandDto
+                    //{
+                    //    Id = il.CuttingLand.Id,
+                    //    Date = il.CuttingLand.Date,
+                    //    Quantity = il.CuttingLand.Quantity,
+                    //    Land = new LandDto
+                    //    {
+                    //        Id = il.CuttingLand.Land.Id,
+                    //        Size = il.CuttingLand.Land.Size,
+                    //        Title = il.CuttingLand.Land.Title,
+                    //        Location = il.CuttingLand.Land.Location,
+                    //        ParentId = il.CuttingLand.Land.ParentId,
+                    //    },
+                    //    CuttingColor = new CuttingColorDto
+                    //    {
+                    //        Id = il.CuttingLand.CuttingColor.Id,
+                    //        Code = il.CuttingLand.CuttingColor.Code,
+                    //    }
+                    //},
                     Insecticide = new InsecticideDto
                     {
                         Id = il.Insecticide.Id,
@@ -181,13 +199,13 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         var landModels = await context.Land.Where(l => !l.Children.Any() && l.IsValid).ToListAsync();
 
         var result = await context.InsecticideLand.Where(il => (date.HasValue ? il.Date.Date == date : il.Date.Date == DateTime.UtcNow.Date) && il.IsValid)
-            .Include(il => il.CuttingLand).ThenInclude(il => il.Land).Include(il => il.Insecticide).ToListAsync();
+            .Include(il => il.Land).Include(il => il.Insecticide).ToListAsync();
 
         List<LandModel> landsNotUsed = new();
 
         foreach (var land in landModels)
         {
-            var isUsed = result.Where(l => l.CuttingLand.LandId == land.Id).Any();
+            var isUsed = result.Where(l => l.LandId == land.Id).Any();
             if (!isUsed)
                 landsNotUsed.Add(land);
         }
@@ -213,25 +231,25 @@ public class InsecticideLandRepo : IInsecticideLandRepo
             Note = il.Note,
             Liter = il.Liter,
             Quantity = il.Quantity,
-            //File = il.File,
-            CuttingLand = new CuttingLandDto
+            Land = new LandDto
             {
-                Id = il.CuttingLand.Id,
-                Date = il.CuttingLand.Date,
-                Quantity = il.CuttingLand.Quantity,
-                Land = new LandDto
+                Id = il.Land.Id,
+                Size = il.Land.Size,
+                Title = il.Land.Title,
+                ParentId = il.Land.ParentId,
+                Location = il.Land.Location,
+                CuttingLands = il.Land.CuttingLands.Where(cl => cl.IsValid).Select(cl => new CuttingLandDto
                 {
-                    Id = il.CuttingLand.Land.Id,
-                    Size = il.CuttingLand.Land.Size,
-                    Title = il.CuttingLand.Land.Title,
-                    Location = il.CuttingLand.Land.Location,
-                    ParentId = il.CuttingLand.Land.ParentId,
-                },
-                CuttingColor = new CuttingColorDto
-                {
-                    Id = il.CuttingLand.CuttingColor.Id,
-                    Code = il.CuttingLand.CuttingColor.Code,
-                }
+                    Id = cl.Id,
+                    Date = cl.Date,
+                    Quantity = cl.Quantity,
+                    IsActive = cl.IsActive,
+                    CuttingColor = new CuttingColorDto
+                    {
+                        Id = cl.CuttingColor.Id,
+                        Code = cl.CuttingColor.Code
+                    },
+                }).ToList()
             },
             Insecticide = new InsecticideDto
             {
@@ -248,15 +266,15 @@ public class InsecticideLandRepo : IInsecticideLandRepo
         if (!await CheckIfExistAsync(id))
             throw new NotFoundException("Land not has this insecticide...");
 
-        if (!await cuttingLandRepo.CheckIfExistAsync(dto.CuttingLandId))
-            throw new NotFoundException("cutting not found..");
+        if (!await landRepo.CheckIfExistAsync(dto.LandId))
+            throw new NotFoundException("land not found..");
 
         if (!await insecticideRepo.CheckIfExistAsync(dto.InsecticideId))
             throw new NotFoundException("Fertilizer not has this fertilizer..");
 
         await context.InsecticideLand.Where(il => il.Id == id && il.IsValid).ExecuteUpdateAsync(il => il.SetProperty(il => il.Note, dto.Note)
         .SetProperty(il => il.Quantity, dto.Quantity).SetProperty(il => il.Liter, dto.Liter).SetProperty(il => il.Date, dto.Date)
-        .SetProperty(il => il.InsecticideId, dto.InsecticideId).SetProperty(il => il.CuttingLandId, dto.CuttingLandId));
+        .SetProperty(il => il.InsecticideId, dto.InsecticideId).SetProperty(il => il.LandId, dto.LandId));
     }
     public async Task RemoveAsync(long id)
     {

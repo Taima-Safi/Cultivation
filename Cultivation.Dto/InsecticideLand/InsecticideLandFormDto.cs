@@ -5,7 +5,7 @@ public class InsecticideLandFormDto
     public string Note { get; set; }
     public DateTime Date { get; set; }
 
-    public List<long> CuttingLandIds { get; set; } = [];
+    public List<long> LandIds { get; set; } = [];
     public List<InsecticideMixDto> Mixes { get; set; } = [];
 
 
