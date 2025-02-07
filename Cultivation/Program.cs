@@ -1,20 +1,5 @@
+using Cultivation.Configuration;
 using Cultivation.Database.Context;
-using Cultivation.Repository.Base;
-using Cultivation.Repository.Client;
-using Cultivation.Repository.Color;
-using Cultivation.Repository.Cutting;
-using Cultivation.Repository.CuttingLand;
-using Cultivation.Repository.DataBase;
-using Cultivation.Repository.Fertilizer;
-using Cultivation.Repository.FertilizerLand;
-using Cultivation.Repository.FertilizerMix;
-using Cultivation.Repository.File;
-using Cultivation.Repository.Flower;
-using Cultivation.Repository.Insecticide;
-using Cultivation.Repository.InsecticideLand;
-using Cultivation.Repository.InsecticideMix;
-using Cultivation.Repository.Land;
-using Cultivation.Repository.Order;
 using FourthPro.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerUI;
@@ -43,26 +28,9 @@ builder.Services.AddMemoryCache(opt =>
 }).AddResponseCaching();
 #endregion
 
-//builder.Services.ConfigureAuthentication(builder.Configuration);
+builder.Services.ConfigureAuthentication(builder.Configuration);
 //builder.Services.ConfigureSwagger();
-//builder.Services.ConfigureRepos();
-//builder.Services.ConfigureServices();
-builder.Services.AddScoped<ILandRepo, LandRepo>();
-builder.Services.AddScoped<IColorRepo, ColorRepo>();
-builder.Services.AddScoped<ICuttingRepo, CuttingRepo>();
-builder.Services.AddScoped<ICuttingLandRepo, CuttingLandRepo>();
-builder.Services.AddScoped<IFertilizerRepo, FertilizerRepo>();
-builder.Services.AddScoped<IFertilizerLandRepo, FertilizerLandRepo>();
-builder.Services.AddScoped<IInsecticideRepo, InsecticideRepo>();
-builder.Services.AddScoped<IInsecticideLandRepo, InsecticideLandRepo>();
-builder.Services.AddScoped<IFlowerRepo, FlowerRepo>();
-builder.Services.AddScoped<IOrderRepo, OrderRepo>();
-builder.Services.AddScoped<IClientRepo, ClientRepo>();
-builder.Services.AddScoped<IFertilizerMixRepo, FertilizerMixRepo>();
-builder.Services.AddScoped<IInsecticideMixRepo, InsecticideMixRepo>();
-builder.Services.AddScoped<IDbRepo, DbRepo>();
-builder.Services.AddScoped(typeof(IFileRepo<>), typeof(FileRepo<>));
-builder.Services.AddScoped(typeof(IBaseRepo<>), typeof(BaseRepo<>));
+builder.Services.ConfigureRepos();
 
 var app = builder.Build();
 //if (app.Environment.IsDevelopment())
