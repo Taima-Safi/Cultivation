@@ -25,7 +25,7 @@ public class BaseRepo<T> : IBaseRepo<T> where T : BaseModel
 
     public async Task<bool> CheckIdsAsync(IEnumerable<long> ids)
     {
-        var entityIdsModel = await Entity.Select(s => s.Id).ToListAsync();
+        var entityIdsModel = await Entity.Where(s => s.IsValid).Select(s => s.Id).ToListAsync();
         var check = ids.All(entityIdsModel.Contains);
         return check;
     }
