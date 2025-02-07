@@ -19,14 +19,16 @@ public class UserRepo : UserService, IUserRepo
     private readonly CultivationDbContext context;
     private readonly IDbRepo dbRepo;
     private readonly IBaseRepo<UserModel> baseRepo;
+    private readonly IBaseRepo<RoleModel> rolebaseRepo;
 
-    public UserRepo(CultivationDbContext context, IDbRepo dbRepo, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IBaseRepo<UserModel> baseRepo)
+    public UserRepo(CultivationDbContext context, IDbRepo dbRepo, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IBaseRepo<UserModel> baseRepo, IBaseRepo<RoleModel> rolebaseRepo)
         : base(configuration, httpContextAccessor)
 
     {
         this.context = context;
         this.dbRepo = dbRepo;
         this.baseRepo = baseRepo;
+        this.rolebaseRepo = rolebaseRepo;
     }
     public async Task<long> AddAsync(UserFormDto dto)
     {
@@ -107,6 +109,9 @@ public class UserRepo : UserService, IUserRepo
     #region UserRole
     public async Task AddUserRolesAsync(IEnumerable<long> roleIds, long userId)
     {
+        if (!await rolebaseRepo.CheckIdsAsync(roleIds))
+            throw new NotFoundException("role not found..");
+
         var userRolesModel = roleIds.Select(roleId => new UserRoleModel
         {
             RoleId = roleId,
