@@ -1,4 +1,5 @@
-﻿using Cultivation.Repository.Role;
+﻿using Cultivation.Dto.Role;
+using Cultivation.Repository.Role;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers
@@ -14,9 +15,9 @@ namespace Cultivation.Controllers
             this.roleRepo = roleRepo;
         }
         [HttpPost]
-        public async Task<IActionResult> Add(string title)
+        public async Task<IActionResult> Add(RoleFormDto dto)
         {
-            var roleId = await roleRepo.AddAsync(title);
+            var roleId = await roleRepo.AddAsync(dto);
             return Ok(roleId);
         }
         [HttpGet]
@@ -32,9 +33,9 @@ namespace Cultivation.Controllers
             return Ok(role);
         }
         [HttpPost]
-        public async Task<IActionResult> Update(long id, string title)
+        public async Task<IActionResult> Update(long id, RoleFormDto dto)
         {
-            await roleRepo.UpdateAsync(id, title);
+            await roleRepo.UpdateAsync(id, dto);
             return Ok();
         }
         [HttpDelete]

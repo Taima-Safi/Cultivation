@@ -17,11 +17,12 @@ public class RoleRepo : IRoleRepo
         this.context = context;
         this.baseRepo = baseRepo;
     }
-    public async Task<long> AddAsync(string title)
+    public async Task<long> AddAsync(RoleFormDto dto)
     {
         var role = await context.Role.AddAsync(new RoleModel
         {
-            Title = title
+            Title = dto.Title,
+            FullAccess = dto.FullAccess
         });
         await context.SaveChangesAsync();
         return role.Entity.Id;
@@ -33,7 +34,8 @@ public class RoleRepo : IRoleRepo
             .Select(c => new RoleDto
             {
                 Id = c.Id,
-                Title = c.Title
+                Title = c.Title,
+                FullAccess = c.FullAccess
             }).ToListAsync();
 
         return x;
@@ -46,15 +48,16 @@ public class RoleRepo : IRoleRepo
         return await context.Role.Where(c => c.Id == id && c.IsValid).Select(c => new RoleDto
         {
             Id = c.Id,
-            Title = c.Title
+            Title = c.Title,
+            FullAccess = c.FullAccess
         }).FirstOrDefaultAsync();
     }
-    public async Task UpdateAsync(long id, string title)
+    public async Task UpdateAsync(long id, RoleFormDto dto)
     {
         if (!await baseRepo.CheckIfExistAsync(x => x.Id == id && x.IsValid))
             throw new NotFoundException("Role not found..");
 
-        await context.Role.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Title, title));
+        await context.Role.Where(c => c.Id == id && c.IsValid).ExecuteUpdateAsync(c => c.SetProperty(c => c.Title, dto.Title).SetProperty(c => c.FullAccess, dto.FullAccess));
     }
 
     public async Task RemoveAsync(long id)

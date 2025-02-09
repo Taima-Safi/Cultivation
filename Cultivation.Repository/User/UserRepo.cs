@@ -121,6 +121,8 @@ public class UserRepo : UserService, IUserRepo
         await context.UserRole.AddRangeAsync(userRolesModel);
         await dbRepo.SaveChangesAsync();
     }
+    public async Task<List<RoleModel>> GetUserRoleAsync(long userId) =>
+         await context.UserRole.Where(s => s.IsValid && s.Id == userId).Select(r => r.Role).ToListAsync();
     public async Task RemoveUserRolesAsync(List<long> rolesToRemove, long userId)
     {
         if (!await baseRepo.CheckIfExistAsync(u => u.Id == userId && u.IsValid))

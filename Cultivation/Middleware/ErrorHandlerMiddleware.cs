@@ -1,4 +1,5 @@
 ﻿
+using Cultivation.Shared.Exception;
 using FourthPro.Dto.Common;
 using FourthPro.Shared.Exception;
 using System.ComponentModel.DataAnnotations;
@@ -54,6 +55,9 @@ public class ErrorHandlerMiddleware : IMiddleware
                 case ValidationException:
                     // validation application error
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+                case MethodNotAllowedException:
+                    response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
                     break;
                 case NotFoundException:
                     response.StatusCode = (int)HttpStatusCode.NotFound;
