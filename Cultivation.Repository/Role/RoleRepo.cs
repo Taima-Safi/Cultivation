@@ -2,7 +2,7 @@
 using Cultivation.Database.Model;
 using Cultivation.Dto.Role;
 using Cultivation.Repository.Base;
-using FourthPro.Shared.Exception;
+using Cultivation.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cultivation.Repository.Role;

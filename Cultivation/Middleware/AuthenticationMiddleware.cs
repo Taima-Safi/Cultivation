@@ -2,7 +2,6 @@
 using Cultivation.Repository.User;
 using Cultivation.Shared.Enum;
 using Cultivation.Shared.Exception;
-using FourthPro.Shared.Exception;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
@@ -24,8 +23,8 @@ public class AuthenticationMiddleware : IMiddleware
             await next(context);
             return;
         }
-
         var token = context.Request.Headers.Authorization.ToString();
+
         if (string.IsNullOrEmpty(token) || !context.User.Identity.IsAuthenticated)
             throw new UnauthorizedAccessException("UnAuthorized");
 
@@ -36,7 +35,7 @@ public class AuthenticationMiddleware : IMiddleware
         var userRepo = context.RequestServices.GetRequiredService<IUserRepo>();
         var userRoles = await userRepo.GetUserRoleAsync(userId);
 
-        if (controllerName.Contains("UserController") || controllerName.Contains("Role"))
+        if (controllerName.Contains("User") || controllerName.Contains("Role"))
         {
             if (roleName != nameof(UserType.SuperAdmin) || userRoles.Any(x => x.FullAccess == false))
                 throw new AccessViolationException("No Access");
@@ -63,8 +62,8 @@ public class AuthenticationMiddleware : IMiddleware
                         throw new AccessViolationException(" No Access");
                     break;
             }
-            await next(context);
-            return;
         }
+        await next(context);
+        return;
     }
 }

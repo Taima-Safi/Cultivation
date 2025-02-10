@@ -1,13 +1,15 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.Role;
 using Cultivation.Dto.User;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.DataBase;
 using Cultivation.Repository.User.Service;
 using Cultivation.Shared.Enum;
+using Cultivation.Shared.Exception;
 using Cultivation.Shared.Helper;
-using FourthPro.Shared.Exception;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
@@ -17,19 +19,70 @@ namespace Cultivation.Repository.User;
 public class UserRepo : UserService, IUserRepo
 {
     private readonly CultivationDbContext context;
+    private readonly IConfiguration configuration;
+    //private readonly TokenRepo tokenRepo;
     private readonly IDbRepo dbRepo;
     private readonly IBaseRepo<UserModel> baseRepo;
-    private readonly IBaseRepo<RoleModel> rolebaseRepo;
+    private readonly IBaseRepo<RoleModel> roleBaseRepo;
 
-    public UserRepo(CultivationDbContext context, IDbRepo dbRepo, IConfiguration configuration, IHttpContextAccessor httpContextAccessor, IBaseRepo<UserModel> baseRepo, IBaseRepo<RoleModel> rolebaseRepo)
+    public UserRepo(CultivationDbContext context, IDbRepo dbRepo, IConfiguration configuration, IHttpContextAccessor httpContextAccessor,
+        IBaseRepo<UserModel> baseRepo, IBaseRepo<RoleModel> roleBaseRepo/*, TokenRepo tokenRepo*/)
         : base(configuration, httpContextAccessor)
 
     {
         this.context = context;
+        this.configuration = configuration;
         this.dbRepo = dbRepo;
         this.baseRepo = baseRepo;
-        this.rolebaseRepo = rolebaseRepo;
+        this.roleBaseRepo = roleBaseRepo;
+        // this.tokenRepo = tokenRepo;
     }
+    public async Task<UserDto> LoginAsync(LoginDto dto)
+    {
+        var model = await context.User.Where(u => u.Email == dto.Email.Trim().ToLower() && u.IsValid).FirstOrDefaultAsync();
+        if (model == null)
+            throw new NotFoundException("This email not found");
+
+        var userDto = await context.User.Where(u => u.Id == model.Id && u.IsValid).Select(model => new UserDto
+        {
+            Id = model.Id,
+            Type = model.Type,
+            Email = model.Email,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            PhoneNumber = model.PhoneNumber,
+            Roles = model.UserRoles.Where(r => r.IsValid).Select(r => new UserRoleDto
+            {
+                Id = r.Id,
+                Role = new RoleDto
+                {
+                    Id = r.Role.Id,
+                    DepoAccess = r.Role.DepoAccess,
+                    FullAccess = r.Role.FullAccess,
+                    OrderAccess = r.Role.OrderAccess,
+                    CuttingLandAccess = r.Role.CuttingLandAccess,
+                }
+            }).ToList()
+
+        }).FirstOrDefaultAsync();
+
+        return userDto;
+    }
+    public async Task CheckPasswordCorrectness(string password, string hashPassword, long userId)
+    {
+        if (hashPassword == null) { throw new ValidationException("PasswordHasBeenRemoved"); }
+
+        var isMatchPassword = PasswordHelper.CheckPassword(password, hashPassword, out string newHash);
+        if (isMatchPassword == PasswordVerificationResult.Failed)
+            throw new ValidationException("PasswordOrEmailWrong");
+
+        if (isMatchPassword == PasswordVerificationResult.SuccessRehashNeeded)
+            await ChangePasswordAsync(newHash, userId);
+    }
+    public async Task ChangePasswordAsync(string newHashPassword, long id)
+    => await context.User.Where(u => u.IsValid && u.Id == id)
+    .ExecuteUpdateAsync(u => u.SetProperty(u => u.HashPassword, newHashPassword));
+
     public async Task<long> AddAsync(UserFormDto dto)
     {
         await dbRepo.BeginTransactionAsync();
@@ -109,7 +162,7 @@ public class UserRepo : UserService, IUserRepo
     #region UserRole
     public async Task AddUserRolesAsync(IEnumerable<long> roleIds, long userId)
     {
-        if (!await rolebaseRepo.CheckIdsAsync(roleIds))
+        if (!await roleBaseRepo.CheckIdsAsync(roleIds))
             throw new NotFoundException("role not found..");
 
         var userRolesModel = roleIds.Select(roleId => new UserRoleModel

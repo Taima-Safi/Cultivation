@@ -10,6 +10,24 @@ public class PasswordHelper
         return passwordHasher.HashPassword(null, password);
     }
 
+    public static PasswordVerificationResult CheckPassword(string password, string hash, out string newHash)
+    {
+        var passwordHasher = new PasswordHasher<object>();
+        var result = passwordHasher.VerifyHashedPassword(null, hash, password);
+        if (result == PasswordVerificationResult.SuccessRehashNeeded)
+        {
+            newHash = HashPassword(password);
+            return result;
+        }
+        else if (result == PasswordVerificationResult.Success)
+        {
+            newHash = hash;
+            return result;
+        }
+        newHash = null;
+        return result;
+    }
+
     public static bool CheckPasswordPolicy(string password, PasswordCriteria opts = null)
     {
         opts ??= new PasswordCriteria();

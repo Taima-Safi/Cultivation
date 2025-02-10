@@ -1,12 +1,11 @@
 ﻿
+using Cultivation.Dto.Common;
 using Cultivation.Shared.Exception;
-using FourthPro.Dto.Common;
-using FourthPro.Shared.Exception;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text;
 
-namespace FourthPro.Middleware;
+namespace Cultivation.Middleware;
 
 public class ErrorHandlerMiddleware : IMiddleware
 {

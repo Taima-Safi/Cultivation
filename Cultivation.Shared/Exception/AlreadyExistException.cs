@@ -1,4 +1,4 @@
-﻿namespace FourthPro.Shared.Exception;
+﻿namespace Cultivation.Shared.Exception;
 
 public class AlreadyExistException : System.Exception
 {

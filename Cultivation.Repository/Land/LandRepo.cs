@@ -6,7 +6,7 @@ using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.Insecticide;
 using Cultivation.Dto.InsecticideLand;
 using Cultivation.Dto.Land;
-using FourthPro.Shared.Exception;
+using Cultivation.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cultivation.Repository.Land;

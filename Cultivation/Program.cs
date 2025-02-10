@@ -1,6 +1,6 @@
 using Cultivation.Configuration;
 using Cultivation.Database.Context;
-using FourthPro.Middleware;
+using Cultivation.Middleware;
 using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<ErrorHandlerMiddleware>();
-//builder.Services.AddTransient<AuthMiddleware>();
+builder.Services.AddTransient<AuthenticationMiddleware>();
 builder.Services.AddHttpContextAccessor();
 
 #region Database
@@ -29,7 +29,7 @@ builder.Services.AddMemoryCache(opt =>
 #endregion
 
 builder.Services.ConfigureAuthentication(builder.Configuration);
-//builder.Services.ConfigureSwagger();
+builder.Services.ConfigureSwagger();
 builder.Services.ConfigureRepos();
 
 var app = builder.Build();
@@ -58,12 +58,13 @@ app.UseSwaggerUI(s =>
 });
 app.UseRouting();
 
-app.UseMiddleware<ErrorHandlerMiddleware>();
-//app.UseMiddleware<AuthMiddleware>();
 app.UseSwaggerUI();
 
-app.UseAuthentication();
 app.UseAuthorization();
+app.UseAuthentication();
+
+app.UseMiddleware<ErrorHandlerMiddleware>();
+app.UseMiddleware<AuthenticationMiddleware>();
 
 app.MapControllers();
 

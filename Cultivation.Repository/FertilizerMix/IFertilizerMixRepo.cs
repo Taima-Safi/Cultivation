@@ -1,6 +1,6 @@
 ﻿using Cultivation.Dto.Fertilizer;
 using Cultivation.Shared.Enum;
-using FourthPro.Dto.Common;
+using Cultivation.Dto.Common;
 
 namespace Cultivation.Repository.FertilizerMix;
 

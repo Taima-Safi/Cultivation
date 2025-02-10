@@ -1,6 +1,6 @@
 ﻿
 using Cultivation.Dto.Cutting;
-using FourthPro.Dto.Common;
+using Cultivation.Dto.Common;
 
 namespace Cultivation.Repository.Cutting;
 
