@@ -27,4 +27,10 @@ public class LoginController : ControllerBase
 
         return Ok(userDto);
     }
+    [HttpPost, AllowAnonymous]
+    public async Task<IActionResult> RefreshToken(string RefreshToken)
+    {
+        var newToken = await tokenRepo.RefreshTokenAsync(RefreshToken);
+        return Ok(newToken);
+    }
 }
