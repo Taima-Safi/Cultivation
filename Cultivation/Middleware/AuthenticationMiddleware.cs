@@ -37,19 +37,21 @@ public class AuthenticationMiddleware : IMiddleware
 
         if (controllerName.Contains("User") || controllerName.Contains("Role"))
         {
-            if (roleName != nameof(UserType.SuperAdmin) || userRoles.Any(x => x.FullAccess == false))
+            if (roleName != nameof(UserType.SuperAdmin) || userRoles.Any(x => x.Title == RoleType.FullAccess.ToString()))
                 throw new AccessViolationException("No Access");
         }
         else
         {
-            var role = new RoleDto();
+            var role = new CheckRoleDto();
             //var userRoles = await userRepo.GetUserRoleAsync(userId);
             foreach (var userRole in userRoles)
             {
-                role.FullAccess |= userRole.FullAccess;
-                role.DepoAccess |= userRole.DepoAccess;
-                role.OrderAccess |= userRole.OrderAccess;
-                role.CuttingLandAccess |= userRole.CuttingLandAccess;
+                role.FullAccess = userRole.Title == RoleType.FullAccess.ToString();
+                role.DepoAccess = userRole.Title == RoleType.DepoAccess.ToString();
+                role.OrderAccess = userRole.Title == RoleType.OrderAccess.ToString();
+                role.CuttingLandAccess = userRole.Title == RoleType.CuttingLandAccess.ToString();
+                //role.DepoAccess |= userRole.DepoAccess;
+                //role.CuttingLandAccess |= userRole.CuttingLandAccess;
             }
             switch (controllerName)
             {

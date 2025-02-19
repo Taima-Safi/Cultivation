@@ -57,10 +57,11 @@ public class UserRepo : UserService, IUserRepo
                 Role = new RoleDto
                 {
                     Id = r.Role.Id,
-                    DepoAccess = r.Role.DepoAccess,
-                    FullAccess = r.Role.FullAccess,
-                    OrderAccess = r.Role.OrderAccess,
-                    CuttingLandAccess = r.Role.CuttingLandAccess,
+                    Title = r.Role.Title,
+                    //DepoAccess = r.Role.DepoAccess,
+                    //FullAccess = r.Role.FullAccess,
+                    //OrderAccess = r.Role.OrderAccess,
+                    //CuttingLandAccess = r.Role.CuttingLandAccess,
                 }
             }).ToList()
 
