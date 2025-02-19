@@ -2,7 +2,7 @@
 
 public enum RoleType
 {
-    FullAccess,
+    FullAccess = 1,
     DepoAccess,
     OrderAccess,
     CuttingLandAccess

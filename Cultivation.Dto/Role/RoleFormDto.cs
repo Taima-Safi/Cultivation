@@ -3,6 +3,6 @@
 public class RoleFormDto
 {
     public string Title { get; set; }
-    public bool FullAccess { get; set; }
+    //public bool FullAccess { get; set; }
 
 }
