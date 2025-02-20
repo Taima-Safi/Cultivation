@@ -37,7 +37,7 @@ public class AuthenticationMiddleware : IMiddleware
 
         if (controllerName.Contains("User") || controllerName.Contains("Role"))
         {
-            if (roleName != nameof(UserType.SuperAdmin) || userRoles.Any(x => x.Title == RoleType.FullAccess.ToString()))
+            if (!userRoles.Any(x => x.Title == RoleType.FullAccess.ToString()) && roleName != nameof(UserType.SuperAdmin))
                 throw new AccessViolationException("No Access");
         }
         else

@@ -89,10 +89,6 @@ public class UserRepo : UserService, IUserRepo
         await dbRepo.BeginTransactionAsync();
         try
         {
-            var currentUser = await context.User.FirstOrDefaultAsync(x => x.Id == CurrentUserId);
-            if (currentUser.Type != UserType.SuperAdmin)
-                throw new ValidationException("No Access..");
-
             var user = await context.User.Where(u => u.Email == dto.Email.Trim().ToLower() && u.IsValid).FirstOrDefaultAsync();
             if (user != null)
                 throw new AlreadyExistException("This email already Exist ");
@@ -133,9 +129,9 @@ public class UserRepo : UserService, IUserRepo
         if (!await baseRepo.CheckIfExistAsync(u => u.Id == id && u.IsValid))
             throw new NotFoundException("user not found..");
 
-        var user = await context.User.Where(u => u.Email == dto.Email.Trim().ToLower() && u.Id != id && u.IsValid).FirstOrDefaultAsync();
-        if (user != null)
-            throw new AlreadyExistException("This email already Exist ");
+        //var user = await context.User.Where(u => u.Email == dto.Email.Trim().ToLower() && u.Id != id && u.IsValid).FirstOrDefaultAsync();
+        //if (user != null)
+        //    throw new AlreadyExistException("This email already Exist ");
 
         await context.User.Where(u => u.Id == id && u.IsValid).ExecuteUpdateAsync(u => u.SetProperty(x => x.FirstName, dto.FirstName.Trim().ToLower())
         .SetProperty(x => x.LastName, dto.LastName.Trim().ToLower())/*.SetProperty(x => x.Email, dto.Email.Trim().ToLower())*/.SetProperty(x => x.Type, dto.Type)

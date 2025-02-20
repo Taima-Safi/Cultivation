@@ -74,9 +74,6 @@ public class TokenRepo : UserService, ITokenRepo
             RefreshToken = userSameToken.HasValue ? oldRefreshToken : StringHelper.GenerateRandomString(),
             ExpireDate = jwtSecurityToken.ValidTo,
         };
-        Console.WriteLine($"Issuer: {Issuer}");
-        Console.WriteLine($"Audience: {Audience}");
-        Console.WriteLine($"Key: {Key}");
 
         tokenDto.Token = "Bearer " + tokenDto.Token;
         if (!userSameToken.HasValue)
