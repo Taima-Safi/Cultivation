@@ -8,7 +8,8 @@ namespace Cultivation.Repository.Flower;
 public interface IFlowerRepo
 {
     Task AddAsync(AddFlowerFormDto dto, long cuttingLandId);
-    Task AddExternalFlower(long flowerStoreId, int count);
+    Task AddExternalFlowerAsync(long flowerStoreId, int count);
+    Task AddTrashedFlowerAsync(long flowerStoreId, int trashedCount);
     Task<bool> CheckIfExistAsync(long id);
     Task<CommonResponseDto<List<FlowerDto>>> GetAllAsync(DateTime? from, DateTime? to, long? cuttingLandId, string cuttingTitle
         , string cuttingColorCode, string worker, double? Long, int pageSize, int pageNum);

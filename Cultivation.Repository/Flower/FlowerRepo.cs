@@ -258,7 +258,7 @@ public class FlowerRepo : IFlowerRepo
     public async Task<List<FlowerStoreModel>> GetStoreModelsByIdsAsync(List<long> ids)
         => await context.FlowerStore.Where(f => ids.Contains(f.Id) && f.IsValid).ToListAsync();
 
-    public async Task AddExternalFlower(long flowerStoreId, int count)
+    public async Task AddExternalFlowerAsync(long flowerStoreId, int count)
     {
         var model = await context.FlowerStore.Where(c => c.Id == flowerStoreId && c.IsValid).FirstOrDefaultAsync();
 

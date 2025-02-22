@@ -60,5 +60,17 @@ public class FlowerController : ControllerBase
         var result = await flowerRepo.GetAllFlowerStoreAsync(code, pageSize, pageNum);
         return Ok(result);
     }
+    [HttpPost]
+    public async Task<IActionResult> AddExternalFlower(long flowerStoreId, int count)
+    {
+        await flowerRepo.AddExternalFlowerAsync(flowerStoreId, count);
+        return Ok();
+    }
+    [HttpPost]
+    public async Task<IActionResult> AddTrashedFlower(long flowerStoreId, int trashedCount)
+    {
+        await flowerRepo.AddTrashedFlowerAsync(flowerStoreId, trashedCount);
+        return Ok();
+    }
     #endregion
 }
