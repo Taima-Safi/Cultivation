@@ -1,4 +1,5 @@
 ﻿using Cultivation.Repository.Color;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Cultivation.Controllers;
@@ -19,6 +20,7 @@ public class ColorController : ControllerBase
         var colorId = await colorRepo.AddAsync(title, code);
         return Ok(colorId);
     }
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll(string title, string code, int pageSize = 10, int pageNum = 0)
     {

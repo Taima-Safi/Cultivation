@@ -1,7 +1,7 @@
 ﻿
 using Cultivation.Dto.Insecticide;
 using Cultivation.Shared.Enum;
-using FourthPro.Dto.Common;
+using Cultivation.Dto.Common;
 
 namespace Cultivation.Repository.InsecticideMix;
 

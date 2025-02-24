@@ -2,8 +2,8 @@
 using Cultivation.Database.Model;
 using Cultivation.Dto.Fertilizer;
 using Cultivation.Repository.Base;
-using FourthPro.Dto.Common;
-using FourthPro.Shared.Exception;
+using Cultivation.Dto.Common;
+using Cultivation.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

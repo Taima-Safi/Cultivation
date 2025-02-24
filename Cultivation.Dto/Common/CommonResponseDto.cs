@@ -1,4 +1,4 @@
-﻿namespace FourthPro.Dto.Common;
+﻿namespace Cultivation.Dto.Common;
 
 public class CommonResponseDto<T>
 {

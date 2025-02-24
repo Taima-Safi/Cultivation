@@ -1,5 +1,5 @@
 ﻿using Cultivation.Dto.CuttingLand;
-using FourthPro.Dto.Common;
+using Cultivation.Dto.Common;
 
 namespace Cultivation.Repository.CuttingLand;
 

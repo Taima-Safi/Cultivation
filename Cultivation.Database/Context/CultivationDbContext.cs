@@ -14,6 +14,10 @@ public class CultivationDbContext : DbContext
     public CultivationDbContext(DbContextOptions<CultivationDbContext> options) : base(options)
     {
     }
+    public DbSet<UserModel> User { get; set; }
+    public DbSet<TokenModel> Token { get; set; }
+    public DbSet<RoleModel> Role { get; set; }
+    public DbSet<UserRoleModel> UserRole { get; set; }
     public DbSet<LandModel> Land { get; set; }
     public DbSet<ColorModel> Color { get; set; }
     public DbSet<FlowerModel> Flower { get; set; }
