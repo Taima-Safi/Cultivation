@@ -14,6 +14,20 @@ public class ClientController : ControllerBase
     {
         this.clientRepo = clientRepo;
     }
+
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadImage(IFormFile file)
+    {
+
+        var id = await clientRepo.UploadImage(file);
+        return Ok(new { id });
+    }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetImage(int id)
+    {
+        var image = await clientRepo.GetImage(id);
+        return File(image.Data, image.ContentType);
+    }
     [HttpPost]
     public async Task<IActionResult> Add(ClientFormDto dto)
     {

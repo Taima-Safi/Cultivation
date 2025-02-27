@@ -1,9 +1,10 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Client;
-using Cultivation.Repository.Base;
 using Cultivation.Dto.Common;
+using Cultivation.Repository.Base;
 using Cultivation.Shared.Exception;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -18,6 +19,38 @@ public class ClientRepo : IClientRepo
     {
         this.context = context;
         this.baseRepo = baseRepo;
+    }
+    public async Task<long> UploadImage(IFormFile file)
+    {
+        {
+            if (file == null || file.Length == 0)
+                throw new NotFoundException("No file uploaded.");
+
+            // Convert the file to a byte array
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            byte[] fileBytes = memoryStream.ToArray();
+
+            // Save the file to the database
+            var image = new FileModel
+            {
+                FileName = file.FileName,
+                ContentType = file.ContentType,
+                Data = fileBytes
+            };
+
+            await context.File.AddAsync(image);
+            await context.SaveChangesAsync();
+            return image.Id;
+        }
+    }
+    public async Task<FileModel> GetImage(int id)
+    {
+        var image = await context.File.FindAsync(id);
+        if (image == null)
+            throw new NotFoundException(" ");
+
+        return image;
     }
     public async Task<long> AddAsync(ClientFormDto dto)
     {
