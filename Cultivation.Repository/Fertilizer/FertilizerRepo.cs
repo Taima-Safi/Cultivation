@@ -59,7 +59,6 @@ public class FertilizerRepo : IFertilizerRepo
                 NPK = f.NPK,
                 //File = f.File,
                 Title = f.Title,
-                //Price = f.Price,
                 PublicTitle = f.PublicTitle,
                 Description = f.Description,
             }).ToListAsync();
@@ -82,7 +81,6 @@ public class FertilizerRepo : IFertilizerRepo
             NPK = f.NPK,
             //File = f.File,
             Title = f.Title,
-            //Price = f.Price,
             PublicTitle = f.PublicTitle,
             Description = f.Description,
         }).FirstOrDefaultAsync();
@@ -95,8 +93,7 @@ public class FertilizerRepo : IFertilizerRepo
 
         await context.Fertilizer.Where(f => f.Id == id && f.IsValid).ExecuteUpdateAsync(f => f.SetProperty(f => f.NPK, dto.NPK)
         .SetProperty(f => f.Title, dto.Title).SetProperty(f => f.PublicTitle, dto.PublicTitle)
-        .SetProperty(f => f.Description, dto.Description)
-        /*.SetProperty(f => f.Price, dto.Price)*/);
+        .SetProperty(f => f.Description, dto.Description));
     }
     public async Task RemoveAsync(long id)
     {
@@ -117,17 +114,15 @@ public class FertilizerRepo : IFertilizerRepo
         {
             await dbRepo.BeginTransactionAsync();
 
-            await context.FertilizerTransaction.AddAsync(new FertilizerTransactionModel
-            {
-                Date = date,
-                IsAdd = isAdd,
-                QuantityChange = quantity,
-                FertilizerId = fertilizerId
-            });
+            if (quantity < 0)
+                throw new NotFoundException("Quantity can't be less than or equal 0..");
 
             var fertilizerStoreModel = await context.FertilizerStore.Where(x => x.FertilizerId == fertilizerId && x.IsValid).FirstOrDefaultAsync();
             if (fertilizerStoreModel == null)
             {
+                if (fertilizerStoreModel.TotalQuantity < quantity)
+                    throw new NotFoundException("Fertilizer quantity is less than you want..");
+
                 if (!isAdd)
                     throw new NotFoundException("Fertilizer not found in depot, you can't remove..");
 
@@ -139,6 +134,14 @@ public class FertilizerRepo : IFertilizerRepo
             }
             else
                 fertilizerStoreModel.TotalQuantity += isAdd ? quantity : -quantity;
+
+            await context.FertilizerTransaction.AddAsync(new FertilizerTransactionModel
+            {
+                Date = date,
+                IsAdd = isAdd,
+                QuantityChange = quantity,
+                FertilizerId = fertilizerId
+            });
 
             await context.SaveChangesAsync();
             await dbRepo.CommitTransactionAsync();

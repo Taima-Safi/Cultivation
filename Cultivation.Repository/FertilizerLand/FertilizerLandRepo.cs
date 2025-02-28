@@ -1,6 +1,7 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Color;
+using Cultivation.Dto.Common;
 using Cultivation.Dto.Cutting;
 using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Fertilizer;
@@ -8,11 +9,11 @@ using Cultivation.Dto.FertilizerLand;
 using Cultivation.Dto.Land;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.CuttingLand;
+using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Repository.File;
 using Cultivation.Repository.Land;
 using Cultivation.Shared.Enum;
-using Cultivation.Dto.Common;
 using Cultivation.Shared.Exception;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace Cultivation.Repository.FertilizerLand;
 
 public class FertilizerLandRepo : IFertilizerLandRepo
 {
+    private readonly IDbRepo dbRepo;
     private readonly CultivationDbContext context;
     private readonly ICuttingLandRepo cuttingLandRepo;
     private readonly IFertilizerRepo fertilizerRepo;
@@ -33,7 +35,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     private readonly IBaseRepo<LandModel> landBaseRepo;
 
     public FertilizerLandRepo(CultivationDbContext context, ILandRepo landRepo, IFertilizerRepo fertilizerRepo, IBaseRepo<FertilizerLandModel> baseRepo,
-        ICuttingLandRepo cuttingLandRepo, IFileRepo<FertilizerExportToExcelDto> fileRepo, IBaseRepo<FertilizerMixModel> mixRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo, IBaseRepo<LandModel> landBaseRepo)
+        ICuttingLandRepo cuttingLandRepo, IFileRepo<FertilizerExportToExcelDto> fileRepo, IBaseRepo<FertilizerMixModel> mixRepo, IBaseRepo<CuttingLandModel> cuttingLandBaseRepo, IBaseRepo<LandModel> landBaseRepo, IDbRepo dbRepo)
     {
         this.context = context;
         this.landRepo = landRepo;
@@ -44,6 +46,7 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         this.mixBaseRepo = mixRepo;
         this.cuttingLandBaseRepo = cuttingLandBaseRepo;
         this.landBaseRepo = landBaseRepo;
+        this.dbRepo = dbRepo;
     }
 
     public async Task<(FormFile file, MemoryStream stream)> ExportExcelAsync(long landId, DateTime? from, DateTime? to, string fileName)
@@ -338,19 +341,36 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
     public async Task AddMixLandAsync(long mixId, long landId)
     {
-        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
-            throw new NotFoundException("mix not found..");
-
-        if (!await landBaseRepo.CheckIfExistAsync(m => m.Id == landId && m.IsValid))
-            throw new NotFoundException("land not found..");
-
-        await context.FertilizerMixLand.AddAsync(new FertilizerMixLandModel
+        try
         {
-            LandId = landId,
-            Date = DateTime.UtcNow,
-            FertilizerMixId = mixId,
-        });
-        await context.SaveChangesAsync();
+            await dbRepo.BeginTransactionAsync();
+
+            if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
+                throw new NotFoundException("mix not found..");
+
+            if (!await landBaseRepo.CheckIfExistAsync(m => m.Id == landId && m.IsValid))
+                throw new NotFoundException("land not found..");
+
+            Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
+                .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
+
+            foreach (var item in dic)
+                await fertilizerRepo.AddToStoreAsync(item.Key, item.Value, DateTime.UtcNow, true);
+
+            await context.FertilizerMixLand.AddAsync(new FertilizerMixLandModel
+            {
+                LandId = landId,
+                Date = DateTime.UtcNow,
+                FertilizerMixId = mixId,
+            });
+            await dbRepo.SaveChangesAsync();
+            await dbRepo.CommitTransactionAsync();
+        }
+        catch (Exception)
+        {
+            await dbRepo.RollbackTransactionAsync();
+            throw;
+        }
     }
     public async Task AddMixLandsAsync(long mixId, List<long> landIds)
     {
@@ -359,6 +379,13 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
         if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id) && m.IsValid))
             throw new NotFoundException("one of lands not found..");
+
+        Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
+            .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
+
+        foreach (var item in dic)
+            await fertilizerRepo.AddToStoreAsync(item.Key, item.Value, DateTime.UtcNow, true);
+
         List<FertilizerMixLandModel> models = [];
         foreach (var id in landIds)
             models.Add(new FertilizerMixLandModel
