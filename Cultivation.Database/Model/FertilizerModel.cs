@@ -9,4 +9,6 @@ public class FertilizerModel : BaseModel
     public string File { get; set; }
     public string Description { get; set; }
     public ICollection<FertilizerLandModel> FertilizerLands { get; set; }
+    public ICollection<FertilizerStoreModel> FertilizerStores { get; set; }
+    public ICollection<FertilizerTransactionModel> FertilizerTransactions { get; set; }
 }
