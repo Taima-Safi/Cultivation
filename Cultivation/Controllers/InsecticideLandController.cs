@@ -80,9 +80,9 @@ public class InsecticideLandController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> RemoveMixLands(long mixLandId)
+    public async Task<IActionResult> RemoveMixLand(long mixLandId)
     {
-        await insecticideLandRepo.RemoveMixLandsAsync(mixLandId);
+        await insecticideLandRepo.RemoveMixLandAsync(mixLandId);
         return Ok();
     }
 

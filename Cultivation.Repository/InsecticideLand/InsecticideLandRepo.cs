@@ -1,5 +1,6 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.Common;
 using Cultivation.Dto.Cutting;
 using Cultivation.Dto.CuttingLand;
 using Cultivation.Dto.Insecticide;
@@ -11,7 +12,6 @@ using Cultivation.Repository.File;
 using Cultivation.Repository.Insecticide;
 using Cultivation.Repository.Land;
 using Cultivation.Shared.Enum;
-using Cultivation.Dto.Common;
 using Cultivation.Shared.Exception;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -338,7 +338,7 @@ public class InsecticideLandRepo : IInsecticideLandRepo
 
         return x1;
     }
-    public async Task RemoveMixLandsAsync(long mixLandId) //ToDo: 
+    public async Task RemoveMixLandAsync(long mixLandId) //ToDo: 
      => await context.InsecticideMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.IsValid, false));
     #endregion
 }

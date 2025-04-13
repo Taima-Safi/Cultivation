@@ -1,6 +1,6 @@
-﻿using Cultivation.Dto.InsecticideLand;
+﻿using Cultivation.Dto.Common;
+using Cultivation.Dto.InsecticideLand;
 using Cultivation.Dto.Land;
-using Cultivation.Dto.Common;
 using Microsoft.AspNetCore.Http;
 
 namespace Cultivation.Repository.InsecticideLand;
@@ -18,6 +18,6 @@ public interface IInsecticideLandRepo
     Task<List<LandDto>> GetLandsWhichNotUsedInDayAsync(DateTime? date);
     Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime? mixedDate);
     Task RemoveAsync(long id);
-    Task RemoveMixLandsAsync(long mixLandId);
+    Task RemoveMixLandAsync(long mixLandId);
     Task UpdateAsync(long id, UpdateInsecticideLandFormDto dto);
 }
