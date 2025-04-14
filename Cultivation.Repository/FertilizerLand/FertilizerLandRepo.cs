@@ -351,11 +351,11 @@ public class FertilizerLandRepo : IFertilizerLandRepo
             if (!await landBaseRepo.CheckIfExistAsync(m => m.Id == landId && m.IsValid))
                 throw new NotFoundException("land not found..");
 
-            Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
-                .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
+            //Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
+            //    .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
 
-            foreach (var item in dic)
-                await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, false);
+            //foreach (var item in dic)
+            //    await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, false);
 
             await context.FertilizerMixLand.AddAsync(new FertilizerMixLandModel
             {
@@ -380,11 +380,11 @@ public class FertilizerLandRepo : IFertilizerLandRepo
         if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id) && m.IsValid))
             throw new NotFoundException("one of lands not found..");
         //todo: fix quantity should add in store
-        Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
-            .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
+        //Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
+        //    .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
 
-        foreach (var item in dic)
-            await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, true);
+        //foreach (var item in dic)
+        //    await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, false);
 
         List<FertilizerMixLandModel> models = [];
         foreach (var id in landIds)
@@ -418,11 +418,11 @@ public class FertilizerLandRepo : IFertilizerLandRepo
 
             if (mixLand == null)
                 throw new NotFoundException("Mix not found..");
-            // error 
-            Dictionary<long, double> dic = mixLand.FertilizerMix.FertilizerMixDetails.ToDictionary(x => x.FertilizerId, x => x.Quantity);
+            //// error 
+            //Dictionary<long, double> dic = mixLand.FertilizerMix.FertilizerMixDetails.ToDictionary(x => x.FertilizerId, x => x.Quantity);
 
-            foreach (var item in dic)
-                await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, false);
+            //foreach (var item in dic)
+            //    await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, false);
 
             mixLand.IsValid = false;
             //await context.FertilizerMixLand.Where(fl => fl.Id == mixLandId && fl.IsValid).ExecuteUpdateAsync(fl => fl.SetProperty(fl => fl.IsValid, false));
