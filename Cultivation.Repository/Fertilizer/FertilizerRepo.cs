@@ -206,44 +206,72 @@ public class FertilizerRepo : IFertilizerRepo
             throw;
         }
     }
-    public async Task UpdateStoreAsync2(Dictionary<long, double> dictionary, DateTime date, bool isAdd)
+    public async Task UpdateStoreAsync2(Dictionary<long, double> fertilizersDic, DateTime date, bool isAdd)
     {
         try
         {
             await dbRepo.BeginTransactionAsync();
 
-            if (dictionary.Any(x => x.Value < 0))
+            if (fertilizersDic.Any(x => x.Value < 0))
                 throw new NotFoundException("One of quantity is less than 0..");
 
-            var fertilizerStoreModels = await context.FertilizerStore.Where(x => dictionary.Values.Contains(x.FertilizerId) && x.IsValid).ToListAsync();
+            var fertilizerStoreModels = await context.FertilizerStore.Where(x => fertilizersDic.Keys.Contains(x.FertilizerId) && x.IsValid).ToListAsync();
+            // For pulling (!isAdd), ensure all requested fertilizers exist in store
+            if (!isAdd && fertilizerStoreModels.Count != fertilizersDic.Count)
+            {
+                var missingIds = fertilizersDic.Keys.Except(fertilizerStoreModels.Select(f => f.FertilizerId));
+                throw new NotFoundException($"Fertilizers not found in store: {string.Join(", ", missingIds)}");
+            }
 
-            //check if all fertilizer in store have required quantity
-            if (!isAdd && dictionary.Any(dic => fertilizerStoreModels.Any(f => f.FertilizerId == dic.Key && f.TotalQuantity < dic.Value)))
-                throw new NotFoundException("One of Fertilizer quantity is less than you want..");
+            // Check if pulling more than available
+            if (!isAdd)
+            {
+                var insufficient = fertilizerStoreModels
+                    .Where(f => f.TotalQuantity < fertilizersDic[f.FertilizerId])
+                    .Select(f => f.FertilizerId);
 
-            Dictionary<long, double> toAddDic = new Dictionary<long, double>();
-            Dictionary<long, double> toUpdateDic = new Dictionary<long, double>();
-            foreach (var dic in dictionary)
-                if (isAdd && !fertilizerStoreModels.Any(f => f.FertilizerId == dic.Key))
-                    toAddDic.Add(dic.Key, dic.Value);
-                else
-                    toUpdateDic.Add(dic.Key, dic.Value);
+                if (insufficient.Any())
+                    throw new NotFoundException($"Insufficient quantity for fertilizers: {string.Join(", ", insufficient)}");
+            }
+            ////check if all fertilizer in store have required quantity
+            //if (!isAdd && fertilizersDic.Any(dic => fertilizerStoreModels.Any(f => f.FertilizerId == dic.Key && f.TotalQuantity < dic.Value)))
+            //    throw new NotFoundException("One of Fertilizer quantity is less than you want..");
+
+            //Dictionary<long, double> toAddDic = new Dictionary<long, double>();
+            //Dictionary<long, double> toUpdateDic = new Dictionary<long, double>();
+
+            // Separate into ADD (new fertilizers) and UPDATE (existing fertilizers)
+            var toAddDic = fertilizersDic
+                .Where(x => isAdd && !fertilizerStoreModels.Any(f => f.FertilizerId == x.Key))
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            var toUpdateDic = fertilizersDic
+                .Where(x => fertilizerStoreModels.Any(f => f.FertilizerId == x.Key))
+                .ToDictionary(x => x.Key, x => x.Value);
+
+
+            //foreach (var item in fertilizersDic)
+            //    if (isAdd && !fertilizerStoreModels.Any(f => f.FertilizerId == item.Key))
+            //        toAddDic.Add(item.Key, item.Value);
+            //    else
+            //        toUpdateDic.Add(item.Key, item.Value);
 
             if (toAddDic.Count > 0)
                 await AddFertilizersToStore(toAddDic);
 
-            if (toUpdateDic.Count > 0)
+            foreach (var storeItem in fertilizerStoreModels)
             {
-                fertilizerStoreModels.ForEach(f =>
+                if (toUpdateDic.TryGetValue(storeItem.FertilizerId, out double quantity))
                 {
-                    if (toUpdateDic.ContainsKey(f.FertilizerId))
-                    {
-                        f.TotalQuantity += isAdd ? toUpdateDic[f.FertilizerId] : -toUpdateDic[f.FertilizerId];
-                    }
-                });
+                    storeItem.TotalQuantity += isAdd ? quantity : -quantity;
+
+                    // Prevent negative stock
+                    if (storeItem.TotalQuantity < 0)
+                        throw new InvalidOperationException($"Negative stock not allowed for fertilizer {storeItem.FertilizerId}");
+                }
             }
 
-            await AddFertilizerTransactionsAsync(dictionary, date, isAdd);
+            await AddFertilizerTransactionsAsync(fertilizersDic, date, isAdd);
 
             await context.SaveChangesAsync();
             await dbRepo.CommitTransactionAsync();
@@ -263,10 +291,12 @@ public class FertilizerRepo : IFertilizerRepo
             var mixModels = await context.FertilizerMixDetail.Where(m => m.FertilizerMixId == mixId && m.IsValid).ToListAsync() ??
                 throw new NotFoundException("mix not found..");
 
-            foreach (var model in mixModels)
-            {
-                await UpdateStoreAsync(model.FertilizerId, model.Quantity * donumNum, date, false);
-            }
+            //foreach (var model in mixModels)
+            //{
+            //    await UpdateStoreAsync(model.FertilizerId, model.Quantity * donumNum, date, false);
+            //}
+            var toUpdateStoreDic = mixModels.ToDictionary(x => x.FertilizerId, x => x.Quantity * donumNum);
+            await UpdateStoreAsync2(toUpdateStoreDic, date, false);
         }
         catch (Exception)
         {

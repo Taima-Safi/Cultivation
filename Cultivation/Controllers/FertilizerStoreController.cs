@@ -19,6 +19,12 @@ public class FertilizerStoreController : ControllerBase
         await fertilizerRepo.UpdateStoreAsync(fertilizerId, quantity, date, isAdd);
         return Ok();
     }
+    [HttpPost]
+    public async Task<IActionResult> UpdateStoreForMix(long mixId, double donumNum, DateTime date)
+    {
+        await fertilizerRepo.UpdateStoreForMixAsync(mixId, donumNum, date);
+        return Ok();
+    }
     //[HttpPost]
     //public async Task<IActionResult> UpdateStoreForMix(long mixId, double donumNum, DateTime date)
     //{

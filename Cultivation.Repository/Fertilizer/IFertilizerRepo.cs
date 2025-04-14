@@ -16,4 +16,5 @@ public interface IFertilizerRepo
     Task UpdateAsync(long id, FertilizerFormDto dto);
     Task AddFertilizersToStore(Dictionary<long, double> toAddDic);
     Task<CommonResponseDto<List<FertilizerStoreDto>>> GetAllFertilizerStoreAsync(string fertilizerTitle, string npk, DateTime? date, int pageSize, int pageNum);
+    Task UpdateStoreForMixAsync(long mixId, double donumNum, DateTime date);
 }
