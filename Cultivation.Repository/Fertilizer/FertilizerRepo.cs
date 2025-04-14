@@ -113,11 +113,11 @@ public class FertilizerRepo : IFertilizerRepo
 
     #region Store
 
-    public async Task AddFertilizersToStore(Dictionary<long, double> toAddDic)
+    public async Task AddFertilizersToStore(Dictionary<long, double> addToStoreDic)
     {
-        if (toAddDic.Count > 0)
+        if (addToStoreDic.Count > 0)
         {
-            var newFertilizers = toAddDic.Select(x => new FertilizerStoreModel
+            var newFertilizers = addToStoreDic.Select(x => new FertilizerStoreModel
             {
                 FertilizerId = x.Key,
                 TotalQuantity = x.Value
@@ -181,17 +181,18 @@ public class FertilizerRepo : IFertilizerRepo
             var fertilizerStoreModel = await context.FertilizerStore.Where(x => x.FertilizerId == fertilizerId && x.IsValid).FirstOrDefaultAsync();
             if (fertilizerStoreModel == null)
             {
-                if (fertilizerStoreModel.TotalQuantity < quantity)
-                    throw new NotFoundException("Fertilizer quantity is less than you want..");
-
                 if (!isAdd)
                     throw new NotFoundException("Fertilizer not found in depot, you can't pull..");
 
                 await AddFertilizersToStore(new Dictionary<long, double> { { fertilizerId, quantity } });
-
             }
             else
+            {
+                if (!isAdd && fertilizerStoreModel.TotalQuantity < quantity)
+                    throw new NotFoundException("Fertilizer quantity is less than you want..");
+
                 fertilizerStoreModel.TotalQuantity += isAdd ? quantity : -quantity;
+            }
 
             await AddFertilizerTransactionsAsync(new Dictionary<long, double> { { fertilizerId, quantity } }, date, isAdd);
 
