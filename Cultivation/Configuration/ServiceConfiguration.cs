@@ -68,7 +68,7 @@ public static class ServiceConfiguration
              Description = "Cultivation API Services.",
              Contact = new OpenApiContact
              {
-                 Name = "Coursing"
+                 Name = "Cultivation"
              },
          });
          c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
@@ -83,17 +83,17 @@ public static class ServiceConfiguration
          });
          c.AddSecurityRequirement(new OpenApiSecurityRequirement
          {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
                     {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
                     }
+                },
+                Array.Empty<string>()
+            }
          });
      });
 

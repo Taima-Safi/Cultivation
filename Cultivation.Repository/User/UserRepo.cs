@@ -43,6 +43,8 @@ public class UserRepo : UserService, IUserRepo
         if (model == null)
             throw new NotFoundException("This email not found");
 
+        await CheckPasswordCorrectness(dto.Password, model.HashPassword, model.Id);
+
         var userDto = await context.User.Where(u => u.Id == model.Id && u.IsValid).Select(model => new UserDto
         {
             Id = model.Id,

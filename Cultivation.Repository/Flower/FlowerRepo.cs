@@ -53,14 +53,16 @@ public class FlowerRepo : IFlowerRepo
                 //var storeLong = store.FirstOrDefault(s => s.FlowerLong == item.Long);
                 if (!store.TryGetValue(item.Long, out var existingStore))
                 {
-                    await context.FlowerStore.AddAsync(new FlowerStoreModel
+                    var newStore = new FlowerStoreModel
                     {
                         Code = cuttingCode,
                         Count = item.Count,
                         FlowerLong = item.Long,
                         TotalCount = item.Count,
                         RemainedCount = item.Count,
-                    });
+                    };
+                    await context.FlowerStore.AddAsync(newStore);
+                    store.Add(item.Long, newStore);
                 }
                 else
                 {
