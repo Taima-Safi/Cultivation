@@ -153,6 +153,7 @@ public class FertilizerRepo : IFertilizerRepo
         {
             Id = f.Id,
             //Date = f.Date,
+            TotalQuantity = f.TotalQuantity,
             Fertilizer = new FertilizerDto
             {
                 Id = f.Fertilizer.Id,
