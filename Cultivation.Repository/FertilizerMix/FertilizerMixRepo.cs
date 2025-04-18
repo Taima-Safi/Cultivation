@@ -1,11 +1,11 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.Common;
 using Cultivation.Dto.Fertilizer;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Fertilizer;
 using Cultivation.Shared.Enum;
-using Cultivation.Dto.Common;
 using Cultivation.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -119,6 +119,24 @@ public class FertilizerMixRepo : IFertilizerMixRepo
                 }
             }).ToList()
         }).FirstOrDefaultAsync();
+    }
+    public async Task<List<FertilizerApplicableMixDto>> GetAllFertilizerApplicableMixAsync()
+    {
+        var applicableMixes = await context.FertilizerApplicableMix.Where(x => x.CurrentDonumCount > 0 && x.IsValid)
+            .Select(x => new FertilizerApplicableMixDto
+            {
+                Id = x.Id,
+                DonumCount = x.DonumCount,
+                CurrentDonumCount = x.CurrentDonumCount,
+                FertilizerMixDto = new GetFertilizerMixDto
+                {
+                    Id = x.FertilizerMix.Id,
+                    Title = x.FertilizerMix.Title,
+                    Color = x.FertilizerMix.Color,
+                }
+            }).ToListAsync();
+
+        return applicableMixes;
     }
 
     public async Task UpdateAsync(long id, string title, FertilizerType type, ColorType color)

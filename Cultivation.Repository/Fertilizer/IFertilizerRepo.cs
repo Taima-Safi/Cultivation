@@ -1,5 +1,5 @@
-﻿using Cultivation.Dto.Fertilizer;
-using Cultivation.Dto.Common;
+﻿using Cultivation.Dto.Common;
+using Cultivation.Dto.Fertilizer;
 
 namespace Cultivation.Repository.Fertilizer;
 

@@ -363,6 +363,8 @@ public class FertilizerLandRepo : IFertilizerLandRepo
                 Date = DateTime.UtcNow,
                 FertilizerMixId = mixId,
             });
+
+
             await dbRepo.SaveChangesAsync();
             await dbRepo.CommitTransactionAsync();
         }
@@ -374,28 +376,51 @@ public class FertilizerLandRepo : IFertilizerLandRepo
     }
     public async Task AddMixLandsAsync(long mixId, List<long> landIds)
     {
-        if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
-            throw new NotFoundException("mix not found..");
+        try
+        {
+            await dbRepo.BeginTransactionAsync();
 
-        if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id) && m.IsValid))
-            throw new NotFoundException("one of lands not found..");
-        //todo: fix quantity should add in store
-        //Dictionary<long, double> dic = await context.FertilizerMixDetail.Where(x => x.FertilizerMixId == mixId && x.IsValid)
-        //    .ToDictionaryAsync(x => x.FertilizerId, x => x.Quantity);
+            if (landIds == null || !landIds.Any())
+                throw new ArgumentException("Land IDs cannot be empty");
 
-        //foreach (var item in dic)
-        //    await fertilizerRepo.UpdateStoreAsync(item.Key, item.Value, DateTime.UtcNow, false);
+            if (!await mixBaseRepo.CheckIfExistAsync(m => m.Id == mixId && m.IsValid))
+                throw new NotFoundException("mix not found..");
 
-        List<FertilizerMixLandModel> models = [];
-        foreach (var id in landIds)
-            models.Add(new FertilizerMixLandModel
+            if (!await landBaseRepo.CheckIfExistAsync(m => landIds.Contains(m.Id) && m.IsValid))
+                throw new NotFoundException("one of lands not found..");
+
+            var mixDonum = await context.FertilizerApplicableMix.Where(x => x.FertilizerMixId == mixId && x.CurrentDonumCount > 0 && x.IsValid).FirstOrDefaultAsync();
+            if (mixDonum == null)
+                throw new NotFoundException("No available mix with positive donum count");
+
+            var landSizes = await context.Land
+                .Where(l => landIds.Contains(l.Id))
+                .Select(l => new { l.Id, l.Size })
+                .ToListAsync();
+
+            double totalLandDonum = landSizes.Sum(x => x.Size);
+            if (totalLandDonum > mixDonum.CurrentDonumCount)
+                throw new NotFoundException("You do not have enough mix ");
+
+            mixDonum.CurrentDonumCount -= totalLandDonum;
+
+            var models = landIds.Select(id => new FertilizerMixLandModel
             {
                 LandId = id,
                 Date = DateTime.UtcNow,
                 FertilizerMixId = mixId
             });
-        await context.FertilizerMixLand.AddRangeAsync(models);
-        await context.SaveChangesAsync();
+
+            await context.FertilizerMixLand.AddRangeAsync(models);
+
+            await dbRepo.SaveChangesAsync();
+            await dbRepo.CommitTransactionAsync();
+        }
+        catch (Exception)
+        {
+            await dbRepo.RollbackTransactionAsync();
+            throw;
+        }
     }
     public async Task<List<LandDto>> GetMixLandsAsync(string landTitle, string mixTitle, DateTime? mixedDate)
     {

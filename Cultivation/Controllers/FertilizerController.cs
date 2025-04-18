@@ -63,6 +63,12 @@ public class FertilizerController : ControllerBase
         return Ok(mixes);
     }
     [HttpGet]
+    public async Task<IActionResult> GetAllFertilizerApplicableMix()
+    {
+        var result = await mixRepo.GetAllFertilizerApplicableMixAsync();
+        return Ok(result);
+    }
+    [HttpGet]
     public async Task<IActionResult> GetMixById(long id)
     {
         var mix = await mixRepo.GetByIdAsync(id);

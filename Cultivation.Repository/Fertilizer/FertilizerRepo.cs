@@ -298,6 +298,16 @@ public class FertilizerRepo : IFertilizerRepo
             //}
             var toUpdateStoreDic = mixModels.ToDictionary(x => x.FertilizerId, x => x.Quantity * donumNum);
             await UpdateStoreAsync2(toUpdateStoreDic, date, false);
+
+            await context.FertilizerApplicableMix.AddAsync(new FertilizerApplicableMixModel
+            {
+                DonumCount = donumNum,
+                FertilizerMixId = mixId,
+                CurrentDonumCount = donumNum,
+            });
+
+            await context.SaveChangesAsync();
+            await dbRepo.CommitTransactionAsync();
         }
         catch (Exception)
         {
