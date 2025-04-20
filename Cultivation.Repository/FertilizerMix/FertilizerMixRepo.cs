@@ -123,6 +123,7 @@ public class FertilizerMixRepo : IFertilizerMixRepo
     public async Task<List<FertilizerApplicableMixDto>> GetAllFertilizerApplicableMixAsync()
     {
         var applicableMixes = await context.FertilizerApplicableMix.Where(x => x.CurrentDonumCount > 0 && x.IsValid)
+            .Include(x => x.FertilizerMix)
             .Select(x => new FertilizerApplicableMixDto
             {
                 Id = x.Id,
