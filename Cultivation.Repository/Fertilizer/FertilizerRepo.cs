@@ -289,7 +289,9 @@ public class FertilizerRepo : IFertilizerRepo
         {
             await dbRepo.BeginTransactionAsync();
 
-            var mixModels = await context.FertilizerMixDetail.Where(m => m.FertilizerMixId == mixId && m.IsValid).ToListAsync() ??
+            var mixModels = (await context.FertilizerMixDetail.Where(m => m.FertilizerMixId == mixId && m.IsValid).ToListAsync());
+
+            if (mixModels.Count == 0)
                 throw new NotFoundException("mix not found..");
 
             //foreach (var model in mixModels)
