@@ -41,6 +41,9 @@ public class CultivationDbContext : DbContext
     public DbSet<FertilizerStoreModel> FertilizerStore { get; set; }
     public DbSet<FertilizerTransactionModel> FertilizerTransaction { get; set; }
     public DbSet<FertilizerApplicableMixModel> FertilizerApplicableMix { get; set; }
+    public DbSet<InsecticideStoreModel> InsecticideStore { get; set; }
+    public DbSet<InsecticideTransactionModel> InsecticideTransaction { get; set; }
+    public DbSet<InsecticideApplicableMixModel> InsecticideApplicableMix { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
