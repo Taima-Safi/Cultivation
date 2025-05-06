@@ -1,6 +1,6 @@
 ﻿namespace Cultivation.Database.Model;
 
-public class InsecticideApplicableMixModel
+public class InsecticideApplicableMixModel : BaseModel
 {
     public double DonumCount { get; set; }
     public double CurrentDonumCount { get; set; }
