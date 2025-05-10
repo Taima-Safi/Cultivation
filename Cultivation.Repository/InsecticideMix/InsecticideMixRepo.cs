@@ -1,11 +1,11 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
+using Cultivation.Dto.Common;
 using Cultivation.Dto.Insecticide;
 using Cultivation.Repository.Base;
 using Cultivation.Repository.DataBase;
 using Cultivation.Repository.Insecticide;
 using Cultivation.Shared.Enum;
-using Cultivation.Dto.Common;
 using Cultivation.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -123,7 +123,25 @@ public class InsecticideMixRepo : IInsecticideMixRepo
             }).ToList()
         }).FirstOrDefaultAsync();
     }
+    public async Task<List<InsecticideApplicableMixDto>> GetAllInsecticideApplicableMixAsync()
+    {
+        var applicableMixes = await context.InsecticideApplicableMix.Where(x => x.CurrentDonumCount > 0 && x.IsValid)
+            .Include(x => x.InsecticideMix)
+            .Select(x => new InsecticideApplicableMixDto
+            {
+                Id = x.Id,
+                DonumCount = x.DonumCount,
+                CurrentDonumCount = x.CurrentDonumCount,
+                InsecticideMixDto = new GetInsecticideMixDto
+                {
+                    Id = x.InsecticideMix.Id,
+                    Title = x.InsecticideMix.Title,
+                    Color = x.InsecticideMix.Color,
+                }
+            }).ToListAsync();
 
+        return applicableMixes;
+    }
     public async Task UpdateAsync(long id, string title, string note, ColorType color)
     {
         if (!await baseRepo.CheckIfExistAsync(x => x.Id == id && x.IsValid))

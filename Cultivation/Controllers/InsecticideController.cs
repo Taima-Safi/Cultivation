@@ -63,6 +63,12 @@ public class InsecticideController : ControllerBase
         return Ok(mixes);
     }
     [HttpGet]
+    public async Task<IActionResult> GetAllInsecticideApplicableMix()
+    {
+        var result = await mixRepo.GetAllInsecticideApplicableMixAsync();
+        return Ok(result);
+    }
+    [HttpGet]
     public async Task<IActionResult> GetMixById(long id)
     {
         var mix = await mixRepo.GetByIdAsync(id);

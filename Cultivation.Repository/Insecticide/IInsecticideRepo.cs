@@ -15,5 +15,6 @@ public interface IInsecticideRepo
     Task<InsecticideDto> GetByIdAsync(long id);
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, InsecticideFormDto dto);
+    Task UpdateStoreAsync(long insecticideId, double quantity, DateTime date, bool isAdd);
     Task UpdateStoreForMixAsync(long mixId, double donumNum, DateTime date);
 }

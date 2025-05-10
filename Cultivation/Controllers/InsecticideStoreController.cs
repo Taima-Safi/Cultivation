@@ -14,12 +14,12 @@ public class InsecticideStoreController : ControllerBase
     {
         this.insecticideRepo = insecticideRepo;
     }
-    //[HttpPost]
-    //public async Task<IActionResult> UpdateStore(long insecticideId, double quantity, DateTime date, bool isAdd)
-    //{
-    //    await insecticideRepo.UpdateStoreAsync(insecticideId, quantity, date, isAdd);
-    //    return Ok();
-    //}
+    [HttpPost]
+    public async Task<IActionResult> UpdateStore(long insecticideId, double quantity, DateTime date, bool isAdd)
+    {
+        await insecticideRepo.UpdateStoreAsync(insecticideId, quantity, date, isAdd);
+        return Ok();
+    }
 
     [HttpPost]
     public async Task<IActionResult> UpdateStoreForMix(long mixId, double donumNum, DateTime date)

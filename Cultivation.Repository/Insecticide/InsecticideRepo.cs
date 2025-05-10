@@ -198,7 +198,44 @@ public class InsecticideRepo : IInsecticideRepo
         return new CommonResponseDto<List<InsecticideTransactionDto>>(x, hasNextPage);
     }
 
-    public async Task UpdateStoreAsync(Dictionary<long, double> insecticidesDic, DateTime date, bool isAdd)
+    public async Task UpdateStoreAsync(long insecticideId, double quantity, DateTime date, bool isAdd)
+    {
+        try
+        {
+            await dbRepo.BeginTransactionAsync();
+
+            if (quantity < 0)
+                throw new NotFoundException("Quantity can't be less than or equal 0..");
+
+            var insecticideStoreModel = await context.InsecticideStore.Where(x => x.InsecticideId == insecticideId && x.IsValid).FirstOrDefaultAsync();
+            if (insecticideStoreModel == null)
+            {
+                if (!isAdd)
+                    throw new NotFoundException("Insecticide not found in depot, you can't pull..");
+
+                await AddInsecticidesToStore(new Dictionary<long, double> { { insecticideId, quantity } });
+            }
+            else
+            {
+                if (!isAdd && insecticideStoreModel.TotalQuantity < quantity)
+                    throw new NotFoundException("Insecticide quantity is less than you want..");
+
+                insecticideStoreModel.TotalQuantity += isAdd ? quantity : -quantity;
+            }
+
+            await AddInsecticideTransactionsAsync(new Dictionary<long, double> { { insecticideId, quantity } }, date, isAdd);
+
+
+            await context.SaveChangesAsync();
+            await dbRepo.CommitTransactionAsync();
+        }
+        catch (Exception)
+        {
+            await dbRepo.RollbackTransactionAsync();
+            throw;
+        }
+    }
+    public async Task UpdateStoreAsync2(Dictionary<long, double> insecticidesDic, DateTime date, bool isAdd)
     {
         if (insecticidesDic.Any(x => x.Value < 0))
             throw new NotFoundException("One of quantity is less than 0..");
@@ -265,7 +302,7 @@ public class InsecticideRepo : IInsecticideRepo
                 x => x.Insecticide.Type == InsecticideType.Powder ? x.Quantity.Value * donumNum : x.Liter * donumNum);
 
 
-            await UpdateStoreAsync(toUpdateStoreDic, date, false);
+            await UpdateStoreAsync2(toUpdateStoreDic, date, false);
 
             await context.InsecticideApplicableMix.AddAsync(new InsecticideApplicableMixModel
             {
