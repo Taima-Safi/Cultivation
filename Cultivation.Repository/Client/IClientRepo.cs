@@ -8,6 +8,7 @@ public interface IClientRepo
     Task<long> AddAsync(ClientFormDto dto);
     Task<bool> CheckIfExistAsync(long id);
     Task<CommonResponseDto<List<ClientDto>>> GetAllAsync(bool? isLocal, string name, int pageSize, int pageNum);
+    Task<int> GetClientCountAsync();
     Task RemoveAsync(long id);
     Task UpdateAsync(long id, ClientFormDto dto);
 }

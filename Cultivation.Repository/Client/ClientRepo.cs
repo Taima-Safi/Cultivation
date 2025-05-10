@@ -1,8 +1,8 @@
 ﻿using Cultivation.Database.Context;
 using Cultivation.Database.Model;
 using Cultivation.Dto.Client;
-using Cultivation.Repository.Base;
 using Cultivation.Dto.Common;
+using Cultivation.Repository.Base;
 using Cultivation.Shared.Exception;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -31,6 +31,9 @@ public class ClientRepo : IClientRepo
         await context.SaveChangesAsync();
         return model.Entity.Id;
     }
+    public async Task<int> GetClientCountAsync()
+    => await context.Client.Where(c => c.IsValid).CountAsync();
+
     public async Task<CommonResponseDto<List<ClientDto>>> GetAllAsync(bool? isLocal, string name, int pageSize, int pageNum)
     {
         Expression<Func<ClientModel, bool>> expression = c => (string.IsNullOrEmpty(name) || c.Name.Contains(name))

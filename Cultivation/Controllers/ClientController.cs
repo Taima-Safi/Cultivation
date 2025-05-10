@@ -21,6 +21,12 @@ public class ClientController : ControllerBase
         return Ok(clientId);
     }
     [HttpGet]
+    public async Task<IActionResult> GetOrderCount()
+    {
+        var clientCount = await clientRepo.GetClientCountAsync();
+        return Ok(clientCount);
+    }
+    [HttpGet]
     public async Task<IActionResult> GetAll(bool? isLocal, string name, int pageSize = 10, int pageNum = 0)
     {
         var clients = await clientRepo.GetAllAsync(isLocal, name, pageSize, pageNum);
