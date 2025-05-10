@@ -21,6 +21,12 @@ public class OrderController : ControllerBase
         return Ok();
     }
     [HttpGet]
+    public async Task<IActionResult> GetOrderCount()
+    {
+        var orderCount = await orderRepo.GetOrderCountAsync();
+        return Ok(orderCount);
+    }
+    [HttpGet]
     public async Task<IActionResult> GetAll(bool isBought, DateTime? from, DateTime? to, int pageSize = 10, int pageNum = 0)
     {
         var result = await orderRepo.GetAllAsync(isBought, from, to, pageSize, pageNum);

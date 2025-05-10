@@ -107,6 +107,9 @@ public class OrderRepo : IOrderRepo
             throw;
         }
     }
+    public async Task<int> GetOrderCountAsync()
+    => await context.Order.Where(o => !o.IsBought && o.IsValid).CountAsync();
+
     public async Task<CommonResponseDto<List<OrderDto>>> GetAllAsync(bool isBought, DateTime? from, DateTime? to, int pageSize, int pageNum)
     {
         Expression<Func<OrderModel, bool>> expression = o =>
