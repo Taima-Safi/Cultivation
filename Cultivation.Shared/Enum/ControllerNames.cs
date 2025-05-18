@@ -2,10 +2,12 @@
 
 public enum ControllerNames
 {
-    UserController,
-    RoleController,
-    LandController,
-    OrderController,
-    FlowerController,
-    CuttingLandController,
+    User,
+    Role,
+    Land,
+    Order,
+    Flower,
+    FertilizerStore,
+    InsecticideStore,
+    CuttingLand,
 }
